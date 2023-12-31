@@ -1,0 +1,14 @@
+altair==5.2.0
+clickhouse-sqlalchemy==0.3.0
+dbt-clickhouse==1.7.1
+pandas==2.1.4
+prefect==2.14.12
+prefect-jupyter==0.3.1
+prefect-shell==0.2.2
+psycopg2-binary==2.9.9
+PyYAML==6.0.1
+rich==13.7.0
+SQLAlchemy==2.0.23
+sqlparse==0.4.4
+typer==0.7.0
+typer-cli==0.0.13 # TODO Remove if not used

@@ -1,0 +1,37 @@
+name: {{ project_name }}
+prefect-version: {{ prefect_version }}
+
+build: null
+
+push: null
+
+pull:
+- prefect.deployments.steps.set_working_directory:
+    directory: /home/analyst/projects/{{ project_name }}
+
+deployments: null
+
+# --------------------------------------------------------------------------------------------------
+# Instructions for new deployments
+# --------------------------------------------------------------------------------------------------
+
+# 1. Copy and append the following template to the `deployments` list above.
+
+# - name: {{ project_name }}__<FLOW_NAME>
+#   version: null
+#   tags: [{{ project_name }}]
+#   description: null
+#   entrypoint: flows/<FLOW_NAME>.py:<FLOW_NAME>_flow
+#   parameters: {}
+#   work_pool:
+#     name: process_pool
+#     work_queue_name: null
+#     job_variables: {}
+#   schedule:
+#     cron: '* * * * *'
+#     timezone: UTC
+#     day_or: true
+
+# 2. Replace `<FLOW_NAME>` with the flow name.
+# 3. Update the parameters, schedule and other attributes.
+# 4. Run the deploy command.

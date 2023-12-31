@@ -1,0 +1,29 @@
+[tool.black]
+color = 1
+line-length = 100
+target-version = ["py311"]
+
+[tool.isort]
+force_alphabetical_sort = true
+line_length = 100
+profile = "black"
+
+[tool.pytest.ini_options]
+addopts = "-q"
+norecursedirs = [
+    "*.egg",
+    ".*",
+    "_darcs",
+    "build",
+    "CVS",
+    "dist",
+    "node_modules",
+    "venv",
+    "{arch}",
+    "__pycache__",
+    "dbt_packages"
+]
+python_classes = ["Test*"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+testpaths = ["tests"]

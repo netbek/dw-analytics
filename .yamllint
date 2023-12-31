@@ -1,0 +1,22 @@
+extends: default
+
+ignore: |
+    analyses/
+    dbt_packages/
+    docs/
+    logs/
+    macros/
+    # models/
+    seeds/
+    snapshots/
+    target/
+    tests/
+
+rules:
+  document-start: disable
+  line-length:
+    max: 100
+  quoted-strings:
+    level: warning
+    quote-type: double
+    required: only-when-needed

@@ -1,0 +1,168 @@
+version: '3.8'
+
+volumes:
+  clickhouse_data:
+  prefect_postgres_data:
+  prometheus_data:
+  grafana_data:
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.11.3.23-alpine
+    env_file:
+      - ./.env_files/clickhouse.env
+    extra_hosts:
+      - host.docker.internal:host-gateway
+    ports:
+      - ${DW_CLICKHOUSE_HTTP_PORT:-8123}:8123
+      - ${DW_CLICKHOUSE_NATIVE_PORT:-9000}:9000
+      - ${DW_CLICKHOUSE_POSTGRES_PORT:-9005}:9005
+    volumes:
+      - ./infrastructure/clickhouse/conf.d/override.xml:/etc/clickhouse-server/config.d/override.xml:ro
+      - ./infrastructure/clickhouse/scripts:/scripts:ro
+      - clickhouse_data:/var/lib/clickhouse:rw
+    healthcheck:
+      test: wget --no-verbose --spider http://localhost:8123/ping || exit 1
+      interval: 1s
+      timeout: 1s
+      retries: 10
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  prefect-postgres:
+    image: postgres:16.1-alpine3.19
+    env_file:
+      - ./.env_files/prefect-postgres.env
+    ports:
+      - ${DW_PREFECT_POSTGRES_PORT:-5432}:5432
+    volumes:
+      - prefect_postgres_data:/var/lib/postgresql/data:rw
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 1s
+      timeout: 1s
+      retries: 10
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  prefect-server:
+    build:
+      context: ./infrastructure/prefect-base
+    command: prefect server start
+    env_file:
+      - ./.env_files/prefect-server.env
+    ports:
+      - ${DW_PREFECT_SERVER_PORT:-4200}:4200
+    volumes:
+      - ./.prefect:/home/analyst/.prefect:rw
+    healthcheck:
+      test: curl --fail http://0.0.0.0:4200/api/health || exit 1
+      interval: 1s
+      timeout: 1s
+      retries: 10
+    deploy:
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      prefect-postgres:
+        condition: service_healthy
+
+  prefect-worker:
+    build:
+      context: ./infrastructure/prefect-base
+    command: prefect worker start --name process-worker --pool process_pool --type process --limit 1
+    env_file:
+      - ./.env_files/prefect-worker.env
+      - ./.env_files/database.env
+    volumes:
+      - ./.dbt:/home/analyst/.dbt:rw
+      - ./.prefect:/home/analyst/.prefect:rw
+      - ./package:/home/analyst/package:rw
+      - ./projects:/home/analyst/projects:rw
+    deploy:
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      prefect-server:
+        condition: service_healthy
+
+  prefect-cli:
+    build:
+      context: ./infrastructure/prefect-base
+    command: /bin/bash
+    env_file:
+      - ./.env_files/prefect-cli.env
+      - ./.env_files/database.env
+    working_dir: /home/analyst/projects/main
+    volumes:
+      - .:/home/analyst:rw
+      - ${SSH_AUTH_SOCK}:/ssh-agent:ro
+    stdin_open: true
+    tty: true
+    depends_on:
+      prefect-server:
+        condition: service_healthy
+      # TODO Uncomment after adding healthcheck to prefect-worker
+      # prefect-worker:
+      #   condition: service_healthy
+
+  jupyter:
+    build:
+      context: ./infrastructure/jupyter
+    env_file:
+      - ./.env_files/jupyter.env
+      - ./.env_files/database.env
+    ports:
+      - ${DW_JUPYTER_PORT:-8888}:8888
+    volumes:
+      - ./.dbt:/home/analyst/.dbt:rw
+      - ./.ipython/profile_default/startup:/home/analyst/.ipython/profile_default/startup:rw
+      - ./.jupyter/jupyter_server_config.py:/home/analyst/.jupyter/jupyter_server_config.py:rw
+      - ./.prefect:/home/analyst/.prefect:rw
+      - ./package:/home/analyst/package:rw
+      - ./projects:/home/analyst/projects:rw
+      - ./infrastructure/jupyter/usr/local/bin/start-notebook.d:/usr/local/bin/start-notebook.d:ro
+    user: 0:0
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    container_name: cadvisor
+    env_file:
+      - ./.env_files/cadvisor.env
+    ports:
+      - ${DW_CADVISOR_PORT:-8080}:8080
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+
+  prometheus:
+    image: prom/prometheus:v2.48.0
+    command: --config.file=/etc/prometheus/prometheus.yml --log.level=warn
+    env_file:
+      - ./.env_files/prometheus.env
+    ports:
+      - ${DW_PROMETHEUS_PORT:-9090}:9090
+    volumes:
+      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus:rw
+    depends_on:
+      - cadvisor
+
+  grafana:
+    image: grafana/grafana-oss:10.2.2
+    env_file:
+      - ./.env_files/grafana.env
+    ports:
+      - ${DW_GRAFANA_PORT:-3000}:3000
+    volumes:
+      - ./infrastructure/grafana/provisioning/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./infrastructure/grafana/provisioning/providers.yml:/etc/grafana/provisioning/dashboards/providers.yml:ro
+      - ./infrastructure/grafana/dashboards:/etc/dashboards:ro
+      - ./infrastructure/grafana/dashboards/home.json:/usr/share/grafana/public/dashboards/home.json:ro
+      - grafana_data:/var/lib/grafana:rw
+    depends_on:
+      - prometheus

@@ -1,0 +1,7 @@
+active = "dev"
+
+[profiles.dev]
+PREFECT_DEFAULT_WORK_POOL_NAME = "process_pool"
+
+[profiles.test]
+PREFECT_DEFAULT_WORK_POOL_NAME = "process_pool"

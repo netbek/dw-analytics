@@ -1,0 +1,10 @@
+analyses/
+dbt_packages/
+docs/
+logs/
+macros/
+# models/
+seeds/
+snapshots/
+target/
+tests/

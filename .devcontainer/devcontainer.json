@@ -1,0 +1,59 @@
+{
+  "name": "dw-analytics",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "prefect-cli",
+  "workspaceFolder": "/home/analyst",
+  "shutdownAction": "none",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dorzey.vscode-sqlfluff",
+        "eamodio.gitlens",
+        "ms-python.black-formatter",
+        "ms-python.flake8",
+        "ms-python.isort",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "samuelcolvin.jinjahtml",
+        "tamasfe.even-better-toml",
+        "usernamehw.errorlens"
+      ],
+      "settings": {
+        "[python]": {
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+          },
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.formatOnSave": true
+        },
+        "black-formatter.args": ["--config", "/home/analyst/pyproject.toml"],
+        "breadcrumbs.enabled": false,
+        "editor.formatOnSave": false,
+        "files.associations": {
+          "*.sql": "jinja-sql"
+        },
+        "files.eol": "\n",
+        "flake8.args": [
+          "--max-line-length=100",
+          "--ignore=D100,D101,D102,D103,D104,D107,D205"
+        ],
+        "git.openRepositoryInParentFolders": "always",
+        "isort.args": ["--settings-path", "/home/analyst/pyproject.toml"],
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "python.experiments.enabled": false,
+        "python.languageServer": "Pylance",
+        "sqlfluff.config": "/home/analyst/.sqlfluff",
+        "sqlfluff.dialect": "clickhouse",
+        "sqlfluff.executablePath": "/home/analyst/.devcontainer/vscode_sqlfluff.py",
+        "sqlfluff.experimental.format.executeInTerminal": true,
+        "sqlfluff.format.enabled": true,
+        "sqlfluff.ignoreLocalConfig": true,
+        "sqlfluff.ignoreParsing": true,
+        "sqlfluff.linter.run": "onSave",
+        "sqlfluff.workingDirectory": "/",
+        "telemetry.telemetryLevel": "off"
+      }
+    }
+  }
+}

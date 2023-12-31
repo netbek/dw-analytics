@@ -1,0 +1,24 @@
+# Repos
+/infrastructure
+
+# Miscellaneous
+*.orig
+*.pyc
+*.Rhistory
+.bash_history
+.bash_logout
+.cache
+.env*
+.gitconfig
+.ipynb_checkpoints
+.local
+.prefect/flows.json
+.prefect/memo_store.toml
+.profile
+.pytest_cache
+.python_history
+.Rproj.user
+.ssh
+.vscode-server
+.~*
+__pycache__
