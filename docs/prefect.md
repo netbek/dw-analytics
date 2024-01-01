@@ -3,11 +3,23 @@
 > [!NOTE]
 > Examples that start with the `cli` command indicate that the command would be executed inside of the Docker container. `cli` can also be accessed outside of the Docker container at `./scripts/cli.sh`. The arguments and options are the same.
 
+## Dashboard
+
+The Prefect server provides a dashboard of flows, deployments and more. To view it:
+
+1. Start the Prefect containers if they are not running already:
+
+    ```shell
+    docker compose up -d prefect-postgres prefect-server prefect-worker prefect-cli
+    ```
+
+2. Open [http://localhost:29020](http://localhost:29020).
+
 ## Flows and tasks
 
 Flows exist as Python functions and flow entities. Python functions are stored in `./projects/<PROJECT_NAME>/flows`, and the flow entities are stored in the Prefect Postgres database.
 
-The flow entities are visible on the [Prefect dashboard](http://localhost:29020/flows) and CLI (`prefect flows ls`).
+The flow entities are visible on the Prefect dashboard and CLI (`prefect flows ls`).
 
 The Python files in `./projects/<PROJECT_NAME>/flows` contain 1 main flow function, optionally subflows, and 1 or more task functions that are used in the flow.
 
