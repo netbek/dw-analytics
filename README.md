@@ -15,7 +15,7 @@ The stack consists of these Docker containers:
 
 | Service           | Description                                                    |
 | ----------------- | -------------------------------------------------------------- |
-| `clickhouse`      | ClickHouse server that manages the reporting database          |
+| `clickhouse`      | ClickHouse server that manages the analytics database          |
 | `prefect-postgres`| Postgres server that manages the Prefect database              |
 | `prefect-server`  | Prefect backend and API                                        |
 | `prefect-worker`  | Process that executes Python workflows                         |
@@ -53,16 +53,16 @@ The repository is structured as follows:
 │   └── # Template for new .env files
 ├── template_project
 │   └── # Template for new projects
-├── .bashrc # Shell configuration used in prefect-cli
+├── .bashrc # Shell configuration used in Prefect CLI container
 ├── .env # Environment variables used by Docker Compose (not containers)
-├── .gitconfig # Git configuration used in prefect-cli
-├── .gitignore # Git configuration used in prefect-cli
-├── .sqlfluff # SQL linter configuration used in prefect-cli
-├── .sqlfluffignore # SQL linter configuration used in prefect-cli
-├── .yamllint # YAML linter configuration used in prefect-cli
+├── .gitconfig # Git configuration used in Prefect CLI container
+├── .gitignore # Git configuration used in Prefect CLI container
+├── .sqlfluff # SQL linter configuration used in Prefect CLI container
+├── .sqlfluffignore # SQL linter configuration used in Prefect CLI container
+├── .yamllint # YAML linter configuration used in Prefect CLI container
 ├── docker-compose.yml # Docker configurations for services, volumes and networking
 ├── install.yml # Installation script configuration
-├── pyproject.toml # Configuration of Python tools in prefect-cli
+├── pyproject.toml # Configuration of Python tools in Prefect CLI container
 ├── requirements.txt # Python dependencies in Prefect and Jupyter containers
 └── requirements_dev.txt # Python dev dependencies in Prefect and Jupyter containers
 ```
