@@ -67,30 +67,30 @@ For example, here are the steps to create a deployment in the `dw_tutorial` proj
 
 Available commands:
 
-| Description                           | Command                                                               |
-|---------------------------------------|-----------------------------------------------------------------------|
-| Deploy all of 1 project               | `cli prefect deploy -p PROJECT_NAME`                                  |
-| Deploy all of multiple projects       | `cli prefect deploy -p PROJECT_NAME -p PROJECT_NAME`                  |
-| Deploy 1 flow                         | `cli prefect deploy -d DEPLOYMENT_NAME`                               |
-| Deploy multiple flows                 | `cli prefect deploy -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME`            |
+| Description                                 | Command                                                               |
+|---------------------------------------------|-----------------------------------------------------------------------|
+| Deploy all flows of 1 project               | `cli prefect deploy -p PROJECT_NAME`                                  |
+| Deploy all flows of multiple projects       | `cli prefect deploy -p PROJECT_NAME -p PROJECT_NAME`                  |
+| Deploy 1 flow                               | `cli prefect deploy -d DEPLOYMENT_NAME`                               |
+| Deploy multiple flows                       | `cli prefect deploy -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME`            |
 
 ### Pause a deployment
 
-| Description                           | Command                                                               |
-|---------------------------------------|-----------------------------------------------------------------------|
-| Pause all of 1 project                | `cli prefect deployment pause -p PROJECT_NAME`                        |
-| Pause all of multiple projects        | `cli prefect deployment pause -p PROJECT_NAME -p PROJECT_NAME`        |
-| Pause 1 deployment                    | `cli prefect deployment pause -d DEPLOYMENT_NAME`                     |
-| Pause multiple deployments            | `cli prefect deployment pause -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME`  |
+| Description                                 | Command                                                               |
+|---------------------------------------------|-----------------------------------------------------------------------|
+| Pause all deployments of 1 project          | `cli prefect deployment pause -p PROJECT_NAME`                        |
+| Pause all deployments of multiple projects  | `cli prefect deployment pause -p PROJECT_NAME -p PROJECT_NAME`        |
+| Pause 1 deployment                          | `cli prefect deployment pause -d DEPLOYMENT_NAME`                     |
+| Pause multiple deployments                  | `cli prefect deployment pause -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME`  |
 
 ### Resume a deployment
 
-| Description                           | Command                                                               |
-|---------------------------------------|-----------------------------------------------------------------------|
-| Resume all of 1 project               | `cli prefect deployment resume -p PROJECT_NAME`                       |
-| Resume all of multiple projects       | `cli prefect deployment resume -p PROJECT_NAME -p PROJECT_NAME`       |
-| Resume 1 deployment                   | `cli prefect deployment resume -d DEPLOYMENT_NAME`                    |
-| Resume multiple deployments           | `cli prefect deployment resume -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME` |
+| Description                                 | Command                                                               |
+|---------------------------------------------|-----------------------------------------------------------------------|
+| Resume all deployments of 1 project         | `cli prefect deployment resume -p PROJECT_NAME`                       |
+| Resume all deployments of multiple projects | `cli prefect deployment resume -p PROJECT_NAME -p PROJECT_NAME`       |
+| Resume 1 deployment                         | `cli prefect deployment resume -d DEPLOYMENT_NAME`                    |
+| Resume multiple deployments                 | `cli prefect deployment resume -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME` |
 
 ### Delete a deployment
 
@@ -106,12 +106,12 @@ To delete a deployment:
 
 Available commands:
 
-| Description                           | Command                                                               |
-|---------------------------------------|-----------------------------------------------------------------------|
-| Delete all of 1 project               | `cli prefect deployment delete -p PROJECT_NAME`                       |
-| Delete all of multiple projects       | `cli prefect deployment delete -p PROJECT_NAME -p PROJECT_NAME`       |
-| Delete 1 deployment                   | `cli prefect deployment delete -d DEPLOYMENT_NAME`                    |
-| Delete multiple deployments           | `cli prefect deployment delete -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME` |
+| Description                                 | Command                                                               |
+|---------------------------------------------|-----------------------------------------------------------------------|
+| Delete all deployments of 1 project         | `cli prefect deployment delete -p PROJECT_NAME`                       |
+| Delete all deployments of multiple projects | `cli prefect deployment delete -p PROJECT_NAME -p PROJECT_NAME`       |
+| Delete 1 deployment                         | `cli prefect deployment delete -d DEPLOYMENT_NAME`                    |
+| Delete multiple deployments                 | `cli prefect deployment delete -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME` |
 
 ## Naming conventions for flows and deployments
 
