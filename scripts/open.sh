@@ -4,7 +4,7 @@ set -e
 scripts_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root_dir="${scripts_dir}/.."
 
-source "${scripts_dir}/functions.sh"
+source "${scripts_dir}/variables.sh"
 
 name_choices=("cadvisor" "grafana" "jupyter" "prefect-server" "prometheus" "vscode")
 
@@ -18,8 +18,8 @@ fi
 
 name="$1"
 
-if ! is_in_array "$name" "${name_choices[@]}"; then
-    echo "Error: Invalid name '$name'. Valid values are: ${name_choices[@]}"
+if [[ ! "${name_choices[@]}" =~ "${name}" ]]; then
+    echo "${tput_red}Invalid name '${name}'. Valid values are: ${name_choices[@]}${tput_reset}"
     exit 1
 fi
 
