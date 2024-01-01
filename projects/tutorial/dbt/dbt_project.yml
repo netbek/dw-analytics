@@ -1,8 +1,8 @@
-name: dw_tutorial
+name: tutorial
 version: 1.0.0
 config-version: 2
 
-profile: dw_tutorial
+profile: tutorial
 
 model-paths: [models]
 analysis-paths: [analyses]
@@ -13,5 +13,5 @@ snapshot-paths: [snapshots]
 clean-targets: [logs, target, dbt_packages]
 
 models:
-  dw_tutorial:
+  tutorial:
     +materialized: view

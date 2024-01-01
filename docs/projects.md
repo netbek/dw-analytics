@@ -5,7 +5,7 @@
 
 ## Overview
 
-Projects are structured as follows. To explore, open `./projects/dw_tutorial`.
+Projects are structured as follows. To explore, open `./projects/tutorial`.
 
 ```shell
 .
@@ -122,7 +122,3 @@ cli project delete PROJECT_NAME
 ## Resources
 
 - [pytest docs](https://docs.pytest.org/en/7.4.x/)
-
-## Next step
-
-[Read the dbt guide](dbt.md).

@@ -61,7 +61,7 @@ main:
 # Tutorial project
 # --------------------------------------------------------------------------------------------------
 
-dw_tutorial:
+tutorial:
   target: dev
   outputs:
     dev:

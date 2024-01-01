@@ -70,7 +70,3 @@ alias cdw="cd /path/to/dw-analytics && docker compose up -d clickhouse prefect-p
 ```
 
 Set `/path/to/dw-analytics` to the location of the repository on your machine.
-
-## Next step
-
-[Read the projects guide](projects.md).

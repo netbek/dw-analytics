@@ -67,9 +67,9 @@ Further reading:
 
 ### Create a deployment
 
-For example, here are the steps to create a deployment in the `dw_tutorial` project:
+For example, here are the steps to create a deployment in the `tutorial` project:
 
-1. Open [./projects/dw_tutorial/prefect.yaml](../projects/dw_tutorial/prefect.yaml#L44) and go to the commented section `Instructions for new deployments`.
+1. Open [./projects/tutorial/prefect.yaml](../projects/tutorial/prefect.yaml#L44) and go to the commented section `Instructions for new deployments`.
 
 2. Copy and append the template to the `deployments` list.
 
@@ -178,7 +178,3 @@ Deployment 2:
 ## Resources
 
 - [Prefect docs](https://docs.prefect.io)
-
-## Next step
-
-[Read the ops guide](ops.md).
