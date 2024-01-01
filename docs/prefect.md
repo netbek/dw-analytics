@@ -17,9 +17,9 @@ The Prefect server provides a dashboard of flows, deployments and more. To view 
 
 ## Flows and tasks
 
-Flows exist as Python functions and flow entities. Python functions are stored in `./projects/<PROJECT_NAME>/flows`, and the flow entities are stored in the Prefect Postgres database.
+Flows exist as Python functions and flow entities. Python functions are stored in `./projects/<PROJECT_NAME>/flows`, and the flow entities are stored in the Prefect database.
 
-The [Prefect dashboard](http://localhost:29020/flows) and CLI (`prefect flows ls`) list flow entities. Flows that have not been deployed won't be listed.
+Flow entities appear on the Prefect dashboard under [Flows](http://localhost:29020/flows) and in the CLI at `prefect flows ls`. Flows that have not been deployed won't be listed.
 
 The Python files in `./projects/<PROJECT_NAME>/flows` contain 1 main flow function, optionally subflows, and 1 or more task functions that are used in the flow.
 
@@ -30,9 +30,9 @@ Further reading:
 
 ## Deployments
 
-Deployments of flows exist as configuration files and deployment entities. The configuration is stored in `./projects/<PROJECT_NAME>/prefect.yaml`, and the deployment entities are stored in the Prefect Postgres database.
+Deployments of flows exist as configuration files and deployment entities. The configuration is stored in `./projects/<PROJECT_NAME>/prefect.yaml`, and the deployment entities are stored in the Prefect database.
 
-The [Prefect dashboard](http://localhost:29020/deployments) and CLI (`prefect deployments ls`) list deployment entities. Deployments that exist only in configuration won't be listed.
+Deployment entities appear on the Prefect dashboard under [Deployments](http://localhost:29020/deployments) and in the CLI at `prefect deployments ls`. Deployments that exist only in configuration won't be listed.
 
 Further reading:
 
@@ -65,61 +65,53 @@ For example, here are the steps to create a deployment in the `dw_tutorial` proj
     cli prefect deploy -d DEPLOYMENT_NAME --pause
     ```
 
-To deploy all the flows of a project, run:
+Available commands:
 
-```shell
-cli prefect deploy -p PROJECT_NAME
-```
+| Description                           | Command                                                               |
+|---------------------------------------|-----------------------------------------------------------------------|
+| Deploy all of 1 project               | `cli prefect deploy -p PROJECT_NAME`                                  |
+| Deploy all of multiple projects       | `cli prefect deploy -p PROJECT_NAME -p PROJECT_NAME`                  |
+| Deploy 1 flow                         | `cli prefect deploy -d DEPLOYMENT_NAME`                               |
+| Deploy multiple flows                 | `cli prefect deploy -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME`            |
 
-To deploy multiple projects, run:
+### Pause a deployment
 
-```shell
-cli prefect deploy -p PROJECT_NAME -p PROJECT_NAME
-```
+| Description                           | Command                                                               |
+|---------------------------------------|-----------------------------------------------------------------------|
+| Pause all of 1 project                | `cli prefect deployment pause -p PROJECT_NAME`                        |
+| Pause all of multiple projects        | `cli prefect deployment pause -p PROJECT_NAME -p PROJECT_NAME`        |
+| Pause 1 deployment                    | `cli prefect deployment pause -d DEPLOYMENT_NAME`                     |
+| Pause multiple deployments            | `cli prefect deployment pause -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME`  |
 
-To deploy a single flow, run:
+### Resume a deployment
 
-```shell
-cli prefect deploy -d DEPLOYMENT_NAME
-```
-
-To deploy multiple flows, run:
-
-```shell
-cli prefect deploy -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME
-```
-
-### Pause and resume a deployment
-
-To pause all deployments of a project, run:
-
-```shell
-cli prefect deployment pause -p PROJECT_NAME
-```
-
-To pause multiple projects, run:
-
-```shell
-cli prefect deployment pause -p PROJECT_NAME -p PROJECT_NAME
-```
-
-To pause a single deployment, run:
-
-```shell
-cli prefect deployment pause -d DEPLOYMENT_NAME
-```
-
-To pause multiple deployments, run:
-
-```shell
-cli prefect deployment pause -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME
-```
-
-To resume a deployment, replace `pause` with `resume` in the examples above. The options are the same.
+| Description                           | Command                                                               |
+|---------------------------------------|-----------------------------------------------------------------------|
+| Resume all of 1 project               | `cli prefect deployment resume -p PROJECT_NAME`                       |
+| Resume all of multiple projects       | `cli prefect deployment resume -p PROJECT_NAME -p PROJECT_NAME`       |
+| Resume 1 deployment                   | `cli prefect deployment resume -d DEPLOYMENT_NAME`                    |
+| Resume multiple deployments           | `cli prefect deployment resume -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME` |
 
 ### Delete a deployment
 
-TODO
+To delete a deployment:
+
+1. Run the `delete` command to delete the deployment entity from the Prefect database:
+
+    ```shell
+    cli prefect deployment delete -d DEPLOYMENT_NAME
+    ```
+
+2. Remove the deployment from the `deployments` list in `./projects/<PROJECT_NAME>/prefect.yaml`.
+
+Available commands:
+
+| Description                           | Command                                                               |
+|---------------------------------------|-----------------------------------------------------------------------|
+| Delete all of 1 project               | `cli prefect deployment delete -p PROJECT_NAME`                       |
+| Delete all of multiple projects       | `cli prefect deployment delete -p PROJECT_NAME -p PROJECT_NAME`       |
+| Delete 1 deployment                   | `cli prefect deployment delete -d DEPLOYMENT_NAME`                    |
+| Delete multiple deployments           | `cli prefect deployment delete -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME` |
 
 ## Naming conventions for flows and deployments
 
