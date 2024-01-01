@@ -14,13 +14,7 @@
     ./scripts/install.sh
     ```
 
-3. Run the infrastructure install script:
-
-    ```shell
-    ./infrastructure/scripts/install.sh
-    ```
-
-4. Start the ClickHouse and Prefect containers:
+3. Start the ClickHouse and Prefect containers:
 
     ```shell
     docker compose up -d clickhouse prefect-postgres prefect-server prefect-worker prefect-cli
@@ -28,7 +22,7 @@
 
     Wait for the container statuses to change to started and healthy.
 
-5. Run the provision script to configure ClickHouse and Prefect:
+4. Run the provision script to configure ClickHouse and Prefect:
 
     ```shell
     ./scripts/cli.sh prefect provision dev
