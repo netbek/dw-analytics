@@ -19,7 +19,7 @@ The Prefect server provides a dashboard of flows, deployments and more. To view 
 
 Flows exist as Python functions and flow entities. Python functions are stored in `./projects/<PROJECT_NAME>/flows`, and the flow entities are stored in the Prefect Postgres database.
 
-The flow entities are visible on the Prefect dashboard and CLI (`prefect flows ls`).
+The [Prefect dashboard](http://localhost:29020/flows) and CLI (`prefect flows ls`) list flow entities. Flows that have not been deployed won't be listed.
 
 The Python files in `./projects/<PROJECT_NAME>/flows` contain 1 main flow function, optionally subflows, and 1 or more task functions that are used in the flow.
 
@@ -31,6 +31,8 @@ Further reading:
 ## Deployments
 
 Deployments of flows exist as configuration files and deployment entities. The configuration is stored in `./projects/<PROJECT_NAME>/prefect.yaml`, and the deployment entities are stored in the Prefect Postgres database.
+
+The [Prefect dashboard](http://localhost:29020/deployments) and CLI (`prefect deployments ls`) list deployment entities. Deployments that exist only in configuration won't be listed.
 
 Further reading:
 
@@ -62,9 +64,6 @@ For example, here are the steps to create a deployment in the `dw_tutorial` proj
     ```shell
     cli prefect deploy -d DEPLOYMENT_NAME --pause
     ```
-
-> [!TIP]
-> Deployments that exist only in configuration won't appear on the [Prefect dashboard](http://localhost:29020/deployments) and CLI (`prefect deployments ls`). Run the deploy command to create the deployment entity in the Prefect Postgres database.
 
 To deploy all the flows of a project, run:
 
