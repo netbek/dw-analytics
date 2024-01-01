@@ -70,3 +70,11 @@ alias cdw="cd /path/to/dw-analytics && docker compose up -d clickhouse prefect-p
 ```
 
 Set `/path/to/dw-analytics` to the location of the repository on your machine.
+
+## Uninstall
+
+To remove the Docker volumes and images, run:
+
+```shell
+./scripts/uninstall.sh
+```
