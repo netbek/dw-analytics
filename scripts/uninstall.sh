@@ -16,5 +16,6 @@ if [ "$answer" != "y" ]; then
 fi
 
 docker compose down -v --rmi local
+docker builder prune -f
 
 echo "${tput_green}Done!${tput_reset}"
