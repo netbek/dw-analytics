@@ -69,7 +69,7 @@ The following ports are exposed:
 
 The configuration is loaded from `./.env` during startup. The default values are in `./template_env/docker-compose.env`.
 
-## Further reading
+## Resources
 
 - [cAdvisor docs](https://github.com/google/cadvisor/blob/master/README.md)
 - [ClickHouse docs](https://clickhouse.com/docs)

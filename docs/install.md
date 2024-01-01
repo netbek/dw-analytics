@@ -28,9 +28,9 @@
     ./scripts/cli.sh prefect provision dev
     ```
 
-### Optional extras
+## Optional extras
 
-#### VS Code
+### VS Code
 
 [Download VS Code](https://code.visualstudio.com/). After installing VS Code, install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers):
 
@@ -38,7 +38,7 @@
 code --install-extension ms-vscode-remote.remote-containers
 ```
 
-#### DBeaver
+### DBeaver
 
 GUI client for Postgres, ClickHouse and more. To install, run:
 
@@ -51,7 +51,7 @@ sudo apt install dbeaver-ce
 
 See the docs for [creating a connection](https://github.com/dbeaver/dbeaver/wiki/Create-Connection).
 
-#### Aliases
+### Aliases
 
 Add aliases for frequently used commands to `~/.bash_aliases`:
 
@@ -70,3 +70,7 @@ alias cdw="cd /path/to/dw-analytics && docker compose up -d clickhouse prefect-p
 ```
 
 Update `/path/to/dw-analytics` to the location of the repository on your machine.
+
+## Next step
+
+[Read the projects guide](projects.md).

@@ -119,6 +119,10 @@ cli project delete PROJECT_NAME
 > [!CAUTION]
 > The project directory `./projects/<PROJECT_NAME>` will be deleted from disk, and the flows and deployments will be deleted from the database.
 
-## Further reading
+## Resources
 
 - [pytest docs](https://docs.pytest.org/en/7.4.x/)
+
+## Next step
+
+[Read the dbt guide](dbt.md).

@@ -146,6 +146,10 @@ Deployment 2:
 - deployment name: `farm__harvest__summer`
 - deployment parameters: `{"season": "summer"}`
 
-## Further reading
+## Resources
 
 - [Prefect docs](https://docs.prefect.io)
+
+## Next step
+
+[Read the ops guide](ops.md).
