@@ -69,7 +69,7 @@ alias jdw="cd /path/to/dw-analytics && docker compose up -d clickhouse prefect-p
 alias cdw="cd /path/to/dw-analytics && docker compose up -d clickhouse prefect-postgres prefect-server prefect-worker prefect-cli && ./scripts/open.sh vscode"
 ```
 
-Update `/path/to/dw-analytics` to the location of the repository on your machine.
+Set `/path/to/dw-analytics` to the location of the repository on your machine.
 
 ## Next step
 
