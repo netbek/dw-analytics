@@ -7,6 +7,7 @@ root_dir="${scripts_dir}/.."
 source "${scripts_dir}/variables.sh"
 source "${scripts_dir}/functions.sh"
 
+args=("$@")
 force=false
 
 while [[ $# -gt 0 ]]; do
@@ -46,27 +47,20 @@ for ((i = 1; i < ${#templates[@]}; i+=2)); do
     fi
 done
 
-if [ -d "${infrastructure_env_dir}" ]; then
-    for input_file in "${infrastructure_env_dir}"/*; do
-        if [ -f "${input_file}" ]; then
-            output_file="${env_dir}/$(basename "${input_file}")"
+./infrastructure/scripts/install_env.sh --quiet "${args[@]}"
 
-            if [ -f "${output_file}" ] && [ "$force" == false ]; then
-                echo "Skipped ${input_file} because ${output_file} exists"
-            else
-                # mv "${input_file}" "${output_file}"
-                cp "${input_file}" "${output_file}"
+for input_file in "${infrastructure_env_dir}"/*; do
+    if [ -f "${input_file}" ] && [[ ! "${input_file}" == "${infrastructure_env_dir}/."* ]]; then
+        output_file="${env_dir}/$(basename "${input_file}")"
 
-                if [ -f "${output_file}" ]; then
-                    echo "${tput_green}Created ${output_file}${tput_reset}"
-                fi
+        if [ -f "${output_file}" ] && [ "$force" == false ]; then
+            echo "Skipped ${input_file} because ${output_file} exists"
+        else
+            cp "${input_file}" "${output_file}"
+
+            if [ -f "${output_file}" ]; then
+                echo "${tput_green}Created ${output_file}${tput_reset}"
             fi
         fi
-    done
-
-    # if is_directory_empty "${infrastructure_env_dir}"; then
-    #     rm -r "${infrastructure_env_dir}"
-    # fi
-else
-    echo "${tput_red}Directory '${infrastructure_env_dir}' not found${tput_reset}"
-fi
+    fi
+done

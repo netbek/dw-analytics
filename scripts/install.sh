@@ -52,7 +52,25 @@ done
 ./scripts/install_env.sh $@
 
 # Create .gitconfig
-./scripts/install_gitconfig.sh $@
+if [ -f ".gitconfig" ] && [ "$force" == false ]; then
+    echo "Skipped .gitconfig because it exists"
+else
+    echo "${tput_yellow}Creating .gitconfig ...${tput_reset}"
+
+    cat <<EOF > .gitconfig
+[core]
+autocrlf = input
+
+[pull]
+rebase = false
+
+[user]
+email = $(git config --get --global user.email)
+name = $(git config --get --global user.name)
+EOF
+
+    echo "${tput_green}Created .gitconfig${tput_reset}"
+fi
 
 # Concatenate requirements into single file for Docker build
 readarray service_requirements_arr < <(yq_cmd -o=csv '.services[] | [key, .requirements[]]' install.yml)
