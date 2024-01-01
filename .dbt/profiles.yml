@@ -2,6 +2,31 @@ config:
   send_anonymous_usage_stats: false
 
 # --------------------------------------------------------------------------------------------------
+# Instructions for new profiles
+# --------------------------------------------------------------------------------------------------
+
+# 1. Run the `cli project init PROJECT_NAME` command.
+# 2. Copy and append the following template to this file.
+
+# <PROJECT_NAME>:
+#   target: dev
+#   outputs:
+#     dev:
+#       type: clickhouse
+#       threads: 1
+#       host: "{{ env_var('CLICKHOUSE_DEV_HOST') }}"
+#       port: "{{ env_var('CLICKHOUSE_DEV_PORT')|as_number }}"
+#       user: "{{ env_var('CLICKHOUSE_DEV_USERNAME') }}"
+#       password: "{{ env_var('CLICKHOUSE_DEV_PASSWORD') }}"
+#       schema: <PROJECT_NAME>
+#       driver: "{{ env_var('CLICKHOUSE_DEV_DRIVER') }}"
+#       secure: "{{ (env_var('CLICKHOUSE_DEV_SECURE') == 'true')|as_bool }}"
+#       use_lw_deletes: true
+
+# 3. Replace `<PROJECT_NAME>` with the project name.
+# 4. Run the `cli project refresh PROJECT_NAME` command.
+
+# --------------------------------------------------------------------------------------------------
 # Main project
 # --------------------------------------------------------------------------------------------------
 
@@ -62,31 +87,6 @@ dw_tutorial:
       driver: "{{ env_var('CLICKHOUSE_TEST_DRIVER') }}"
       secure: "{{ (env_var('CLICKHOUSE_TEST_SECURE') == 'true')|as_bool }}"
       use_lw_deletes: true
-
-# --------------------------------------------------------------------------------------------------
-# Instructions for new profiles
-# --------------------------------------------------------------------------------------------------
-
-# 1. Run the `cli project init PROJECT_NAME` command.
-# 2. Copy and append the following template to this file.
-
-# <PROJECT_NAME>:
-#   target: dev
-#   outputs:
-#     dev:
-#       type: clickhouse
-#       threads: 1
-#       host: "{{ env_var('CLICKHOUSE_DEV_HOST') }}"
-#       port: "{{ env_var('CLICKHOUSE_DEV_PORT')|as_number }}"
-#       user: "{{ env_var('CLICKHOUSE_DEV_USERNAME') }}"
-#       password: "{{ env_var('CLICKHOUSE_DEV_PASSWORD') }}"
-#       schema: <PROJECT_NAME>
-#       driver: "{{ env_var('CLICKHOUSE_DEV_DRIVER') }}"
-#       secure: "{{ (env_var('CLICKHOUSE_DEV_SECURE') == 'true')|as_bool }}"
-#       use_lw_deletes: true
-
-# 3. Replace `<PROJECT_NAME>` with the project name.
-# 4. Run the `cli project refresh PROJECT_NAME` command.
 
 # --------------------------------------------------------------------------------------------------
 # User projects

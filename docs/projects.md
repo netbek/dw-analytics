@@ -50,7 +50,7 @@ When more than 1 flow or notebook needs a certain function, consider adding a ut
 
     This command copies the directories and files from `./template_project` to `./projects/<PROJECT_NAME>`.
 
-2. Add a profile for `<PROJECT_NAME>` to [.dbt/profiles.yml](../.dbt/profiles.yml#L36).
+2. Add a profile for `<PROJECT_NAME>` to [.dbt/profiles.yml](../.dbt/profiles.yml#L5).
 
 3. Run the `refresh` command:
 
