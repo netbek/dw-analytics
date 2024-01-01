@@ -27,17 +27,19 @@ To explore:
     cli --help
     ```
 
-## GUI
+## Dashboards
 
-The following Docker containers provide a GUI. The `open.sh` script only opens a URL or application, so remember to start the relevant container(s) beforehand.
+The following Docker containers provide dashboards. The `open.sh` script only opens a URL or application, so remember to start the relevant container(s) beforehand.
 
-| Service            | Description               | Command                            |
-|--------------------|---------------------------|------------------------------------|
-| `cadvisor`         | cAdvisor dashboard        | `./scripts/open.sh cadvisor`       |
-| `grafana`          | Grafana dashboard         | `./scripts/open.sh grafana`        |
-| `jupyter`          | Jupyter index view        | `./scripts/open.sh jupyter`        |
-| `prefect-server`   | Prefect server dashboard  | `./scripts/open.sh prefect-server` |
-| `prometheus`       | Prometheus dashboard      | `./scripts/open.sh prometheus`     |
+| Service            | Command                            |
+|--------------------|------------------------------------|
+| `cadvisor`         | `./scripts/open.sh cadvisor`       |
+| `grafana`          | `./scripts/open.sh grafana`        |
+| `jupyter`          | `./scripts/open.sh jupyter`        |
+| `prefect-server`   | `./scripts/open.sh prefect-server` |
+| `prometheus`       | `./scripts/open.sh prometheus`     |
+
+## Database connections
 
 TODO Add note about connection settings for ClickHouse and Prefect Postgres
 
