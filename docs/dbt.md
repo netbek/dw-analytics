@@ -2,7 +2,7 @@
 
 ## CLI
 
-The Prefect CLI container has 2 CLIs for interacting with dbt:
+The CLI container has 2 CLIs for interacting with dbt:
 
 - `dbt`: the entire dbt CLI
 - `cli dbt`: a supplementary CLI that provides convenience commands for using dbt
@@ -12,7 +12,7 @@ To explore:
 1. Log into the Docker container:
 
     ```shell
-    docker compose exec prefect-cli bash
+    docker compose exec cli bash
     ```
 
 2. View the list of available commands:

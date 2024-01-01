@@ -6,4 +6,4 @@ root_dir="${scripts_dir}/.."
 
 cd "${root_dir}"
 
-docker compose exec prefect-cli prefect $@
+docker compose exec cli prefect $@

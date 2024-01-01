@@ -19,7 +19,7 @@ The stack consists of these Docker containers:
 | `prefect-postgres`| Postgres server that manages the Prefect database              |
 | `prefect-server`  | Prefect backend and API                                        |
 | `prefect-worker`  | Process that executes Python workflows                         |
-| `prefect-cli`     | Development environment for dbt, Prefect, and VS Code          |
+| `cli`             | CLIs for dbt and Prefect, and dev environment for VS Code      |
 | `jupyter`         | Jupyter Notebook server                                        |
 | `cadvisor`        | cAdvisor service that collects and processes resource usage    |
 | `prometheus`      | Prometheus service that records metrics of Docker containers   |
@@ -53,16 +53,16 @@ The repository is structured as follows:
 │   └── # Template for new .env files
 ├── template_project
 │   └── # Template for new projects
-├── .bashrc # Shell configuration used in Prefect CLI container
+├── .bashrc # Shell configuration used in CLI container
 ├── .env # Environment variables used by Docker Compose (not containers)
-├── .gitconfig # Git configuration used in Prefect CLI container
-├── .gitignore # Git configuration used in Prefect CLI container
-├── .sqlfluff # SQL linter configuration used in Prefect CLI container
-├── .sqlfluffignore # SQL linter configuration used in Prefect CLI container
-├── .yamllint # YAML linter configuration used in Prefect CLI container
+├── .gitconfig # Git configuration used in CLI container
+├── .gitignore # Git configuration used in CLI container
+├── .sqlfluff # SQL linter configuration used in CLI container
+├── .sqlfluffignore # SQL linter configuration used in CLI container
+├── .yamllint # YAML linter configuration used in CLI container
 ├── docker-compose.yml # Docker configurations for services, volumes and networking
 ├── install.yml # Installation script configuration
-├── pyproject.toml # Configuration of Python tools in Prefect CLI container
+├── pyproject.toml # Configuration of Python tools in CLI container
 ├── requirements.txt # Python dependencies in Prefect and Jupyter containers
 └── requirements_dev.txt # Python dev dependencies in Prefect and Jupyter containers
 ```

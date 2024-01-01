@@ -17,7 +17,7 @@
 3. Start the ClickHouse and Prefect containers:
 
     ```shell
-    docker compose up -d clickhouse prefect-postgres prefect-server prefect-worker prefect-cli
+    docker compose up -d clickhouse prefect-postgres prefect-server prefect-worker cli
     ```
 
     Wait for the container statuses to change to started and healthy.
@@ -57,16 +57,16 @@ Add aliases for frequently used commands to `~/.bash_aliases`:
 
 ```shell
 # Start ClickHouse and Prefect
-alias adw="cd /path/to/dw-analytics && docker compose up clickhouse prefect-postgres prefect-server prefect-worker prefect-cli"
+alias adw="cd /path/to/dw-analytics && docker compose up clickhouse prefect-postgres prefect-server prefect-worker cli"
 
 # Stop all services
 alias sdw="cd /path/to/dw-analytics && docker compose down"
 
 # Start ClickHouse, Prefect and Jupyter in detached mode, and open Jupyter
-alias jdw="cd /path/to/dw-analytics && docker compose up -d clickhouse prefect-postgres prefect-server prefect-worker prefect-cli jupyter && ./scripts/open.sh jupyter"
+alias jdw="cd /path/to/dw-analytics && docker compose up -d clickhouse prefect-postgres prefect-server prefect-worker cli jupyter && ./scripts/open.sh jupyter"
 
 # Start ClickHouse and Prefect in detached mode, and open VS Code
-alias cdw="cd /path/to/dw-analytics && docker compose up -d clickhouse prefect-postgres prefect-server prefect-worker prefect-cli && ./scripts/open.sh vscode"
+alias cdw="cd /path/to/dw-analytics && docker compose up -d clickhouse prefect-postgres prefect-server prefect-worker cli && ./scripts/open.sh vscode"
 ```
 
 Set `/path/to/dw-analytics` to the location of the repository on your machine.

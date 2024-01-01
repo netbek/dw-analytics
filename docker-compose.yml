@@ -88,12 +88,12 @@ services:
       prefect-server:
         condition: service_healthy
 
-  prefect-cli:
+  cli:
     build:
       context: ./infrastructure/prefect-base
     command: /bin/bash
     env_file:
-      - ./.env_files/prefect-cli.env
+      - ./.env_files/cli.env
       - ./.env_files/database.env
     working_dir: /home/analyst/projects
     volumes:

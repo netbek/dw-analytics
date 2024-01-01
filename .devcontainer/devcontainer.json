@@ -1,7 +1,7 @@
 {
   "name": "dw-analytics",
   "dockerComposeFile": "../docker-compose.yml",
-  "service": "prefect-cli",
+  "service": "cli",
   "workspaceFolder": "/home/analyst",
   "shutdownAction": "none",
   "customizations": {

@@ -10,7 +10,7 @@ The Prefect server provides a dashboard of flows, deployments and more. To view 
 1. Start the Prefect containers if they are not running already:
 
     ```shell
-    docker compose up -d prefect-postgres prefect-server prefect-worker prefect-cli
+    docker compose up -d prefect-postgres prefect-server prefect-worker cli
     ```
 
 2. Go to [http://localhost:29020](http://localhost:29020) or run the `open` script:
@@ -21,7 +21,7 @@ The Prefect server provides a dashboard of flows, deployments and more. To view 
 
 ## CLI
 
-The Prefect CLI container has 2 CLIs for interacting with Prefect:
+The CLI container has 2 CLIs for interacting with Prefect:
 
 - `prefect`: the entire Prefect CLI
 - `cli prefect`: a supplementary CLI that provides convenience commands for using Prefect
@@ -31,7 +31,7 @@ To explore:
 1. Log into the Docker container:
 
     ```shell
-    docker compose exec prefect-cli bash
+    docker compose exec cli bash
     ```
 
 2. View the list of available commands:

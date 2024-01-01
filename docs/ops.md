@@ -5,7 +5,7 @@
 
 ## CLI
 
-The Prefect CLI container has 3 CLIs:
+The CLI container has 3 CLIs:
 
 - `dbt`: the entire dbt CLI
 - `prefect`: the entire Prefect CLI
@@ -16,7 +16,7 @@ To explore:
 1. Log into the Docker container:
 
     ```shell
-    docker compose exec prefect-cli bash
+    docker compose exec cli bash
     ```
 
 2. View the list of available commands:
