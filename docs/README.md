@@ -2,12 +2,12 @@
 
 ## Guides
 
-- [Installation](install.md)
-- [Projects](projects.md)
-- [dbt](dbt.md)
-- [Jupyter Notebook](jupyter.md)
-- [Prefect](prefect.md)
-- [Ops](ops.md)
+- [Installation](01-install.md)
+- [Projects](02-projects.md)
+- [dbt](03-dbt.md)
+- [Jupyter Notebook](04-jupyter.md)
+- [Prefect](05-prefect.md)
+- [Ops](06-ops.md)
 
 ## Resources
 
