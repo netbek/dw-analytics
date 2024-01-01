@@ -19,6 +19,28 @@ The Prefect server provides a dashboard of flows, deployments and more. To view 
     ./scripts/open.sh prefect-server
     ```
 
+## CLI
+
+The Prefect CLI container has 2 CLIs for interacting with Prefect:
+
+- `prefect`: the entire Prefect CLI
+- `cli prefect`: a supplementary CLI that provides convenience commands for using Prefect
+
+To explore:
+
+1. Log into the Docker container:
+
+    ```shell
+    docker compose exec prefect-cli bash
+    ```
+
+2. View the list of available commands:
+
+    ```shell
+    prefect --help
+    cli prefect --help
+    ```
+
 ## Flows and tasks
 
 Flows exist as Python functions and flow entities. Python functions are stored in `./projects/<PROJECT_NAME>/flows`, and the flow entities are stored in the Prefect database.

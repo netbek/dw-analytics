@@ -5,11 +5,27 @@
 
 ## CLI
 
-The `prefect-cli` container has 3 CLIs. To explore, start the Docker container: `docker compose run --rm prefect-cli bash`
+The Prefect CLI container has 3 CLIs:
 
-- `dbt`: The dbt CLI. Run `dbt --help` for a list of available commands.
-- `prefect`: The Prefect CLI. Run `prefect --help` for a list of available commands.
-- `cli`: A supplementary CLI that provides convenience commands for managing projects and running dbt and Prefect. Run `cli --help` for a list of available commands.
+- `dbt`: the entire dbt CLI
+- `prefect`: the entire Prefect CLI
+- `cli`: a supplementary CLI that provides convenience commands for managing projects and using dbt and Prefect
+
+To explore:
+
+1. Log into the Docker container:
+
+    ```shell
+    docker compose exec prefect-cli bash
+    ```
+
+2. View the list of available commands:
+
+    ```shell
+    dbt --help
+    prefect --help
+    cli --help
+    ```
 
 ## GUI
 
