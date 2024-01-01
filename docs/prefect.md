@@ -27,34 +27,17 @@ Further reading:
 
 ### Create a deployment
 
-For example, see [the template project's prefect.yaml](../template_project/prefect.yaml#L15) configuration:
+For example, here are the steps to create a deployment in the `dw_tutorial` project:
 
-```yaml
-- name: {{ project_name }}__<FLOW_NAME>
-  version: null
-  tags: [{{ project_name }}]
-  description: null
-  entrypoint: flows/<FLOW_NAME>.py:<FLOW_NAME>_flow
-  parameters: {}
-  work_pool:
-    name: process_pool
-    work_queue_name: null
-    job_variables: {}
-  schedule:
-    cron: '* * * * *'
-    timezone: UTC
-    day_or: true
-```
+1. Open [./projects/dw_tutorial/prefect.yaml](../dw_tutorial/prefect.yaml#L44) and go to the commented section `Instructions for new deployments`.
 
-Steps:
+2. Copy and append the template to the `deployments` list.
 
-1. Copy and append the template to the `deployments` list of `./projects/<PROJECT_NAME>/prefect.yaml`.
+3. Replace `<FLOW_NAME>` with the flow name.
 
-2. Replace `<FLOW_NAME>` with the flow name.
+4. Update the parameters, schedule and other attributes.
 
-3. Update the parameters, schedule and other attributes.
-
-4. Run the deploy command:
+5. Run the deploy command:
 
     ```shell
     cli prefect deploy -d DEPLOYMENT_NAME
@@ -70,9 +53,6 @@ Steps:
 
 > [!TIP]
 > Deployments that exist only in configuration won't appear on the [Prefect dashboard](http://localhost:29020/deployments) and CLI (`prefect deployments ls`). Run the deploy command to create the deployment entity in the Prefect Postgres database.
-
-> [!CAUTION]
-> Update your project's `prefect.yaml` according to the example. Don't update `./projects/template_project/prefect.yaml` inadvertently.
 
 To deploy all the flows of a project, run:
 
