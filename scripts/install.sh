@@ -7,6 +7,7 @@ root_dir="${scripts_dir}/.."
 source "${scripts_dir}/variables.sh"
 source "${scripts_dir}/functions.sh"
 
+args=("$@")
 force=false
 
 while [[ $# -gt 0 ]]; do
@@ -49,7 +50,7 @@ for repository in "${repositories[@]}"; do
 done
 
 # Create .env files
-./scripts/install_env.sh $@
+./scripts/install_env.sh "${args[@]}"
 
 # Create .gitconfig
 if [ -f ".gitconfig" ] && [ "$force" == false ]; then
