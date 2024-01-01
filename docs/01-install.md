@@ -73,7 +73,7 @@ Set `/path/to/dw-analytics` to the location of the repository on your machine.
 
 ## Uninstall
 
-To delete the Docker volumes and images, run:
+To delete all the data and Docker images, run:
 
 ```shell
 ./scripts/uninstall.sh
