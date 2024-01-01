@@ -13,7 +13,11 @@ The Prefect server provides a dashboard of flows, deployments and more. To view 
     docker compose up -d prefect-postgres prefect-server prefect-worker prefect-cli
     ```
 
-2. Open [http://localhost:29020](http://localhost:29020).
+2. Go to [http://localhost:29020](http://localhost:29020) or run the `open` script:
+
+    ```shell
+    ./scripts/open.sh prefect-server
+    ```
 
 ## Flows and tasks
 
