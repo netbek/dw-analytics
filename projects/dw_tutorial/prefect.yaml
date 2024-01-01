@@ -1,4 +1,4 @@
-name: main
+name: dw_tutorial
 prefect-version: 2.14.12
 
 build: null
@@ -7,9 +7,38 @@ push: null
 
 pull:
 - prefect.deployments.steps.set_working_directory:
-    directory: /home/analyst/projects/main
+    directory: /home/analyst/projects/dw_tutorial
 
-deployments: null
+deployments:
+- name: dw_tutorial__dbt_run
+  version: null
+  tags: [dw_tutorial]
+  description: null
+  entrypoint: flows/dbt.py:dbt_run_flow
+  parameters: {}
+  work_pool:
+    name: process_pool
+    work_queue_name: null
+    job_variables: {}
+  schedule:
+    cron: '* * * * *'
+    timezone: UTC
+    day_or: true
+
+- name: dw_tutorial__notebook
+  version: null
+  tags: [dw_tutorial]
+  description: null
+  entrypoint: flows/notebook.py:notebook_flow
+  parameters: {"greeting": "bom dia!"}
+  work_pool:
+    name: process_pool
+    work_queue_name: null
+    job_variables: {}
+  schedule:
+    cron: '* * * * *'
+    timezone: UTC
+    day_or: true
 
 # --------------------------------------------------------------------------------------------------
 # Instructions for new deployments
@@ -17,9 +46,9 @@ deployments: null
 
 # 1. Copy and append the following template to the `deployments` list above.
 
-# - name: main__<FLOW_NAME>
+# - name: dw_tutorial__<FLOW_NAME>
 #   version: null
-#   tags: [main]
+#   tags: [dw_tutorial]
 #   description: null
 #   entrypoint: flows/<FLOW_NAME>.py:<FLOW_NAME>_flow
 #   parameters: {}

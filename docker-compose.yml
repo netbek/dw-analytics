@@ -95,7 +95,7 @@ services:
     env_file:
       - ./.env_files/prefect-cli.env
       - ./.env_files/database.env
-    working_dir: /home/analyst/projects/main
+    working_dir: /home/analyst/projects
     volumes:
       - .:/home/analyst:rw
       - ${SSH_AUTH_SOCK}:/ssh-agent:ro

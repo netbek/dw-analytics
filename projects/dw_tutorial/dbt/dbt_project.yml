@@ -1,0 +1,17 @@
+name: dw_tutorial
+version: 1.0.0
+config-version: 2
+
+profile: dw_tutorial
+
+model-paths: [models]
+analysis-paths: [analyses]
+test-paths: [tests]
+seed-paths: [seeds]
+macro-paths: [macros]
+snapshot-paths: [snapshots]
+clean-targets: [logs, target, dbt_packages]
+
+models:
+  dw_tutorial:
+    +materialized: view

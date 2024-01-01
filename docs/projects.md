@@ -5,7 +5,7 @@
 
 ## Overview
 
-Projects are structured as follows. To explore, open `./template_project` or `./projects/main`.
+Projects are structured as follows. To explore, open `./template_project` or `./projects/dw_tutorial`.
 
 ```shell
 .

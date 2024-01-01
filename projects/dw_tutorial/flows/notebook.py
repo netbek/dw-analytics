@@ -1,11 +1,11 @@
 from prefect import flow, get_run_logger
 from prefect_jupyter import notebook
-from projects.main.constants import NOTEBOOKS_DIR
+from projects.dw_tutorial.constants import NOTEBOOKS_DIR
 
 import os
 
 
-@flow(name="main__notebook_flow")
+@flow(name="dw_tutorial__notebook_flow")
 def notebook_flow(greeting: str):
     nb = notebook.execute_notebook(
         os.path.join(NOTEBOOKS_DIR, "greet.ipynb"), parameters={"greeting": greeting}
