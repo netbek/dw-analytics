@@ -1,35 +1,11 @@
 version: '3.8'
 
 volumes:
-  clickhouse_data:
   prefect_postgres_data:
   prometheus_data:
   grafana_data:
 
 services:
-  clickhouse:
-    image: clickhouse/clickhouse-server:23.11.3.23-alpine
-    env_file:
-      - ./.env_files/clickhouse.env
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    ports:
-      - ${DW_CLICKHOUSE_HTTP_PORT:-8123}:8123
-      - ${DW_CLICKHOUSE_NATIVE_PORT:-9000}:9000
-      - ${DW_CLICKHOUSE_POSTGRES_PORT:-9005}:9005
-    volumes:
-      - ./docker/clickhouse/conf.d/override.xml:/etc/clickhouse-server/config.d/override.xml:ro
-      - ./docker/clickhouse/scripts:/scripts:ro
-      - clickhouse_data:/var/lib/clickhouse:rw
-    healthcheck:
-      test: wget --no-verbose --spider http://localhost:8123/ping || exit 1
-      interval: 1s
-      timeout: 1s
-      retries: 10
-    deploy:
-      restart_policy:
-        condition: on-failure
-
   prefect-postgres:
     image: postgres:16.1-alpine3.19
     env_file:
@@ -76,6 +52,8 @@ services:
     env_file:
       - ./.env_files/prefect-worker.env
       - ./.env_files/database.env
+    extra_hosts:
+      - host.docker.internal:host-gateway # Used for connection to ClickHouse
     volumes:
       - ./.dbt:/home/analyst/.dbt:rw
       - ./.prefect:/home/analyst/.prefect:rw
@@ -96,6 +74,8 @@ services:
       - ./.env_files/cli.env
       - ./.env_files/database.env
     working_dir: /home/analyst/projects
+    extra_hosts:
+      - host.docker.internal:host-gateway # Used for connection to ClickHouse
     volumes:
       - .:/home/analyst:rw
       - ${SSH_AUTH_SOCK}:/ssh-agent:ro
@@ -114,6 +94,8 @@ services:
     env_file:
       - ./.env_files/jupyter.env
       - ./.env_files/database.env
+    extra_hosts:
+      - host.docker.internal:host-gateway # Used for connection to ClickHouse
     ports:
       - ${DW_JUPYTER_PORT:-8888}:8888
     volumes:

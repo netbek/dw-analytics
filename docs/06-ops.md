@@ -65,19 +65,12 @@ Stop monitoring the containers:
 docker compose down cadvisor prometheus grafana
 ```
 
-### ClickHouse
-
-TODO
-
 ## Networking
 
 The following ports are exposed:
 
 | Service            | Port  | Protocol              |
 |--------------------|-------|-----------------------|
-| clickhouse         | 29000 | HTTP                  |
-| clickhouse         | 29001 | Native/TCP            |
-| clickhouse         | 29002 | Postgres emulation    |
 | prefect-postgres   | 29010 | Postgres              |
 | prefect-server     | 29020 | HTTP                  |
 | jupyter            | 29030 | HTTP                  |

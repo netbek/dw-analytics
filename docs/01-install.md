@@ -14,15 +14,23 @@
     ./scripts/install.sh
     ```
 
-3. Start the ClickHouse and Prefect containers:
+3. Start the ClickHouse container:
 
     ```shell
-    docker compose up -d clickhouse prefect-postgres prefect-server prefect-worker cli
+    docker compose up -d prefect-postgres prefect-server prefect-worker cli
     ```
 
     Wait for the container statuses to change to started and healthy.
 
-4. Run the provision script to configure ClickHouse and Prefect:
+4. Start the Prefect containers:
+
+    ```shell
+    docker compose up -d prefect-postgres prefect-server prefect-worker cli
+    ```
+
+    Wait for the container statuses to change to started and healthy.
+
+5. Run the provision script to configure ClickHouse and Prefect:
 
     ```shell
     ./scripts/cli.sh prefect provision dev
@@ -56,20 +64,26 @@ See the docs for [creating a connection](https://github.com/dbeaver/dbeaver/wiki
 Add aliases for frequently used commands to `~/.bash_aliases`:
 
 ```shell
-# Start ClickHouse and Prefect
-alias adw="cd /path/to/dw-analytics && docker compose up clickhouse prefect-postgres prefect-server prefect-worker cli"
+# Start ClickHouse
+alias ach="cd /path/to/dw-clickhouse && docker compose up -d"
 
-# Stop all services
+# Start Prefect
+alias adw="cd /path/to/dw-analytics && docker compose up prefect-postgres prefect-server prefect-worker cli"
+
+# Stop ClickHouse
+alias sch="cd /path/to/dw-clickhouse && docker compose down"
+
+# Stop Prefect
 alias sdw="cd /path/to/dw-analytics && docker compose down"
 
-# Start ClickHouse, Prefect and Jupyter in detached mode, and open Jupyter
-alias jdw="cd /path/to/dw-analytics && docker compose up -d clickhouse prefect-postgres prefect-server prefect-worker cli jupyter && ./scripts/open.sh jupyter"
+# Start Prefect and Jupyter in detached mode, and open Jupyter
+alias jdw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli jupyter && ./scripts/open.sh jupyter"
 
-# Start ClickHouse and Prefect in detached mode, and open VS Code
-alias cdw="cd /path/to/dw-analytics && docker compose up -d clickhouse prefect-postgres prefect-server prefect-worker cli && ./scripts/open.sh vscode"
+# Start Prefect in detached mode, and open VS Code
+alias cdw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli && ./scripts/open.sh vscode"
 ```
 
-Set `/path/to/dw-analytics` to the location of the repository on your machine.
+Set `/path/to/` to the location of the repositories on your machine.
 
 ## Uninstall
 
