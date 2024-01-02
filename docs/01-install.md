@@ -48,7 +48,7 @@ code --install-extension ms-vscode-remote.remote-containers
 
 ### DBeaver
 
-GUI client for Postgres, ClickHouse and more. To install, run:
+GUI client for Postgres, ClickHouse and other databases. To install, run:
 
 ```shell
 curl https://dbeaver.io/debs/dbeaver.gpg.key | sudo apt-key add -
