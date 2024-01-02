@@ -23,7 +23,6 @@ cd "${root_dir}"
 
 template_env_dir="template_env"
 env_dir=".env_files"
-infrastructure_env_dir="infrastructure/.env_files"
 
 mkdir -p "${env_dir}"
 
@@ -47,20 +46,27 @@ for ((i = 1; i < ${#templates[@]}; i+=2)); do
     fi
 done
 
-./infrastructure/scripts/install_env.sh --quiet "${args[@]}"
+readarray repositories < <(yq_cmd -o=csv '.repositories[] | key' install.yml)
 
-for input_file in "${infrastructure_env_dir}"/*; do
-    if [ -f "${input_file}" ] && [[ ! "${input_file}" == "${infrastructure_env_dir}/."* ]]; then
-        output_file="${env_dir}/$(basename "${input_file}")"
+for repository in "${repositories[@]}"; do
+    repository=$(strip "${repository}")
+    repository_env_dir="docker/${repository}/.env_files"
 
-        if [ -f "${output_file}" ] && [ "$force" == false ]; then
-            echo "Skipped ${input_file} because ${output_file} exists"
-        else
-            cp "${input_file}" "${output_file}"
+    ./docker/${repository}/scripts/install_env.sh --quiet "${args[@]}"
 
-            if [ -f "${output_file}" ]; then
-                echo "${tput_green}Created ${output_file}${tput_reset}"
+    for input_file in "${repository_env_dir}"/*; do
+        if [ -f "${input_file}" ] && [[ ! "${input_file}" == "${repository_env_dir}/."* ]]; then
+            output_file="${env_dir}/$(basename "${input_file}")"
+
+            if [ -f "${output_file}" ] && [ "$force" == false ]; then
+                echo "Skipped ${input_file} because ${output_file} exists"
+            else
+                cp "${input_file}" "${output_file}"
+
+                if [ -f "${output_file}" ]; then
+                    echo "${tput_green}Created ${output_file}${tput_reset}"
+                fi
             fi
         fi
-    fi
+    done
 done

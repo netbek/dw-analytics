@@ -18,8 +18,8 @@ services:
       - ${DW_CLICKHOUSE_NATIVE_PORT:-9000}:9000
       - ${DW_CLICKHOUSE_POSTGRES_PORT:-9005}:9005
     volumes:
-      - ./infrastructure/clickhouse/conf.d/override.xml:/etc/clickhouse-server/config.d/override.xml:ro
-      - ./infrastructure/clickhouse/scripts:/scripts:ro
+      - ./docker/clickhouse/conf.d/override.xml:/etc/clickhouse-server/config.d/override.xml:ro
+      - ./docker/clickhouse/scripts:/scripts:ro
       - clickhouse_data:/var/lib/clickhouse:rw
     healthcheck:
       test: wget --no-verbose --spider http://localhost:8123/ping || exit 1
@@ -49,7 +49,7 @@ services:
 
   prefect-server:
     build:
-      context: ./infrastructure/prefect-base
+      context: ./docker/infrastructure/prefect-base
     command: prefect server start
     env_file:
       - ./.env_files/prefect-server.env
@@ -71,7 +71,7 @@ services:
 
   prefect-worker:
     build:
-      context: ./infrastructure/prefect-base
+      context: ./docker/infrastructure/prefect-base
     command: prefect worker start --name process-worker --pool process_pool --type process --limit 1
     env_file:
       - ./.env_files/prefect-worker.env
@@ -90,7 +90,7 @@ services:
 
   cli:
     build:
-      context: ./infrastructure/prefect-base
+      context: ./docker/infrastructure/prefect-base
     command: /bin/bash
     env_file:
       - ./.env_files/cli.env
@@ -110,7 +110,7 @@ services:
 
   jupyter:
     build:
-      context: ./infrastructure/jupyter
+      context: ./docker/infrastructure/jupyter
     env_file:
       - ./.env_files/jupyter.env
       - ./.env_files/database.env
@@ -123,7 +123,7 @@ services:
       - ./.prefect:/home/analyst/.prefect:rw
       - ./package:/home/analyst/package:rw
       - ./projects:/home/analyst/projects:rw
-      - ./infrastructure/jupyter/usr/local/bin/start-notebook.d:/usr/local/bin/start-notebook.d:ro
+      - ./docker/infrastructure/jupyter/usr/local/bin/start-notebook.d:/usr/local/bin/start-notebook.d:ro
     user: 0:0
 
   cadvisor:
@@ -147,7 +147,7 @@ services:
     ports:
       - ${DW_PROMETHEUS_PORT:-9090}:9090
     volumes:
-      - ./infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./docker/infrastructure/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus:rw
     depends_on:
       - cadvisor
@@ -159,10 +159,10 @@ services:
     ports:
       - ${DW_GRAFANA_PORT:-3000}:3000
     volumes:
-      - ./infrastructure/grafana/provisioning/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
-      - ./infrastructure/grafana/provisioning/providers.yml:/etc/grafana/provisioning/dashboards/providers.yml:ro
-      - ./infrastructure/grafana/dashboards:/etc/dashboards:ro
-      - ./infrastructure/grafana/dashboards/home.json:/usr/share/grafana/public/dashboards/home.json:ro
+      - ./docker/infrastructure/grafana/provisioning/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml:ro
+      - ./docker/infrastructure/grafana/provisioning/providers.yml:/etc/grafana/provisioning/dashboards/providers.yml:ro
+      - ./docker/infrastructure/grafana/dashboards:/etc/dashboards:ro
+      - ./docker/infrastructure/grafana/dashboards/home.json:/usr/share/grafana/public/dashboards/home.json:ro
       - grafana_data:/var/lib/grafana:rw
     depends_on:
       - prometheus

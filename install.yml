@@ -1,4 +1,7 @@
 repositories:
+  clickhouse:
+    url: git@github.com:netbek/dw-clickhouse.git
+    branch: main
   infrastructure:
     url: git@github.com:netbek/dw-infrastructure.git
     branch: main

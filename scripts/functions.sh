@@ -4,6 +4,10 @@ scripts_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 source "${scripts_dir}/variables.sh"
 
+function strip() {
+    echo "$(sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' <<< "$1")"
+}
+
 function is_directory_empty() {
     shopt -s nullglob
     files=("$1"/*)

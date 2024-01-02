@@ -41,7 +41,7 @@ The repository is structured as follows:
 │   └── # Jupyter server configuration
 ├── .prefect
 │   └── # Prefect profiles
-├── infrastructure
+├── docker
 │   └── # Docker container configurations
 ├── package
 │   └── # Supplementary CLI and common utilities

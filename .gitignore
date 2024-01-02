@@ -1,7 +1,3 @@
-# Repos
-/infrastructure
-
-# Miscellaneous
 *.orig
 *.pyc
 *.Rhistory
