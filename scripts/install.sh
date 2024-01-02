@@ -24,6 +24,8 @@ cd "${root_dir}"
 # Install repositories
 readarray repositories < <(yq_cmd -o=csv '.repositories[] | [key, .url, .branch]' install.yml)
 
+cd "${root_dir}/docker"
+
 for repository in "${repositories[@]}"; do
     IFS=',' read -ra values <<< "${repository}"
     name="${values[0]}"
@@ -48,6 +50,8 @@ for repository in "${repositories[@]}"; do
 
     echo "${tput_green}Installed '${name}'${tput_reset}"
 done
+
+cd "${root_dir}"
 
 # Create .env files
 ./scripts/install_env.sh "${args[@]}"
