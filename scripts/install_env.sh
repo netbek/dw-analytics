@@ -53,7 +53,7 @@ mkdir -p "${env_dir}"
 # context+=("profile=${profile}")
 # render_template --pretty --prettier_parser yaml ./template_env docker-compose.yml.jinja2 "${context[@]}" > docker-compose.yml
 
-# Render env files
+# Render .env files
 templates=(
     ${template_env_dir}/docker-compose.env      .env
     ${template_env_dir}/database.env            ${env_dir}/database.env
@@ -74,7 +74,7 @@ for ((i = 1; i < ${#templates[@]}; i+=2)); do
     fi
 done
 
-# Render env files of Docker images
+# Render .env files of Docker images
 readarray repositories < <(yq_cmd -o=csv '.repositories[] | key' install.yml)
 
 if [ "$force" == true ]; then

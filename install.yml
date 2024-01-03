@@ -1,6 +1,6 @@
 repositories:
-  infrastructure:
-    url: git@github.com:netbek/dw-infrastructure.git
+  dw-prefect:
+    url: git@github.com:netbek/dw-prefect.git
     branch: main
 
 services:

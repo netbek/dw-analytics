@@ -107,7 +107,7 @@ for service_requirements in "${service_requirements_arr[@]}"; do
     service="${values[0]}"
     requirements_arr=("${values[@]:1}")
     requirements_concat=""
-    output_file="./docker/infrastructure/${service}/build/src/requirements.txt"
+    output_file="./docker/dw-prefect/${service}/build/src/requirements.txt"
 
     for requirement in "${requirements_arr[@]}"; do
         requirement=$(realpath "${requirement}")
