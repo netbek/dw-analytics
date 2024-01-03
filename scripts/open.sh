@@ -6,7 +6,7 @@ root_dir="${scripts_dir}/.."
 
 source "${scripts_dir}/variables.sh"
 
-name_choices=("cadvisor" "grafana" "jupyter" "prefect-server" "prometheus" "vscode")
+name_choices=("jupyter" "prefect-server" "vscode")
 
 if ([ "$1" == "--help" ] || [ -z "$1" ]); then
     echo "Usage: $0 NAME"
@@ -27,16 +27,10 @@ cd "${root_dir}"
 
 source .env
 
-if [ "${name}" == "cadvisor" ]; then
-    open_cmd "http://localhost:${DW_CADVISOR_PORT}"
-elif [ "${name}" == "grafana" ]; then
-    open_cmd "http://localhost:${DW_GRAFANA_PORT}"
-elif [ "${name}" == "jupyter" ]; then
+if [ "${name}" == "jupyter" ]; then
     open_cmd "http://localhost:${DW_JUPYTER_PORT}/nbclassic/tree"
 elif [ "${name}" == "prefect-server" ]; then
     open_cmd "http://localhost:${DW_PREFECT_SERVER_PORT}"
-elif [ "${name}" == "prometheus" ]; then
-    open_cmd "http://localhost:${DW_PROMETHEUS_PORT}"
 elif [ "${name}" == "vscode" ]; then
     vscode_remote_cmd "$PWD" /home/analyst
 fi

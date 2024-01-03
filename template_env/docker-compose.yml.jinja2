@@ -8,8 +8,10 @@ services:
     image: postgres:16.1-alpine3.19
     env_file:
       - ./.env_files/prefect-postgres.env
+    {% if DW_PREFECT_POSTGRES_PORT -%}
     ports:
-      - ${DW_PREFECT_POSTGRES_PORT:-5432}:5432
+      - {{ DW_PREFECT_POSTGRES_PORT }}:5432
+    {%- endif %}
     volumes:
       - prefect_postgres_data:/var/lib/postgresql/data:rw
     healthcheck:
@@ -27,8 +29,10 @@ services:
     command: prefect server start
     env_file:
       - ./.env_files/prefect-server.env
+    {% if DW_PREFECT_SERVER_PORT -%}
     ports:
-      - ${DW_PREFECT_SERVER_PORT:-4200}:4200
+      - {{ DW_PREFECT_SERVER_PORT }}:4200
+    {%- endif %}
     volumes:
       - ./.prefect:/home/analyst/.prefect:rw
     healthcheck:
@@ -86,6 +90,7 @@ services:
       # prefect-worker:
       #   condition: service_healthy
 
+  {% if profile in ('dev') -%}
   jupyter:
     build:
       context: ./docker/infrastructure/jupyter
@@ -94,8 +99,10 @@ services:
       - ./.env_files/database.env
     extra_hosts:
       - host.docker.internal:host-gateway # Used for connection to ClickHouse
+    {% if DW_JUPYTER_PORT -%}
     ports:
-      - ${DW_JUPYTER_PORT:-8888}:8888
+      - {{ DW_JUPYTER_PORT }}:8888
+    {%- endif %}
     volumes:
       - ./.dbt:/home/analyst/.dbt:rw
       - ./.ipython/profile_default/startup:/home/analyst/.ipython/profile_default/startup:rw
@@ -105,3 +112,4 @@ services:
       - ./projects:/home/analyst/projects:rw
       - ./docker/infrastructure/jupyter/usr/local/bin/start-notebook.d:/usr/local/bin/start-notebook.d:ro
     user: 0:0
+  {%- endif %}

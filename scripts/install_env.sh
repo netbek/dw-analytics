@@ -7,13 +7,35 @@ root_dir="${scripts_dir}/.."
 source "${scripts_dir}/variables.sh"
 source "${scripts_dir}/functions.sh"
 
+function echo_help() {
+    echo "Usage: $0 PROFILE [-f|--force]"
+    echo ""
+    echo "Arguments:"
+    echo "  profile: ${profile_choices[@]}"
+}
+
+if [ -z "$1" ]; then
+    echo_help
+    exit 1
+fi
+
 args=("$@")
+profile="$1"
 force=false
+
+if [[ ! " ${profile_choices[@]} " =~ " ${profile} " ]]; then
+    echo "${tput_red}Invalid profile. Allowed values are: ${profile_choices[@]}${tput_reset}"
+    exit 1
+fi
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -f|--force)
             force=true
+            ;;
+        --help)
+            echo_help
+            exit 0
             ;;
     esac
     shift
@@ -21,11 +43,17 @@ done
 
 cd "${root_dir}"
 
-template_env_dir="template_env"
+template_env_dir="template_env/${profile}"
 env_dir=".env_files"
 
 mkdir -p "${env_dir}"
 
+# Render Compose file
+# mapfile -t context < <(grep -v '^#' "${template_env_dir}/docker-compose.env")
+# context+=("profile=${profile}")
+# render_template --pretty --prettier_parser yaml ./template_env docker-compose.yml.jinja2 "${context[@]}" > docker-compose.yml
+
+# Render env files
 templates=(
     ${template_env_dir}/docker-compose.env      .env
     ${template_env_dir}/database.env            ${env_dir}/database.env
@@ -46,13 +74,20 @@ for ((i = 1; i < ${#templates[@]}; i+=2)); do
     fi
 done
 
+# Render env files of Docker images
 readarray repositories < <(yq_cmd -o=csv '.repositories[] | key' install.yml)
+
+if [ "$force" == true ]; then
+    filtered_args=("--force")
+else
+    filtered_args=()
+fi
 
 for repository in "${repositories[@]}"; do
     repository=$(strip "${repository}")
     repository_env_dir="docker/${repository}/.env_files"
 
-    ./docker/${repository}/scripts/install_env.sh --quiet "${args[@]}"
+    ./docker/${repository}/scripts/install_env.sh --quiet "${filtered_args[@]}"
 
     for input_file in "${repository_env_dir}"/*; do
         if [ -f "${input_file}" ] && [[ ! "${input_file}" == "${repository_env_dir}/."* ]]; then

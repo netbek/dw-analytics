@@ -7,13 +7,35 @@ root_dir="${scripts_dir}/.."
 source "${scripts_dir}/variables.sh"
 source "${scripts_dir}/functions.sh"
 
+function echo_help() {
+    echo "Usage: $0 PROFILE [-f|--force]"
+    echo ""
+    echo "Arguments:"
+    echo "  profile: ${profile_choices[@]}"
+}
+
+if [ -z "$1" ]; then
+    echo_help
+    exit 1
+fi
+
 args=("$@")
+profile="$1"
 force=false
+
+if [[ ! " ${profile_choices[@]} " =~ " ${profile} " ]]; then
+    echo "${tput_red}Invalid profile. Allowed values are: ${profile_choices[@]}${tput_reset}"
+    exit 1
+fi
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
         -f|--force)
             force=true
+            ;;
+        --help)
+            echo_help
+            exit 0
             ;;
     esac
     shift
