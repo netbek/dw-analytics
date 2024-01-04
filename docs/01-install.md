@@ -1,24 +1,30 @@
 # Installation
 
-## Development
+## Prerequisites
 
-1. Install Docker and Docker Compose:
+1. [Docker Engine v23 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2 or higher](https://docs.docker.com/compose/install/). Follow the links for instructions, or run this script:
 
     ```shell
     ./scripts/install_docker.sh
     ```
 
-2. Run the install script:
+2. [Postgres v13 or higher](https://www.postgresql.org/about/news/postgresql-13-released-2077/).
+
+3. [ClickHouse v23.3 or higher](https://clickhouse.com/docs/en/whats-new/changelog#-clickhouse-release-233-lts-2023-03-30). For development, use [https://github.com/netbek/dw-clickhouse](https://github.com/netbek/dw-clickhouse).
+
+## Development: Installation
+
+1. Run the install script:
 
     ```shell
     ./scripts/install.sh
     ```
 
-3. Start the Postgres container.
+2. Start the Postgres container.
 
-4. [Start the ClickHouse container](https://github.com/netbek/dw-clickhouse/blob/main/README.md#usage).
+3. Start the ClickHouse container. If using [https://github.com/netbek/dw-clickhouse](https://github.com/netbek/dw-clickhouse), then [follow these instructions](https://github.com/netbek/dw-clickhouse/blob/main/README.md#usage).
 
-5. Start the Prefect containers:
+4. Start the Prefect containers:
 
     ```shell
     docker compose up -d prefect-postgres prefect-server prefect-worker cli
@@ -26,13 +32,13 @@
 
     Wait for the container statuses to change to started and healthy. If you prefer to run the containers in the foreground, then omit the `-d` option.
 
-6. Run the provision script to configure Prefect:
+5. Run the provision script to configure Prefect:
 
     ```shell
     ./scripts/cli.sh prefect provision dev
     ```
 
-## Optional extras
+## Development: Optional extras
 
 ### VS Code
 
@@ -74,6 +80,10 @@ alias cdw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres pre
 ```
 
 Set `/path/to/` to the location of the repositories on your machine. If you prefer to run the containers in the foreground, then omit the `-d` option.
+
+### Monitoring
+
+The resource usage of the Docker containers can be monitored with [https://github.com/netbek/dw-monitor](https://github.com/netbek/dw-monitor).
 
 ## Uninstall
 

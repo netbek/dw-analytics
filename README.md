@@ -9,23 +9,7 @@
 - [Prefect](docs/05-prefect.md)
 - [Ops](docs/06-ops.md)
 
-## Overview
-
-The stack consists of these Docker containers:
-
-| Service           | Description                                                    |
-| ----------------- | -------------------------------------------------------------- |
-| `clickhouse`      | ClickHouse server that manages the analytics database          |
-| `prefect-postgres`| Postgres server that manages the Prefect database              |
-| `prefect-server`  | Prefect backend and API                                        |
-| `prefect-worker`  | Process that executes Python workflows                         |
-| `cli`             | CLIs for dbt and Prefect, and dev environment for VS Code      |
-| `jupyter`         | Jupyter Notebook server                                        |
-| `cadvisor`        | cAdvisor service that collects and processes resource usage    |
-| `prometheus`      | Prometheus service that records metrics of Docker containers   |
-| `grafana`         | Grafana service that visualizes metrics of Docker containers   |
-
-The repository is structured as follows:
+## Filesystem
 
 ```shell
 .
