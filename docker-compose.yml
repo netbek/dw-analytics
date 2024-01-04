@@ -11,6 +11,7 @@ services:
     ports:
       - ${DW_PREFECT_POSTGRES_PORT:-5432}:5432
     volumes:
+      - ./docker/dw-prefect/prefect-postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
       - prefect_postgres_data:/var/lib/postgresql/data:rw
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
