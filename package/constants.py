@@ -1,64 +1,11 @@
 from enum import Enum
-from typing import Optional
 
 import os
-import prefect
-
-
-def build_database_connection_url(
-    type: str,
-    host: str,
-    port: int,
-    username: str,
-    password: str,
-    database: str,
-    driver: Optional[str] = None,
-):
-    if driver:
-        scheme = f"{type}+{driver}"
-    else:
-        scheme = type
-
-    return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
-
-
-def get_database_connection_settings_for_active_profile():
-    profile_name = prefect.context.get_settings_context().profile.name
-
-    # TODO Remove after removing default profile from Prefect and adding dev profile
-    if profile_name == "default":
-        profile_name = "dev"
-
-    profile_name_env = profile_name.upper()
-
-    driver = os.getenv(f"CLICKHOUSE_{profile_name_env}_DRIVER")
-    host = os.getenv(f"CLICKHOUSE_{profile_name_env}_HOST")
-    port = os.getenv(f"CLICKHOUSE_{profile_name_env}_PORT")
-    username = os.getenv(f"CLICKHOUSE_{profile_name_env}_USERNAME")
-    password = os.getenv(f"CLICKHOUSE_{profile_name_env}_PASSWORD")
-    database = os.getenv(f"CLICKHOUSE_{profile_name_env}_DATABASE")
-
-    return {
-        "driver": driver,
-        "host": host,
-        "port": port,
-        "username": username,
-        "password": password,
-        "database": database,
-    }
-
 
 # Filesystem
 HOME_DIR = os.environ["HOME"]
 PROJECTS_DIR = os.path.join(HOME_DIR, "projects")
 TEMPLATE_PROJECT_DIR = os.path.join(HOME_DIR, "template_project")
-
-# Database
-CLICKHOUSE_URL = build_database_connection_url(
-    type="clickhouse", **get_database_connection_settings_for_active_profile()
-)
-
-CLICKHOUSE_TEST_DATABASE = os.environ["CLICKHOUSE_TEST_DATABASE"]
 
 # dbt
 DBT_PROFILES_DIR = os.environ["DBT_PROFILES_DIR"]

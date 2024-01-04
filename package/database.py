@@ -142,3 +142,20 @@ def _create_mock_engine(bind, stream=None):
     engine = create_mock_engine(bind_url, executor=dump)
 
     return engine
+
+
+def build_connection_url(
+    type: str,
+    host: str,
+    port: int,
+    username: str,
+    password: str,
+    database: str,
+    driver: Optional[str] = None,
+):
+    if driver:
+        scheme = f"{type}+{driver}"
+    else:
+        scheme = type
+
+    return f"{scheme}://{username}:{password}@{host}:{port}/{database}"

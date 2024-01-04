@@ -1,7 +1,12 @@
 from package.constants import DBT_PROFILES_DIR  # noqa: F401
+from package.project import Project
 
-import os
+project = Project.from_path(__file__)
 
-DBT_PROJECT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "dbt")
+# Filesystem
+PROJECT_DIR = project.directory
+DBT_PROJECT_DIR = project.dbt_directory
+NOTEBOOKS_DIR = project.notebooks_directory
 
-NOTEBOOKS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "notebooks")
+# Database
+CLICKHOUSE_URL = project.database_connection_url

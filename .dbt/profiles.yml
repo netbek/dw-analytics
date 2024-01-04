@@ -1,6 +1,7 @@
 config:
   partial_parse: true
   send_anonymous_usage_stats: false
+  use_colors: true
 
 # --------------------------------------------------------------------------------------------------
 # Instructions for new profiles
@@ -15,16 +16,16 @@ config:
 #     dev:
 #       type: clickhouse
 #       threads: 1
-#       host: "{{ env_var('CLICKHOUSE_DEV_HOST') }}"
-#       port: "{{ env_var('CLICKHOUSE_DEV_PORT')|as_number }}"
-#       user: "{{ env_var('CLICKHOUSE_DEV_USERNAME') }}"
-#       password: "{{ env_var('CLICKHOUSE_DEV_PASSWORD') }}"
-#       schema: <PROJECT_NAME>
-#       driver: "{{ env_var('CLICKHOUSE_DEV_DRIVER') }}"
-#       secure: "{{ (env_var('CLICKHOUSE_DEV_SECURE') == 'true')|as_bool }}"
+#       host: "{{ env_var('<PROJECT_NAME>_CLICKHOUSE_HOST') }}"
+#       port: "{{ env_var('<PROJECT_NAME>_CLICKHOUSE_PORT')|as_number }}"
+#       user: "{{ env_var('<PROJECT_NAME>_CLICKHOUSE_USERNAME') }}"
+#       password: "{{ env_var('<PROJECT_NAME>_CLICKHOUSE_PASSWORD') }}"
+#       schema: "{{ env_var('<PROJECT_NAME>_CLICKHOUSE_DATABASE') }}"
+#       driver: "{{ env_var('<PROJECT_NAME>_CLICKHOUSE_DRIVER') }}"
+#       secure: "{{ (env_var('<PROJECT_NAME>_CLICKHOUSE_SECURE') == 'true')|as_bool }}"
 #       use_lw_deletes: true
 
-# 3. Replace `<PROJECT_NAME>` with the project name.
+# 3. Replace `<PROJECT_NAME>` with the project name. Must be lowercase except for env variables that must be uppercase.
 # 4. Run the `cli project refresh PROJECT_NAME` command.
 
 tutorial:
@@ -33,25 +34,13 @@ tutorial:
     dev:
       type: clickhouse
       threads: 1
-      host: "{{ env_var('CLICKHOUSE_DEV_HOST') }}"
-      port: "{{ env_var('CLICKHOUSE_DEV_PORT')|as_number }}"
-      user: "{{ env_var('CLICKHOUSE_DEV_USERNAME') }}"
-      password: "{{ env_var('CLICKHOUSE_DEV_PASSWORD') }}"
-      schema: "{{ env_var('CLICKHOUSE_DEV_DATABASE') }}"
-      driver: "{{ env_var('CLICKHOUSE_DEV_DRIVER') }}"
-      secure: "{{ (env_var('CLICKHOUSE_DEV_SECURE') == 'true')|as_bool }}"
-      use_lw_deletes: true
-
-    test:
-      type: clickhouse
-      threads: 1
-      host: "{{ env_var('CLICKHOUSE_TEST_HOST') }}"
-      port: "{{ env_var('CLICKHOUSE_TEST_PORT')|as_number }}"
-      user: "{{ env_var('CLICKHOUSE_TEST_USERNAME') }}"
-      password: "{{ env_var('CLICKHOUSE_TEST_PASSWORD') }}"
-      schema: "{{ env_var('CLICKHOUSE_TEST_DATABASE') }}"
-      driver: "{{ env_var('CLICKHOUSE_TEST_DRIVER') }}"
-      secure: "{{ (env_var('CLICKHOUSE_TEST_SECURE') == 'true')|as_bool }}"
+      host: "{{ env_var('TUTORIAL_CLICKHOUSE_HOST') }}"
+      port: "{{ env_var('TUTORIAL_CLICKHOUSE_PORT')|as_number }}"
+      user: "{{ env_var('TUTORIAL_CLICKHOUSE_USERNAME') }}"
+      password: "{{ env_var('TUTORIAL_CLICKHOUSE_PASSWORD') }}"
+      schema: "{{ env_var('TUTORIAL_CLICKHOUSE_DATABASE') }}"
+      driver: "{{ env_var('TUTORIAL_CLICKHOUSE_DRIVER') }}"
+      secure: "{{ (env_var('TUTORIAL_CLICKHOUSE_SECURE') == 'true')|as_bool }}"
       use_lw_deletes: true
 
 main:
@@ -60,23 +49,11 @@ main:
     dev:
       type: clickhouse
       threads: 1
-      host: "{{ env_var('CLICKHOUSE_DEV_HOST') }}"
-      port: "{{ env_var('CLICKHOUSE_DEV_PORT')|as_number }}"
-      user: "{{ env_var('CLICKHOUSE_DEV_USERNAME') }}"
-      password: "{{ env_var('CLICKHOUSE_DEV_PASSWORD') }}"
-      schema: "{{ env_var('CLICKHOUSE_DEV_DATABASE') }}"
-      driver: "{{ env_var('CLICKHOUSE_DEV_DRIVER') }}"
-      secure: "{{ (env_var('CLICKHOUSE_DEV_SECURE') == 'true')|as_bool }}"
-      use_lw_deletes: true
-
-    test:
-      type: clickhouse
-      threads: 1
-      host: "{{ env_var('CLICKHOUSE_TEST_HOST') }}"
-      port: "{{ env_var('CLICKHOUSE_TEST_PORT')|as_number }}"
-      user: "{{ env_var('CLICKHOUSE_TEST_USERNAME') }}"
-      password: "{{ env_var('CLICKHOUSE_TEST_PASSWORD') }}"
-      schema: "{{ env_var('CLICKHOUSE_TEST_DATABASE') }}"
-      driver: "{{ env_var('CLICKHOUSE_TEST_DRIVER') }}"
-      secure: "{{ (env_var('CLICKHOUSE_TEST_SECURE') == 'true')|as_bool }}"
+      host: "{{ env_var('MAIN_CLICKHOUSE_HOST') }}"
+      port: "{{ env_var('MAIN_CLICKHOUSE_PORT')|as_number }}"
+      user: "{{ env_var('MAIN_CLICKHOUSE_USERNAME') }}"
+      password: "{{ env_var('MAIN_CLICKHOUSE_PASSWORD') }}"
+      schema: "{{ env_var('MAIN_CLICKHOUSE_DATABASE') }}"
+      driver: "{{ env_var('MAIN_CLICKHOUSE_DRIVER') }}"
+      secure: "{{ (env_var('MAIN_CLICKHOUSE_SECURE') == 'true')|as_bool }}"
       use_lw_deletes: true

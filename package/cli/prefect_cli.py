@@ -8,7 +8,7 @@ from package.constants import (
     PREFECT_PROFILES_PATH,
     PREFECT_PROVISION_PATH,
 )
-from package.utils.project import get_project_dir, list_projects
+from package.project import Project
 from package.utils.typer_utils import typer_async
 from prefect import get_client
 from prefect.client.orchestration import PrefectClient
@@ -282,33 +282,22 @@ def _load_deploy_configs(
     project_names: Optional[List[str]] = None, deployment_names: Optional[List[str]] = None
 ):
     deploy_configs = []
-    all_project_names = list_projects()
+    all_projects = Project.list_projects()
 
     if project_names:
-        selected_project_names = [name for name in all_project_names if name in project_names]
+        selected_projects = [project for project in all_projects if project.name in project_names]
     else:
-        selected_project_names = all_project_names
+        selected_projects = all_projects
 
-    for project_name in selected_project_names:
-        project_dir = get_project_dir(project_name)
-        config_path = os.path.join(project_dir, "prefect.yaml")
-
-        with open(config_path) as file:
-            config = yaml.safe_load(file)
-
-        deployments = config.get("deployments") or {}
+    for project in selected_projects:
+        prefect_config = project.load_prefect_config()
+        deployments = prefect_config.get("deployments") or {}
 
         for deployment in deployments:
             if deployment_names and deployment["name"] not in deployment_names:
                 continue
 
-            deploy_configs.append(
-                {
-                    **deployment,
-                    "project_name": project_name,
-                    "config_path": config_path,
-                }
-            )
+            deploy_configs.append({**deployment, "project_name": project.name})
 
     return deploy_configs
 

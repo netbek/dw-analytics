@@ -42,21 +42,13 @@ When more than 1 flow or notebook needs a certain function, consider adding a ut
 
 ## Create a project
 
-1. Run the `init` command:
+To create a project, run:
 
-    ```shell
-    cli project init PROJECT_NAME
-    ```
+```shell
+cli project init PROJECT_NAME
+```
 
-    This command copies the directories and files from `./template_project` to `./projects/<PROJECT_NAME>`.
-
-2. Add a profile for `<PROJECT_NAME>` to [.dbt/profiles.yml](../.dbt/profiles.yml#L5).
-
-3. Run the `refresh` command:
-
-    ```shell
-    cli project refresh PROJECT_NAME
-    ```
+This command copies the directories and files from `./template_project` to `./projects/<PROJECT_NAME>`.
 
 ## Linting and testing a project
 

@@ -14,23 +14,19 @@
     ./scripts/install.sh
     ```
 
-3. Start the ClickHouse container:
+3. Start the Postgres container.
+
+4. [Start the ClickHouse container](https://github.com/netbek/dw-clickhouse/blob/main/README.md#usage).
+
+5. Start the Prefect containers:
 
     ```shell
     docker compose up -d prefect-postgres prefect-server prefect-worker cli
     ```
 
-    Wait for the container statuses to change to started and healthy.
+    Wait for the container statuses to change to started and healthy. If you prefer to run the containers in the foreground, then omit the `-d` option.
 
-4. Start the Prefect containers:
-
-    ```shell
-    docker compose up -d prefect-postgres prefect-server prefect-worker cli
-    ```
-
-    Wait for the container statuses to change to started and healthy.
-
-5. Run the provision script to configure ClickHouse and Prefect:
+6. Run the provision script to configure Prefect:
 
     ```shell
     ./scripts/cli.sh prefect provision dev
@@ -64,14 +60,8 @@ See the docs for [creating a connection](https://github.com/dbeaver/dbeaver/wiki
 Add aliases for frequently used commands to `~/.bash_aliases`:
 
 ```shell
-# Start ClickHouse
-alias ach="cd /path/to/dw-clickhouse && docker compose up -d"
-
-# Start Prefect
-alias adw="cd /path/to/dw-analytics && docker compose up prefect-postgres prefect-server prefect-worker cli"
-
-# Stop ClickHouse
-alias sch="cd /path/to/dw-clickhouse && docker compose down"
+# Start Prefect in detached mode
+alias adw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli"
 
 # Stop Prefect
 alias sdw="cd /path/to/dw-analytics && docker compose down"
@@ -83,7 +73,7 @@ alias jdw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres pre
 alias cdw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli && ./scripts/open.sh vscode"
 ```
 
-Set `/path/to/` to the location of the repositories on your machine.
+Set `/path/to/` to the location of the repositories on your machine. If you prefer to run the containers in the foreground, then omit the `-d` option.
 
 ## Uninstall
 

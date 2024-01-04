@@ -74,9 +74,6 @@ The following ports are exposed:
 | prefect-postgres   | 29010 | Postgres              |
 | prefect-server     | 29020 | HTTP                  |
 | jupyter            | 29030 | HTTP                  |
-| cadvisor           | 29040 | HTTP                  |
-| prometheus         | 29050 | HTTP                  |
-| grafana            | 29060 | HTTP                  |
 
 The configuration is loaded from `./.env` during startup. The default values are in `./template_env/docker-compose.env`.
 

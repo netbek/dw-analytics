@@ -1,4 +1,11 @@
 profiles:
+  ci:
+    work_pools:
+      process_pool:
+        type: process
+        concurrency_limit: 1
+    work_queues: null
+
   dev:
     work_pools:
       process_pool:
@@ -6,7 +13,7 @@ profiles:
         concurrency_limit: 1
     work_queues: null
 
-  test:
+  prod:
     work_pools:
       process_pool:
         type: process

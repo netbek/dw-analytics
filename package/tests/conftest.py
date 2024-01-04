@@ -1,26 +1,39 @@
-from package.constants import CLICKHOUSE_TEST_DATABASE, CLICKHOUSE_URL
-from package.database import Database
+from package.database import build_connection_url, Database
 from typing import Generator, Optional
 from urllib.parse import urlsplit, urlunsplit
 
+import os
 import pytest
 
 pytest_plugins = "package.tests.fixtures.database"
 
 
 @pytest.fixture(scope="session")
-def generate_test_database_connection_url() -> Generator[Optional[str], None, None]:
-    original_url = CLICKHOUSE_URL
+def database_connection_url():
+    return build_connection_url(
+        type="clickhouse",
+        driver=os.getenv("DEFAULT_CLICKHOUSE_DRIVER"),
+        host=os.getenv("DEFAULT_CLICKHOUSE_HOST"),
+        port=os.getenv("DEFAULT_CLICKHOUSE_PORT"),
+        username=os.getenv("DEFAULT_CLICKHOUSE_USERNAME"),
+        password=os.getenv("DEFAULT_CLICKHOUSE_PASSWORD"),
+        database=os.getenv("DEFAULT_CLICKHOUSE_DATABASE"),
+    )
 
-    if not original_url:
+
+@pytest.fixture(scope="session")
+def generate_test_database_connection_url(
+    database_connection_url: str,
+) -> Generator[Optional[str], None, None]:
+    if not database_connection_url:
         yield None
         return
 
-    scheme, netloc, database, query, fragment = urlsplit(original_url)
-    test_db_name = CLICKHOUSE_TEST_DATABASE or database.strip("/") + "_testing"
+    scheme, netloc, database, query, fragment = urlsplit(database_connection_url)
+    test_db_name = database.strip("/") + "_testing"
     quoted_db_name = f'"{test_db_name}"'
 
-    with Database(original_url) as db:
+    with Database(database_connection_url) as db:
         db.execute(f"drop database if exists {quoted_db_name}")
         db.execute(f"create database {quoted_db_name}")
 
@@ -28,7 +41,7 @@ def generate_test_database_connection_url() -> Generator[Optional[str], None, No
 
     yield new_url
 
-    with Database(original_url) as db:
+    with Database(database_connection_url) as db:
         db.execute(f"drop database if exists {quoted_db_name}")
 
 
