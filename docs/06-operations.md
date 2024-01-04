@@ -38,11 +38,19 @@ The following Docker containers provide dashboards. The `open.sh` script only op
 
 ## Database connections
 
-TODO Add note about connection settings for Prefect Postgres
+If the Prefect Postgres server port is exposed (see [Networking](#networking)), then see `./.env_files/prefect-postgres.env` and `./.env` for the credentials and port, respectively. The default settings are:
+
+```yaml
+Host: localhost
+Port: 29010
+Username: postgres
+Password: postgres
+Database: prefect
+```
 
 ## Monitoring
 
-The Docker containers can be monitored with [https://github.com/netbek/dw-monitor](https://github.com/netbek/dw-monitor).
+The resource usage of the Docker containers can be monitored with [https://github.com/netbek/dw-monitor](https://github.com/netbek/dw-monitor).
 
 ## Networking
 
