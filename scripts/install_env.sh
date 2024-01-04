@@ -43,8 +43,8 @@ done
 
 cd "${root_dir}"
 
-template_env_dir="template_env/${profile}"
-env_dir=".env_files"
+template_env_dir="./template_env"
+env_dir="./.env_files"
 
 mkdir -p "${env_dir}"
 
@@ -55,9 +55,10 @@ mkdir -p "${env_dir}"
 
 # Render .env files
 templates=(
-    ${template_env_dir}/docker-compose.env      .env
-    ${template_env_dir}/database.env            ${env_dir}/database.env
+    docker-compose.env.jinja2       ./.env
+    database.env.jinja2             ${env_dir}/database.env
 )
+context=("profile=${profile}")
 
 for ((i = 1; i < ${#templates[@]}; i+=2)); do
     template_file="${templates[i-1]}"
@@ -66,7 +67,7 @@ for ((i = 1; i < ${#templates[@]}; i+=2)); do
     if [ -f "${output_file}" ] && [ "$force" == false ]; then
         echo "Skipped ${template_file} because ${output_file} exists"
     else
-        cp "${template_file}" "${output_file}"
+        render_template "${template_env_dir}" "${template_file}" "${context[@]}" > "${output_file}"
 
         if [ -f "${output_file}" ]; then
             echo "${tput_green}Created ${output_file}${tput_reset}"
