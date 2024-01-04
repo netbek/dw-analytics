@@ -10,7 +10,7 @@
 
 2. [Postgres v13 or higher](https://www.postgresql.org/about/news/postgresql-13-released-2077/).
 
-3. [ClickHouse v23.3 or higher](https://clickhouse.com/docs/en/whats-new/changelog#-clickhouse-release-233-lts-2023-03-30). For development, use [https://github.com/netbek/dw-clickhouse](https://github.com/netbek/dw-clickhouse).
+3. [ClickHouse v23.8 or higher](https://clickhouse.com/docs/en/whats-new/changelog#-clickhouse-release-238-lts-2023-08-31). For development, use [https://github.com/netbek/dw-clickhouse](https://github.com/netbek/dw-clickhouse).
 
 ## Development: Installation
 
