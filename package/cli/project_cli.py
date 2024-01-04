@@ -24,7 +24,7 @@ async def init(project_name: str):
     app.console.print(
         f"To complete the setup, perform these steps:\n"
         f"1. Add env variables for '{project_name}' to ./template_env/<PROFILE>/database.env\n"
-        f"2. Run './scripts/install_env.sh'\n"
+        f"2. Run './scripts/install_env.sh PROFILE -f'\n"
         f"3. Add a profile for '{project_name}' to {DBT_PROFILES_FILE}\n"
         f"4. Stop and restart the containers\n"
         f"5. Run './scripts/cli.sh project refresh {project_name}'"
@@ -45,7 +45,7 @@ async def delete(project_name: str):
     app.console.print(
         f"To complete the deletion, perform these steps:\n"
         f"1. Remove env variables for '{project_name}' from ./template_env/<PROFILE>/database.env\n"
-        f"2. Run './scripts/install_env.sh'\n"
+        f"2. Run './scripts/install_env.sh PROFILE -f'\n"
         f"3. Remove the profile for '{project_name}' from {DBT_PROFILES_FILE}\n"
         f"4. Stop and restart the containers\n"
     )
