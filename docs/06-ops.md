@@ -33,56 +33,30 @@ The following Docker containers provide dashboards. The `open.sh` script only op
 
 | Service            | Command                            |
 |--------------------|------------------------------------|
-| `cadvisor`         | `./scripts/open.sh cadvisor`       |
-| `grafana`          | `./scripts/open.sh grafana`        |
 | `jupyter`          | `./scripts/open.sh jupyter`        |
 | `prefect-server`   | `./scripts/open.sh prefect-server` |
-| `prometheus`       | `./scripts/open.sh prometheus`     |
 
 ## Database connections
 
-TODO Add note about connection settings for ClickHouse and Prefect Postgres
+TODO Add note about connection settings for Prefect Postgres
 
 ## Monitoring
 
-### Container metrics
-
-Start monitoring the containers:
-
-```shell
-docker compose up cadvisor prometheus grafana
-```
-
-Open the Grafana dashboard:
-
-```shell
-./scripts/open.sh grafana
-```
-
-Stop monitoring the containers:
-
-```shell
-docker compose down cadvisor prometheus grafana
-```
+The Docker containers can be monitored with [https://github.com/netbek/dw-monitor](https://github.com/netbek/dw-monitor).
 
 ## Networking
 
-The following ports are exposed:
+Ports can optionally be exposed. The configuration is loaded from `./.env` during startup.
 
 | Service            | Port  | Protocol              |
 |--------------------|-------|-----------------------|
-| prefect-postgres   | 29010 | Postgres              |
-| prefect-server     | 29020 | HTTP                  |
-| jupyter            | 29030 | HTTP                  |
-
-The configuration is loaded from `./.env` during startup. The default values are in `./template_env/docker-compose.env`.
+| `prefect-postgres` | 29010 | Postgres              |
+| `prefect-server`   | 29020 | HTTP                  |
+| `jupyter`          | 29030 | HTTP                  |
 
 ## Resources
 
-- [cAdvisor docs](https://github.com/google/cadvisor/blob/master/README.md)
 - [ClickHouse docs](https://clickhouse.com/docs)
-- [Grafana docs](https://grafana.com/docs/grafana/latest/)
 - [Jupyter Notebook docs](https://jupyter-notebook.readthedocs.io/en/latest/)
 - [Postgres docs](https://www.postgresql.org/docs/current/index.html)
 - [Prefect docs](https://docs.prefect.io)
-- [Prometheus docs](https://prometheus.io/docs/introduction/overview/)
