@@ -55,8 +55,8 @@ mkdir -p "${env_dir}"
 
 # Render .env files
 templates=(
-    docker-compose.env.jinja2       ./.env
-    database.env.jinja2             ${env_dir}/database.env
+    env.jinja2                          ./.env
+    env_files/database.env.jinja2       ${env_dir}/database.env
 )
 context=("profile=${profile}")
 
