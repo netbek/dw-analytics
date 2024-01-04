@@ -7,7 +7,7 @@
 - [dbt](docs/03-dbt.md)
 - [Jupyter Notebook](docs/04-jupyter.md)
 - [Prefect](docs/05-prefect.md)
-- [Ops](docs/06-ops.md)
+- [Operations](docs/06-operations.md)
 
 ## Filesystem
 

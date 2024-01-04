@@ -1,4 +1,4 @@
-# Ops
+# Operations
 
 > [!NOTE]
 > Examples that start with the `cli` command indicate that the command would be executed inside of the Docker container. `cli` can also be accessed outside of the Docker container at `./scripts/cli.sh`. The arguments and options are the same.

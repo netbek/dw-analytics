@@ -7,7 +7,7 @@
 - [dbt](03-dbt.md)
 - [Jupyter Notebook](04-jupyter.md)
 - [Prefect](05-prefect.md)
-- [Ops](06-ops.md)
+- [Operations](06-operations.md)
 
 ## Resources
 
