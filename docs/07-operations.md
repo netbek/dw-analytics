@@ -68,6 +68,7 @@ Ports can optionally be exposed. The configuration is loaded from `./.env` durin
 | `prefect-postgres` | 29010 | Postgres              |
 | `prefect-server`   | 29020 | HTTP                  |
 | `jupyter`          | 29030 | HTTP                  |
+| `api`              | 29040 | HTTP                  |
 
 ## Resources
 

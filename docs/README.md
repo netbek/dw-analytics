@@ -6,8 +6,9 @@
 - [Projects](02-projects.md)
 - [dbt](03-dbt.md)
 - [Jupyter Notebook](04-jupyter.md)
-- [Prefect](05-prefect.md)
-- [Operations](06-operations.md)
+- [API](05-api.md)
+- [Prefect](06-prefect.md)
+- [Operations](07-operations.md)
 
 ## Resources
 
