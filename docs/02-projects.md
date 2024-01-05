@@ -11,6 +11,8 @@ Projects are structured as follows. To explore, open `./projects/tutorial`.
 .
 └── projects
     └── <PROJECT_NAME>
+        ├── api
+        │   └── # API
         ├── dbt
         │   └── # dbt configuration, models, and tests
         ├── flows

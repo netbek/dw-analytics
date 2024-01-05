@@ -112,7 +112,9 @@ services:
       context: ./docker/dw-prefect/api
     command: uvicorn main:app --app-dir /home/analyst/projects/tutorial/api --host 0.0.0.0 --port 80 --reload
     env_file:
+      - ./.env_files/api.env
       - ./.env_files/database.env
+    working_dir: /home/analyst/projects/tutorial/api
     extra_hosts:
       - host.docker.internal:host-gateway # Used for connection to ClickHouse
     ports:
