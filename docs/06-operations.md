@@ -50,10 +50,10 @@ Database: prefect
 
 Examples:
 
-| Command                                                                                       | Description                                       |
-|-----------------------------------------------------------------------------------------------|---------------------------------------------------|
-| `psql -h localhost -p 29010 -U prefect -d prefect`                                            | Use `psql` installed on host machine              |
-| `docker compose exec prefect-postgres psql -U prefect -d prefect`                             | Use `psql` installed in container                 |
+| Description                          | Command                                                           |
+|--------------------------------------|-------------------------------------------------------------------|
+| Use `psql` installed on host machine | `psql -h localhost -p 29010 -U prefect -d prefect`                |
+| Use `psql` installed in container    | `docker compose exec prefect-postgres psql -U prefect -d prefect` |
 
 ## Monitoring
 
