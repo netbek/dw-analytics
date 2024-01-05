@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-1. [Docker Engine v23 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2 or higher](https://docs.docker.com/compose/install/). Follow the links for instructions, or run this script:
+1. [Docker Engine v23 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2 or higher](https://docs.docker.com/compose/install/). Follow the links for instructions or run this script:
 
     ```shell
     ./scripts/install_docker.sh
@@ -50,7 +50,7 @@ code --install-extension ms-vscode-remote.remote-containers
 
 ### DBeaver
 
-GUI client for Postgres, ClickHouse and other databases. To install, run:
+Client for Postgres, ClickHouse and other databases. To install, run:
 
 ```shell
 curl https://dbeaver.io/debs/dbeaver.gpg.key | sudo apt-key add -

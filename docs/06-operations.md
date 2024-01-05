@@ -38,15 +38,22 @@ The following Docker containers provide dashboards. The `open.sh` script only op
 
 ## Database connections
 
-If the Prefect Postgres server port is exposed (see [Networking](#networking)), then see `./.env_files/prefect-postgres.env` and `./.env` for the credentials and port, respectively. The default settings are:
+The default settings for the Prefect Postgres server are:
 
 ```yaml
 Host: localhost
 Port: 29010
-Username: postgres
-Password: postgres
+Username: prefect
+Password: prefect
 Database: prefect
 ```
+
+Examples:
+
+| Command                                                                                       | Description                                       |
+|-----------------------------------------------------------------------------------------------|---------------------------------------------------|
+| `psql -h localhost -p 29010 -U prefect -d prefect`                                            | Use `psql` installed on host machine              |
+| `docker compose exec prefect-postgres psql -U prefect -d prefect`                             | Use `psql` installed in container                 |
 
 ## Monitoring
 
