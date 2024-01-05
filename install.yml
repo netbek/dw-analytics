@@ -11,4 +11,7 @@ services:
   jupyter:
     requirements:
       - ./requirements.txt
-      - ./requirements_dev.txt
+  api:
+    requirements:
+      - ./requirements.txt
+      - ./requirements_api.txt

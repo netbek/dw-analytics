@@ -106,3 +106,16 @@ services:
       - ./projects:/home/analyst/projects:rw
       - ./docker/dw-prefect/jupyter/usr/local/bin/start-notebook.d:/usr/local/bin/start-notebook.d:ro
     user: 0:0
+
+  api:
+    build:
+      context: ./docker/dw-prefect/api
+    command: uvicorn main:app --app-dir /home/analyst/projects/tutorial/api --host 0.0.0.0 --port 80 --reload
+    env_file:
+      - ./.env_files/database.env
+    extra_hosts:
+      - host.docker.internal:host-gateway # Used for connection to ClickHouse
+    ports:
+      - ${DW_API_PORT:-8080}:80
+    volumes:
+      - .:/home/analyst:rw

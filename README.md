@@ -47,8 +47,9 @@
 ├── docker-compose.yml # Docker configurations for services, volumes and networking
 ├── install.yml # Installation script configuration
 ├── pyproject.toml # Configuration of Python tools in CLI container
-├── requirements.txt # Python dependencies in Prefect and Jupyter containers
-└── requirements_dev.txt # Python dev dependencies in Prefect and Jupyter containers
+├── requirements_api.txt # Extra Python dependencies in API container
+├── requirements_dev.txt # Extra Python dependencies for development in Prefect containers
+└── requirements.txt # Common Python dependencies in Prefect, Jupyter and API containers
 ```
 
 ## License

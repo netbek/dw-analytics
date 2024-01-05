@@ -1,11 +1,13 @@
-altair==5.2.0
+clickhouse-driver==0.2.6
 clickhouse-sqlalchemy==0.3.0
 dbt-clickhouse==1.7.1
+dbt-semantic-interfaces @ git+https://github.com/dbt-labs/dbt-semantic-interfaces.git@backport--243-to-0.4.latest # TODO Remove after https://github.com/dbt-labs/dbt-semantic-interfaces/pull/244 is merged. Pydantic v2 required by FastAPI.
 pandas==2.1.4
 prefect==2.14.12
 prefect-jupyter==0.3.1
 prefect-shell==0.2.2
 psycopg2-binary==2.9.9
+pydantic==2.5.3
 PyYAML==6.0.1
 rich==13.7.0
 SQLAlchemy==2.0.25

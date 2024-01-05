@@ -58,7 +58,7 @@ for repository in "${repositories[@]}"; do
 
     if [ -d "$name" ]; then
         cd "$name"
-        git reset --hard
+        # git reset --hard
         git checkout "$branch"
         git pull
         # ./scripts/install.sh
