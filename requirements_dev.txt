@@ -1,5 +1,5 @@
-black==23.12.1
 pytest==7.4.4
+ruff==0.1.11
 sqlfluff==2.3.5
 sqlfluff-templater-dbt==2.3.5
 yamllint==1.33.0

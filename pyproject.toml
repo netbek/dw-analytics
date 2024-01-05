@@ -1,12 +1,12 @@
-[tool.black]
-color = 1
-line-length = 100
-target-version = ["py311"]
-
 [tool.isort]
 force_alphabetical_sort = true
 line_length = 100
 profile = "black"
+
+[tool.ruff]
+ignore = ["D100", "D101", "D102", "D103", "D104", "D107", "D205"]
+line-length = 100
+target-version = "py311"
 
 [tool.pytest.ini_options]
 addopts = "-q"
