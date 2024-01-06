@@ -104,7 +104,7 @@ project_name=$(basename "$PWD")
 # Build Python image
 build_context="./docker/python"
 cd "${build_context}"
-docker build -f Dockerfile -t "${project_name}-python" .
+docker build -f Dockerfile -t "${project_name}/python" .
 docker builder prune -f
 cd "${root_dir}"
 
