@@ -68,14 +68,20 @@ EOF
 fi
 
 # Concatenate requirements into single file for Docker build
-readarray service_requirements_arr < <(yq_cmd -o=csv '.services[] | [key, .requirements[]]' install.yml)
+readarray service_requirements_arr < <(yq_cmd -o=csv '.services[] | [key, .build.context, .x-requirements[]]' docker-compose.yml)
+processed_build_contexts=()
 
 for service_requirements in "${service_requirements_arr[@]}"; do
     IFS=',' read -ra values <<< "${service_requirements}"
     service="${values[0]}"
-    requirements_arr=("${values[@]:1}")
+    build_context="${values[1]}"
+    requirements_arr=("${values[@]:2}")
     requirements_concat=""
-    output_file="./docker/${service}/build/src/requirements.txt"
+    output_file="${build_context}/build/src/requirements.txt"
+
+    if [ "${#requirements_arr[@]}" -eq 0 ] || [[ " ${processed_build_contexts[@]} " =~ " ${build_context} " ]]; then
+        continue
+    fi
 
     for requirement in "${requirements_arr[@]}"; do
         requirement=$(realpath "${requirement}")
@@ -91,6 +97,7 @@ for service_requirements in "${service_requirements_arr[@]}"; do
 
     echo -e "$requirements_concat" > "$output_file"
     echo "${tput_green}Created ${output_file}${tput_reset}"
+    processed_build_contexts+=("${build_context}")
 done
 
 services=$(yq_cmd -o=csv '.services | keys' docker-compose.yml | tr ", " " ")

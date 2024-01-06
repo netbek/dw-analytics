@@ -46,7 +46,6 @@
 ├── .sqlfluffignore # SQL linter configuration used in CLI container
 ├── .yamllint # YAML linter configuration used in CLI container
 ├── docker-compose.yml # Docker configurations for services, volumes and networking
-├── install.yml # Installation script configuration
 ├── pyproject.toml # Configuration of Python tools in CLI container
 ├── requirements_api.txt # Extra Python dependencies in API container
 ├── requirements_dev.txt # Extra Python dependencies for development in Prefect containers

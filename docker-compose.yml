@@ -43,6 +43,9 @@ services:
     depends_on:
       prefect-postgres:
         condition: service_healthy
+    x-requirements:
+      - ./requirements.txt
+      - ./requirements_dev.txt
 
   prefect-worker:
     build:
@@ -64,6 +67,9 @@ services:
     depends_on:
       prefect-server:
         condition: service_healthy
+    x-requirements:
+      - ./requirements.txt
+      - ./requirements_dev.txt
 
   cli:
     build:
@@ -86,6 +92,9 @@ services:
       # TODO Uncomment after adding healthcheck to prefect-worker
       # prefect-worker:
       #   condition: service_healthy
+    x-requirements:
+      - ./requirements.txt
+      - ./requirements_dev.txt
 
   jupyter:
     build:
@@ -106,6 +115,8 @@ services:
       - ./projects:/home/analyst/projects:rw
       - ./docker/jupyter/usr/local/bin/start-notebook.d:/usr/local/bin/start-notebook.d:ro
     user: 0:0
+    x-requirements:
+      - ./requirements.txt
 
   api:
     build:
@@ -121,3 +132,6 @@ services:
       - ${DW_API_PORT:-8080}:80
     volumes:
       - .:/home/analyst:rw
+    x-requirements:
+      - ./requirements.txt
+      - ./requirements_api.txt
