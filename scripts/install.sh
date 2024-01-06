@@ -8,7 +8,7 @@ source "${scripts_dir}/variables.sh"
 source "${scripts_dir}/functions.sh"
 
 function echo_help() {
-    echo "Usage: $0 PROFILE [-f|--force]"
+    echo "Usage: $0 PROFILE [--cache/--no-cache] [-f|--force] [--prefect_postgres_default_username <value>] [--prefect_postgres_default_password <value>] [--prefect_postgres_default_database <value>] [--prefect_postgres_prefect_username <value>] [--prefect_postgres_prefect_password <value>] [--prefect_postgres_prefect_database <value>]"
     echo ""
     echo "Arguments:"
     echo "  profile: ${profile_choices[@]}"
@@ -39,38 +39,6 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
     shift
-done
-
-cd "${root_dir}"
-
-# Install repositories
-readarray repositories < <(yq_cmd -o=csv '.repositories[] | [key, .url, .branch]' install.yml)
-
-cd "${root_dir}/docker"
-
-for repository in "${repositories[@]}"; do
-    IFS=',' read -ra values <<< "${repository}"
-    name="${values[0]}"
-    url="${values[1]}"
-    branch="${values[2]}"
-
-    echo "${tput_yellow}Installing '${name}' ...${tput_reset}"
-
-    if [ -d "$name" ]; then
-        cd "$name"
-        # git reset --hard
-        git checkout "$branch"
-        git pull
-        # ./scripts/install.sh
-        cd ..
-    else
-        git clone -b "$branch" "$url" "$name"
-        cd "$name"
-        # ./scripts/install.sh
-        cd ..
-    fi
-
-    echo "${tput_green}Installed '${name}'${tput_reset}"
 done
 
 cd "${root_dir}"
@@ -107,7 +75,7 @@ for service_requirements in "${service_requirements_arr[@]}"; do
     service="${values[0]}"
     requirements_arr=("${values[@]:1}")
     requirements_concat=""
-    output_file="./docker/dw-prefect/${service}/build/src/requirements.txt"
+    output_file="./docker/${service}/build/src/requirements.txt"
 
     for requirement in "${requirements_arr[@]}"; do
         requirement=$(realpath "${requirement}")

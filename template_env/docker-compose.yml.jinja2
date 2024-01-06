@@ -25,7 +25,7 @@ services:
 
   prefect-server:
     build:
-      context: ./docker/dw-prefect/prefect-base
+      context: ./docker/prefect-base
     command: prefect server start
     env_file:
       - ./.env_files/prefect-server.env
@@ -49,7 +49,7 @@ services:
 
   prefect-worker:
     build:
-      context: ./docker/dw-prefect/prefect-base
+      context: ./docker/prefect-base
     command: prefect worker start --name process-worker --pool process_pool --type process --limit 1
     env_file:
       - ./.env_files/prefect-worker.env
@@ -70,7 +70,7 @@ services:
 
   cli:
     build:
-      context: ./docker/dw-prefect/prefect-base
+      context: ./docker/prefect-base
     command: /bin/bash
     env_file:
       - ./.env_files/cli.env
@@ -93,7 +93,7 @@ services:
   {% if profile in ('dev') -%}
   jupyter:
     build:
-      context: ./docker/dw-prefect/jupyter
+      context: ./docker/jupyter
     env_file:
       - ./.env_files/jupyter.env
       - ./.env_files/database.env
@@ -110,13 +110,13 @@ services:
       - ./.prefect:/home/analyst/.prefect:rw
       - ./package:/home/analyst/package:rw
       - ./projects:/home/analyst/projects:rw
-      - ./docker/dw-prefect/jupyter/usr/local/bin/start-notebook.d:/usr/local/bin/start-notebook.d:ro
+      - ./docker/jupyter/usr/local/bin/start-notebook.d:/usr/local/bin/start-notebook.d:ro
     user: 0:0
   {%- endif %}
 
   api:
     build:
-      context: ./docker/dw-prefect/api
+      context: ./docker/api
     command: uvicorn main:app --app-dir /home/analyst/projects/tutorial/api --host 0.0.0.0 --port 80 --reload
     env_file:
       - ./.env_files/database.env
