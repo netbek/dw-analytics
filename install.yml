@@ -1,9 +1,0 @@
-images:
-  api:
-    requirements:
-      - ./docker/api/requirements.txt
-
-  python:
-    requirements:
-      - ./docker/python/requirements.txt
-      - ./docker/python/requirements_dev.txt

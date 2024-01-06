@@ -24,7 +24,8 @@ services:
 
   prefect-server:
     build:
-      context: ./docker/prefect-base
+      context: .
+      target: prefect-common
     command: prefect server start
     env_file:
       - ./.env_files/prefect-server.env
@@ -46,7 +47,8 @@ services:
 
   prefect-worker:
     build:
-      context: ./docker/prefect-base
+      context: .
+      target: prefect-common
     command: prefect worker start --name process-worker --pool process_pool --type process --limit 1
     env_file:
       - ./.env_files/prefect-worker.env
@@ -67,7 +69,8 @@ services:
 
   cli:
     build:
-      context: ./docker/prefect-base
+      context: .
+      target: prefect-common
     command: /bin/bash
     env_file:
       - ./.env_files/cli.env
@@ -89,7 +92,8 @@ services:
 
   jupyter:
     build:
-      context: ./docker/jupyter
+      context: .
+      target: jupyter
     env_file:
       - ./.env_files/jupyter.env
       - ./.env_files/database.env
@@ -109,7 +113,8 @@ services:
 
   api:
     build:
-      context: ./docker/api
+      context: .
+      target: api
     command: uvicorn main:app --app-dir /home/analyst/projects/tutorial/api --host 0.0.0.0 --port 80 --reload
     env_file:
       - ./.env_files/api.env

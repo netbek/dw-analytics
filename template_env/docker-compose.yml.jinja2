@@ -13,6 +13,7 @@ services:
       - {{ DW_PREFECT_POSTGRES_PORT }}:5432
     {%- endif %}
     volumes:
+      - ./docker/prefect-postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
       - prefect_postgres_data:/var/lib/postgresql/data:rw
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
@@ -25,7 +26,8 @@ services:
 
   prefect-server:
     build:
-      context: ./docker/prefect-base
+      context: .
+      target: prefect-common
     command: prefect server start
     env_file:
       - ./.env_files/prefect-server.env
@@ -49,7 +51,8 @@ services:
 
   prefect-worker:
     build:
-      context: ./docker/prefect-base
+      context: .
+      target: prefect-common
     command: prefect worker start --name process-worker --pool process_pool --type process --limit 1
     env_file:
       - ./.env_files/prefect-worker.env
@@ -70,7 +73,8 @@ services:
 
   cli:
     build:
-      context: ./docker/prefect-base
+      context: .
+      target: prefect-common
     command: /bin/bash
     env_file:
       - ./.env_files/cli.env
@@ -93,7 +97,8 @@ services:
   {% if profile in ('dev') -%}
   jupyter:
     build:
-      context: ./docker/jupyter
+      context: .
+      target: jupyter
     env_file:
       - ./.env_files/jupyter.env
       - ./.env_files/database.env
@@ -116,10 +121,13 @@ services:
 
   api:
     build:
-      context: ./docker/api
+      context: .
+      target: api
     command: uvicorn main:app --app-dir /home/analyst/projects/tutorial/api --host 0.0.0.0 --port 80 --reload
     env_file:
+      - ./.env_files/api.env
       - ./.env_files/database.env
+    working_dir: /home/analyst/projects/tutorial/api
     extra_hosts:
       - host.docker.internal:host-gateway # Used for connection to ClickHouse
     {% if DW_API_PORT -%}

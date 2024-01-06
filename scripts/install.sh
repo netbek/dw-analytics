@@ -67,47 +67,6 @@ EOF
     echo "${tput_green}Created .gitconfig${tput_reset}"
 fi
 
-# Concatenate requirements into single file for Docker build
-readarray image_requirements_arr < <(yq_cmd -o=csv '.images[] | [key, .requirements[]]' install.yml)
-processed_build_contexts=()
-
-for image_requirements in "${image_requirements_arr[@]}"; do
-    IFS=',' read -ra values <<< "${image_requirements}"
-    image="${values[0]}"
-    requirements_arr=("${values[@]:1}")
-    requirements_concat=""
-    build_context="./docker/${image}"
-    output_file="${build_context}/build/src/requirements.txt"
-
-    if [ "${#requirements_arr[@]}" -eq 0 ]; then
-        continue
-    fi
-
-    for requirement in "${requirements_arr[@]}"; do
-        requirement=$(realpath "${requirement}")
-
-        if [ -f "${requirement}" ]; then
-            requirements_concat+="# Source: ${requirement}\n"
-            requirements_concat+="$(cat "${requirement}")"
-            requirements_concat+="\n\n"
-        else
-            echo "${tput_red}File not found: ${requirement}${tput_reset}"
-        fi
-    done
-
-    echo -e "$requirements_concat" > "$output_file"
-    echo "${tput_green}Created ${output_file}${tput_reset}"
-done
-
-project_name=$(basename "$PWD")
-
-# Build Python image
-build_context="./docker/python"
-cd "${build_context}"
-docker build -f Dockerfile -t "${project_name}-python" .
-docker builder prune -f
-cd "${root_dir}"
-
 services=$(yq_cmd -o=csv '.services | keys' docker-compose.yml | tr ", " " ")
 
 # Pull Docker images

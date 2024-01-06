@@ -16,10 +16,6 @@ if [ "$answer" != "y" ]; then
 fi
 
 docker compose down -v --rmi local
-
-project_name=$(basename "$PWD")
-docker image rm -f "${project_name}-python"
-
 docker builder prune -f
 
 echo "${tput_green}Done!${tput_reset}"
