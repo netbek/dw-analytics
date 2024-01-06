@@ -1,3 +1,4 @@
+FROM dw-analytics-python AS python-builder
 FROM prefecthq/prefect:2.14.13-python3.11
 
 ARG DOCKER_UID
@@ -9,14 +10,8 @@ RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
     ca-certificates curl git openssh-client
 
+COPY --from=python-builder /usr/local/lib/python3.11/site-packages/ /usr/local/lib/python3.11/site-packages/
 COPY build /build
-
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir --requirement /build/src/requirements.txt
-
-WORKDIR /usr/local/lib/python3.11/site-packages
-RUN patch -p1 < /build/patches/dbt-clickhouse/columns_in_query.diff
-RUN patch -p1 < /build/patches/dbt-clickhouse/format_columns.diff
 
 WORKDIR /usr/local/dbt
 RUN curl -O https://raw.githubusercontent.com/dbt-labs/dbt-completion.bash/915cdc5e301f5bc4c89324d3bd790320476728cf/dbt-completion.bash

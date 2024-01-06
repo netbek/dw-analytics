@@ -68,18 +68,18 @@ EOF
 fi
 
 # Concatenate requirements into single file for Docker build
-readarray service_requirements_arr < <(yq_cmd -o=csv '.services[] | [key, .build.context, .x-requirements[]]' docker-compose.yml)
+readarray image_requirements_arr < <(yq_cmd -o=csv '.images[] | [key, .requirements[]]' install.yml)
 processed_build_contexts=()
 
-for service_requirements in "${service_requirements_arr[@]}"; do
-    IFS=',' read -ra values <<< "${service_requirements}"
-    service="${values[0]}"
-    build_context="${values[1]}"
-    requirements_arr=("${values[@]:2}")
+for image_requirements in "${image_requirements_arr[@]}"; do
+    IFS=',' read -ra values <<< "${image_requirements}"
+    image="${values[0]}"
+    requirements_arr=("${values[@]:1}")
     requirements_concat=""
+    build_context="./docker/${image}"
     output_file="${build_context}/build/src/requirements.txt"
 
-    if [ "${#requirements_arr[@]}" -eq 0 ] || [[ " ${processed_build_contexts[@]} " =~ " ${build_context} " ]]; then
+    if [ "${#requirements_arr[@]}" -eq 0 ]; then
         continue
     fi
 
@@ -97,8 +97,16 @@ for service_requirements in "${service_requirements_arr[@]}"; do
 
     echo -e "$requirements_concat" > "$output_file"
     echo "${tput_green}Created ${output_file}${tput_reset}"
-    processed_build_contexts+=("${build_context}")
 done
+
+project_name=$(basename "$PWD")
+
+# Build Python image
+build_context="./docker/python"
+cd "${build_context}"
+docker build -f Dockerfile -t "${project_name}-python" .
+docker builder prune -f
+cd "${root_dir}"
 
 services=$(yq_cmd -o=csv '.services | keys' docker-compose.yml | tr ", " " ")
 
@@ -109,5 +117,6 @@ $cmd
 # Build Docker images
 cmd="docker compose build ${services} --build-arg DOCKER_UID=$(id -u) --build-arg DOCKER_GID=$(id -g)"
 $cmd
+docker builder prune -f
 
 echo "${tput_green}Done!${tput_reset}"
