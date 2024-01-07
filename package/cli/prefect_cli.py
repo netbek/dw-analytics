@@ -302,7 +302,13 @@ def _load_deploy_configs(
             if deployment_names and deployment["name"] not in deployment_names:
                 continue
 
-            deploy_configs.append({**deployment, "project_name": project.name})
+            deploy_configs.append(
+                {
+                    **deployment,
+                    "project_name": project.name,
+                    "config_path": project.prefect_config_path,
+                }
+            )
 
     return deploy_configs
 
