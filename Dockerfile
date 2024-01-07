@@ -83,11 +83,15 @@ RUN groupadd ${DOCKER_USER} --gid ${DOCKER_GID} && \
     echo "\n${DOCKER_USER} ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     chown --recursive ${DOCKER_UID}:${DOCKER_GID} /home/${DOCKER_USER}
 
+RUN apt-get autoremove --yes && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 USER ${DOCKER_USER}
 WORKDIR /home/${DOCKER_USER}
 
 EXPOSE 8888
-CMD ["jupyter", "nbclassic", "--ip='0.0.0.0'", "--port=8888", "--no-browser", "--ServerApp.token=''", "--ServerApp.password=''"]
+CMD ["jupyter", "nbclassic", "--ip='0.0.0.0'", "--port=8888", "--no-browser"]
 
 ####################################################################################################
 
@@ -111,5 +115,11 @@ RUN groupadd ${DOCKER_USER} --gid ${DOCKER_GID} && \
     echo "\n${DOCKER_USER} ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     chown --recursive ${DOCKER_UID}:${DOCKER_GID} /home/${DOCKER_USER}
 
+RUN apt-get autoremove --yes && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 USER ${DOCKER_USER}
 WORKDIR /home/${DOCKER_USER}
+
+EXPOSE 80
