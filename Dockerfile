@@ -75,8 +75,7 @@ ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 COPY --from=python-builder "${VIRTUAL_ENV}" "${VIRTUAL_ENV}"
 COPY --from=python-builder /build /build
 
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --requirement /build/requirements_jupyter.txt
+RUN pip install --no-cache-dir --requirement /build/requirements_jupyter.txt
 
 RUN groupadd ${DOCKER_USER} --gid ${DOCKER_GID} && \
     useradd ${DOCKER_USER} --create-home --gid ${DOCKER_GID} --uid ${DOCKER_UID} --shell /bin/false && \
@@ -107,8 +106,7 @@ ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 COPY --from=python-builder "${VIRTUAL_ENV}" "${VIRTUAL_ENV}"
 COPY --from=python-builder /build /build
 
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --requirement /build/requirements_api.txt
+RUN pip install --no-cache-dir --requirement /build/requirements_api.txt
 
 RUN groupadd ${DOCKER_USER} --gid ${DOCKER_GID} && \
     useradd ${DOCKER_USER} --create-home --gid ${DOCKER_GID} --uid ${DOCKER_UID} --shell /bin/false && \
