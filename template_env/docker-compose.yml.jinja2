@@ -60,10 +60,16 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway # Used for connection to ClickHouse
     volumes:
+      - ./docker/prefect-worker/healthcheck.py:/docker/healthcheck.py:ro
       - ./.dbt:/home/analyst/.dbt:rw
       - ./.prefect:/home/analyst/.prefect:rw
       - ./package:/home/analyst/package:rw
       - ./projects:/home/analyst/projects:rw
+    healthcheck:
+      test: /docker/healthcheck.py process-worker process_pool || exit 1
+      interval: 1s
+      timeout: 1s
+      retries: 10
     deploy:
       restart_policy:
         condition: on-failure
@@ -90,9 +96,8 @@ services:
     depends_on:
       prefect-server:
         condition: service_healthy
-      # TODO Uncomment after adding healthcheck to prefect-worker
-      # prefect-worker:
-      #   condition: service_healthy
+      prefect-worker:
+        condition: service_healthy
 
   {% if profile in ('dev') -%}
   jupyter:
