@@ -20,10 +20,6 @@
 │   └── # VS Code dev container configuration
 ├── .env_files
 │   └── # .env files used in Docker containers
-├── .ipython
-│   └── # Jupyter notebook configuration
-├── .jupyter
-│   └── # Jupyter server configuration
 ├── .prefect
 │   └── # Prefect profiles
 ├── docker
@@ -49,6 +45,7 @@
 ├── pyproject.toml # Configuration of Python tools in CLI container
 ├── requirements_api.txt # Extra Python dependencies of API container
 ├── requirements_dev.txt # Python development dependencies
+├── requirements_jupyter.txt # Extra Python dependencies of Jupyter container
 └── requirements.txt # Python dependencies
 ```
 

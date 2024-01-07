@@ -94,6 +94,7 @@ services:
     build:
       context: .
       target: jupyter
+    command: jupyter nbclassic --ip='0.0.0.0' --port=8888 --no-browser --ServerApp.token='' --ServerApp.password='' --ServerApp.notebook_dir='/home/analyst/projects'
     env_file:
       - ./.env_files/jupyter.env
       - ./.env_files/database.env
@@ -103,13 +104,9 @@ services:
       - ${DW_JUPYTER_PORT:-8888}:8888
     volumes:
       - ./.dbt:/home/analyst/.dbt:rw
-      - ./.ipython/profile_default/startup:/home/analyst/.ipython/profile_default/startup:rw
-      - ./.jupyter/jupyter_server_config.py:/home/analyst/.jupyter/jupyter_server_config.py:rw
       - ./.prefect:/home/analyst/.prefect:rw
       - ./package:/home/analyst/package:rw
       - ./projects:/home/analyst/projects:rw
-      - ./docker/jupyter/usr/local/bin/start-notebook.d:/usr/local/bin/start-notebook.d:ro
-    user: 0:0
 
   api:
     build:
