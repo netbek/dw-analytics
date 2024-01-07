@@ -30,7 +30,7 @@ class Project:
         return cls(name)
 
     @classmethod
-    def from_path(cls, path: str) -> Optional[str]:
+    def from_path(cls, path: str) -> Optional["Project"]:
         parent_dir = os.path.abspath(PROJECTS_DIR)
         child_dir = os.path.abspath(path)
 
@@ -49,7 +49,7 @@ class Project:
         return bool([project for project in cls.list_projects() if project.name == name])
 
     @classmethod
-    def list_projects(cls) -> [str]:
+    def list_projects(cls) -> ["Project"]:
         return [cls(name) for name in list(os.listdir(PROJECTS_DIR))]
 
     @classmethod
@@ -146,7 +146,7 @@ class Project:
             os.path.join(self.dbt_directory, "macros", "dbt"),
         )
 
-    def load_prefect_config(self):
+    def load_prefect_config(self) -> dict:
         with open(self.prefect_config_path) as file:
             config = yaml.safe_load(file)
 
