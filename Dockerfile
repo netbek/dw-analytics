@@ -9,13 +9,13 @@ ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 RUN python -m venv ${VIRTUAL_ENV}
 
 COPY scripts/patches /build/patches
-COPY requirements.txt /build/requirements.txt
 COPY requirements_api.txt /build/requirements_api.txt
+COPY requirements_base.txt /build/requirements_base.txt
 COPY requirements_dev.txt /build/requirements_dev.txt
 COPY requirements_jupyter.txt /build/requirements_jupyter.txt
 
 RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir --requirement /build/requirements.txt && \
+    pip install --no-cache-dir --requirement /build/requirements_base.txt && \
     pip install --no-cache-dir --requirement /build/requirements_dev.txt
 
 WORKDIR "${VIRTUAL_ENV}/lib/python3.11/site-packages"
