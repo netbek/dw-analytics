@@ -1,5 +1,3 @@
-from enum import Enum
-
 import os
 
 # Filesystem
@@ -73,15 +71,3 @@ CODEGEN_TO_CLICKHOUSE_DATA_TYPES = {
     "uint8": "UInt8",
     "uuid": "UUID",
 }
-
-# TODO Consolidate constants and enums
-ACTION_CREATE = "create"
-ACTION_DELETE = "delete"
-ACTION_PAUSE = "pause"
-ACTION_RESUME = "resume"
-
-
-class DeploymentAction(str, Enum):
-    delete = "delete"
-    pause = "pause"
-    resume = "resume"

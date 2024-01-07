@@ -1,13 +1,6 @@
+from enum import Enum
 from package.cli.root import app
-from package.constants import (
-    ACTION_CREATE,
-    ACTION_DELETE,
-    ACTION_PAUSE,
-    ACTION_RESUME,
-    DeploymentAction,
-    PREFECT_PROFILES_PATH,
-    PREFECT_PROVISION_PATH,
-)
+from package.constants import PREFECT_PROFILES_PATH, PREFECT_PROVISION_PATH
 from package.project import Project
 from package.utils.typer_utils import typer_async
 from prefect import get_client
@@ -26,6 +19,16 @@ import yaml
 
 prefect_app = typer.Typer(name="prefect", add_completion=False)
 app.add_typer(prefect_app)
+
+
+class DeployAction(str, Enum):
+    create = "create"
+
+
+class DeploymentAction(str, Enum):
+    delete = "delete"
+    pause = "pause"
+    resume = "resume"
 
 
 class DeploymentNotFoundError(Exception):
@@ -50,7 +53,7 @@ def version():
 async def provision(
     profile_name: Optional[str] = typer.Argument(
         None, help="Profile name. Default is the active profile."
-    )
+    ),
 ):
     profiles = prefect.settings.load_profiles()
     current_profile = prefect.context.get_settings_context().profile
@@ -139,13 +142,13 @@ async def deploy(
 
         try:
             deployment_actions = _build_deployment_actions(
-                ACTION_CREATE, selected_names, existing_names
+                DeployAction.create, selected_names, existing_names
             )
         except Exception as e:
             app.console.print(e.message, style="red")
             return
 
-        create_names = [d["name"] for d in deployment_actions if d["action"] == ACTION_CREATE]
+        create_names = [d["name"] for d in deployment_actions if d["action"] == DeployAction.create]
 
         for name in create_names:
             create_deployments = [
@@ -173,7 +176,9 @@ async def deploy(
                     await client.update_schedule(deployment.id, False)
                     app.console.print(f"Paused deployment '{deployment.name}'", style="green")
 
-        update_names = [d["name"] for d in deployment_actions if d["action"] == ACTION_RESUME]
+        update_names = [
+            d["name"] for d in deployment_actions if d["action"] == DeploymentAction.resume
+        ]
         update_deployments = [d for d in existing if d.name in update_names]
 
         for deployment in update_deployments:
@@ -224,11 +229,11 @@ async def deployment(
         deployments = [d for d in existing if d.name in deployment_names]
 
         for deployment in deployments:
-            if action == ACTION_DELETE:
+            if action == DeploymentAction.delete:
                 await delete_deployment(client, deployment.id)
-            elif action == ACTION_PAUSE:
+            elif action == DeploymentAction.pause:
                 await pause_deployment(client, deployment.id)
-            elif action == ACTION_RESUME:
+            elif action == DeploymentAction.resume:
                 await resume_deployment(client, deployment.id)
 
 
@@ -303,19 +308,21 @@ def _load_deploy_configs(
 
 
 def _build_deployment_actions(
-    action: str, selected_names: [str], existing_names: Optional[List[str]] = None
+    action: DeployAction | DeploymentAction,
+    selected_names: [str],
+    existing_names: Optional[List[str]] = None,
 ):
     result = []
 
     if not existing_names:
         existing_names = []
 
-    if action == ACTION_CREATE:
+    if action == DeployAction.create:
         for name in selected_names:
             if name in existing_names:
-                result.append({"action": ACTION_RESUME, "name": name})
+                result.append({"action": DeploymentAction.resume, "name": name})
             else:
-                result.append({"action": ACTION_CREATE, "name": name})
+                result.append({"action": DeployAction.create, "name": name})
     else:
         not_found = []
 
