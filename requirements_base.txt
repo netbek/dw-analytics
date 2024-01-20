@@ -2,8 +2,8 @@ clickhouse-driver==0.2.6
 clickhouse-sqlalchemy==0.3.0
 dbt-clickhouse==1.7.1
 dbt-semantic-interfaces==0.4.3
-pandas==2.1.4
-prefect==2.14.13
+pandas==2.2.0
+prefect==2.14.16
 prefect-jupyter==0.3.1
 prefect-shell==0.2.2
 psycopg2-binary==2.9.9
