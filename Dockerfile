@@ -1,4 +1,4 @@
-FROM python:3.11.7-slim-bookworm AS python-builder
+FROM python:3.11.9-slim-bookworm AS python-builder
 
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
@@ -14,7 +14,7 @@ COPY requirements_base.txt /build/requirements_base.txt
 COPY requirements_dev.txt /build/requirements_dev.txt
 COPY requirements_jupyter.txt /build/requirements_jupyter.txt
 
-RUN pip install --no-cache-dir --upgrade pip && \
+RUN pip install --no-cache-dir --upgrade pip wheel setuptools && \
     pip install --no-cache-dir --requirement /build/requirements_base.txt && \
     pip install --no-cache-dir --requirement /build/requirements_dev.txt
 
@@ -30,7 +30,7 @@ RUN apt-get autoremove --yes && \
 
 ####################################################################################################
 
-FROM prefecthq/prefect:2.16.0-python3.11 AS prefect-common
+FROM prefecthq/prefect:2.17.1-python3.11 AS prefect-common
 
 ARG DOCKER_UID
 ARG DOCKER_GID
@@ -63,7 +63,7 @@ WORKDIR /home/${DOCKER_USER}
 
 ####################################################################################################
 
-FROM python:3.11.7-slim-bookworm AS jupyter
+FROM python:3.11.9-slim-bookworm AS jupyter
 
 ARG DOCKER_UID
 ARG DOCKER_GID
@@ -94,7 +94,7 @@ CMD ["jupyter", "nbclassic", "--ip='0.0.0.0'", "--port=8888", "--no-browser"]
 
 ####################################################################################################
 
-FROM python:3.11.7-slim-bookworm AS api
+FROM python:3.11.9-slim-bookworm AS api
 
 ARG DOCKER_UID
 ARG DOCKER_GID
