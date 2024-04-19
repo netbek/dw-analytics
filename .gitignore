@@ -4,6 +4,7 @@
 .bash_history
 .bash_logout
 .cache
+.dotnet
 .env*
 .gitconfig
 .ipynb_checkpoints
@@ -14,7 +15,10 @@
 .pytest_cache
 .python_history
 .Rproj.user
+.ruff_cache
 .ssh
 .vscode-server
 .~*
 __pycache__
+
+projects/main

@@ -75,10 +75,10 @@ function dbt() {
         if [ -z "$project_name" ]; then
             echo "${tput_red}Run the dbt command from the project's dbt directory${tput_reset}"
         else
-            cd "${PROJECTS_DIR}/${project_name}/dbt" && /usr/local/bin/dbt "$@"
+            cd "${PROJECTS_DIR}/${project_name}/dbt" && /opt/venv/bin/dbt "$@"
         fi
     else
-        /usr/local/bin/dbt "$@"
+        /opt/venv/bin/dbt "$@"
     fi
 }
 
@@ -92,10 +92,10 @@ function prefect() {
         if [ -z "$project_name" ]; then
             echo "${tput_red}Run the prefect command from the project's root directory${tput_reset}"
         else
-            cd "${PROJECTS_DIR}/${project_name}" && /usr/local/bin/prefect "$@"
+            cd "${PROJECTS_DIR}/${project_name}" && /opt/venv/bin/prefect "$@"
         fi
     else
-        /usr/local/bin/prefect "$@"
+        /opt/venv/bin/prefect "$@"
     fi
 }
 
