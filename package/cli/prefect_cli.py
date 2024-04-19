@@ -4,9 +4,9 @@ from package.constants import PREFECT_PROFILES_PATH, PREFECT_PROVISION_PATH
 from package.project import Project
 from package.utils.typer_utils import typer_async
 from prefect import get_client
+from prefect._vendor.starlette import status
 from prefect.client.orchestration import PrefectClient
 from prefect.client.schemas.actions import WorkPoolCreate, WorkPoolUpdate
-from starlette import status
 from typing import List, Optional
 from uuid import UUID
 
@@ -173,7 +173,7 @@ async def deploy(
                 app.console.print(f"Created deployment '{deployment.name}'", style="green")
 
                 if pause:
-                    await client.update_schedule(deployment.id, False)
+                    await client.set_deployment_paused_state(deployment.id, True)
                     app.console.print(f"Paused deployment '{deployment.name}'", style="green")
 
         update_names = [
@@ -183,10 +183,10 @@ async def deploy(
 
         for deployment in update_deployments:
             if pause:
-                await client.update_schedule(deployment.id, False)
+                await client.set_deployment_paused_state(deployment.id, True)
                 app.console.print(f"Paused deployment '{deployment.name}'", style="green")
             else:
-                await client.update_schedule(deployment.id, True)
+                await client.set_deployment_paused_state(deployment.id, False)
                 app.console.print(f"Resumed deployment '{deployment.name}'", style="green")
 
 
@@ -261,14 +261,14 @@ async def delete_deployment(client: PrefectClient, deployment_id: UUID):
 async def pause_deployment(client: PrefectClient, deployment_id: UUID):
     deployment = await client.read_deployment(deployment_id)
 
-    await client.update_schedule(deployment.id, False)
+    await client.set_deployment_paused_state(deployment.id, True)
     app.console.print(f"Paused deployment '{deployment.name}'", style="green")
 
 
 async def resume_deployment(client: PrefectClient, deployment_id: UUID):
     deployment = await client.read_deployment(deployment_id)
 
-    await client.update_schedule(deployment.id, True)
+    await client.set_deployment_paused_state(deployment.id, False)
     app.console.print(f"Resumed deployment '{deployment.name}'", style="green")
 
 
@@ -315,7 +315,7 @@ def _load_deploy_configs(
 
 def _build_deployment_actions(
     action: DeployAction | DeploymentAction,
-    selected_names: [str],
+    selected_names: List[str],
     existing_names: Optional[List[str]] = None,
 ):
     result = []

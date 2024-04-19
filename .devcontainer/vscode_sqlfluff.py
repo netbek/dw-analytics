@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/opt/venv/bin/python
 from pathlib import Path
 
 import os

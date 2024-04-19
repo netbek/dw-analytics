@@ -1,13 +1,13 @@
 diff --git a/dbt/adapters/clickhouse/impl.py b/dbt/adapters/clickhouse/impl.py
-index f5b9b0c..9b05c53 100644
+index 7fc27d5..415397c 100644
 --- a/dbt/adapters/clickhouse/impl.py
 +++ b/dbt/adapters/clickhouse/impl.py
-@@ -430,7 +430,7 @@ class ClickHouseAdapter(SQLAdapter):
+@@ -455,7 +455,7 @@ class ClickHouseAdapter(SQLAdapter):
  
      @available.parse_none
      def format_columns(self, columns) -> List[Dict]:
 -        return [{'name': column.name, 'data_type': column.dtype} for column in columns]
 +        return [{'name': column.name, 'data_type': column.data_type} for column in columns]
  
-     @classmethod
-     def render_raw_columns_constraints(cls, raw_columns: Dict[str, Dict[str, Any]]) -> List:
+     @available
+     def get_credentials(self, connection_overrides) -> Dict:
