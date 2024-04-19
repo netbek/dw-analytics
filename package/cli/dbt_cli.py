@@ -29,8 +29,8 @@ def generate_model_yaml(models: List[str]):
         raise Exception(f"No dbt_project.yml found in {cwd} or higher")
 
     dbt_dir = dbt_project_file.parent
-    pattern = f"models/**/{models}.sql"
-    model_paths = dbt_dir.glob(pattern)
+    patterns = [f"models/**/{model}.sql" for model in models]
+    model_paths = [file for pattern in patterns for file in dbt_dir.glob(pattern)]
 
     for model_path in model_paths:
         model_name = os.path.splitext(os.path.basename(model_path))[0]
@@ -91,14 +91,12 @@ def generate_model_yaml(models: List[str]):
             ],
         }
 
-        old_model = None
-        for model in schema["models"]:
-            if model["name"] == model_name:
-                old_model = model
-                break
+        old_model_indexes = [
+            i for i, model in enumerate(schema["models"]) if model["name"] == model_name
+        ]
 
-        if old_model:
-            schema["models"][old_model[0]] = new_model
+        if old_model_indexes:
+            schema["models"][old_model_indexes[0]] = new_model
         else:
             schema["models"].append(new_model)
 
