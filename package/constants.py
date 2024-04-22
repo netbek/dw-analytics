@@ -70,4 +70,5 @@ CODEGEN_TO_CLICKHOUSE_DATA_TYPES = {
     "uint64": "UInt64",
     "uint8": "UInt8",
     "uuid": "UUID",
+    "variant": "Variant",
 }
