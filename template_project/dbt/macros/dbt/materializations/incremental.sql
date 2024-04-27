@@ -36,7 +36,7 @@
     {% endcall %} #}
 
     {# See original logic above #}
-    {% if config.get('insert_by_period__watermark_column') %}
+    {% if config.get('insert_by_period__column') %}
       {{ clickhouse__insert_by_period_create_table(False, target_relation, sql) }}
     {% else %}
       {% call statement('main') %}
@@ -51,7 +51,7 @@
     {% endcall %} #}
 
     {# See original logic above #}
-    {% if config.get('insert_by_period__watermark_column') %}
+    {% if config.get('insert_by_period__column') %}
       {{ clickhouse__insert_by_period_create_table(False, intermediate_relation, sql) }}
     {% else %}
       {% call statement('main') %}
@@ -132,12 +132,12 @@
 
 
 {# Adapted from https://github.com/dbt-labs/dbt-labs-experimental-features/blob/42f36a4418dd4f7f6b0bd36c03dcc3ec01bb3304/insert_by_period/macros/get_period_boundaries.sql #}
-{% macro clickhouse__get_period_boundaries(watermark_column, start_date, stop_date, period) -%}
+{% macro clickhouse__get_period_boundaries(period_column, start_date, stop_date, period) -%}
   {% call statement('period_boundaries', fetch_result=True) -%}
     {# with data as (
       select
-        date_trunc('second', min('{{ watermark_column }}')) as start_timestamp,
-        date_trunc('second', max('{{ watermark_column }}')) + interval '1 second' as stop_timestamp
+        date_trunc('second', min('{{ period_column }}')) as start_timestamp,
+        date_trunc('second', max('{{ period_column }}')) + interval '1 second' as stop_timestamp
       from {{ source }}
     ) #}
 
@@ -157,12 +157,12 @@
 
 
 {# Adapted from https://github.com/dbt-labs/dbt-labs-experimental-features/blob/42f36a4418dd4f7f6b0bd36c03dcc3ec01bb3304/insert_by_period/macros/get_period_sql.sql #}
-{% macro clickhouse__get_period_sql(sql, watermark_column, period, start_timestamp, stop_timestamp, offset) -%}
+{% macro clickhouse__get_period_sql(sql, period_column, period, start_timestamp, stop_timestamp, offset) -%}
   {%- set period_filter -%}
     (
-      "{{ watermark_column }}" >  '{{ start_timestamp }}'::timestamp + interval '{{ offset }} {{ period }}' and
-      "{{ watermark_column }}" <= '{{ start_timestamp }}'::timestamp + interval '{{ offset }} {{ period }}' + interval '1 {{ period }}' and
-      "{{ watermark_column }}" <  '{{ stop_timestamp }}'::timestamp
+      "{{ period_column }}" >  '{{ start_timestamp }}'::timestamp + interval '{{ offset }} {{ period }}' and
+      "{{ period_column }}" <= '{{ start_timestamp }}'::timestamp + interval '{{ offset }} {{ period }}' + interval '1 {{ period }}' and
+      "{{ period_column }}" <  '{{ stop_timestamp }}'::timestamp
     )
   {%- endset -%}
   {%- set filtered_sql = sql | replace('__INSERT_BY_PERIOD_FILTER__', period_filter) -%}
@@ -172,7 +172,7 @@
 
 {# Adapted from https://github.com/dbt-labs/dbt-labs-experimental-features/blob/42f36a4418dd4f7f6b0bd36c03dcc3ec01bb3304/insert_by_period/macros/insert_by_period_materialization.sql #}
 {% macro clickhouse__insert_by_period_create_table(temporary, relation, sql) %}
-  {%- set watermark_column = config.require('insert_by_period__watermark_column') -%}
+  {%- set period_column = config.require('insert_by_period__column') -%}
   {%- set start_date = config.require('insert_by_period__start_date') -%}
   {%- set stop_date = config.get('insert_by_period__stop_date') or '' -%}
   {%- set period = config.get('insert_by_period__period') or 'week' -%}
@@ -184,7 +184,7 @@
     {{ exceptions.raise_compiler_error(error_message) }}
   {%- endif -%}
 
-  {%- set period_boundaries = clickhouse__get_period_boundaries(watermark_column, start_date, stop_date, period) -%}
+  {%- set period_boundaries = clickhouse__get_period_boundaries(period_column, start_date, stop_date, period) -%}
   {%- set period_boundaries_results = load_result('period_boundaries')['data'][0] -%}
   {%- set start_timestamp = period_boundaries_results[0] | string -%}
   {%- set stop_timestamp = period_boundaries_results[1] | string -%}
@@ -195,7 +195,7 @@
     {%- set msg = "Running for " ~ period ~ " " ~ (offset + 1) ~ " of " ~ (num_periods) -%}
     {{ print(msg) }}
 
-    {%- set filtered_sql = clickhouse__get_period_sql(sql, watermark_column, period, start_timestamp, stop_timestamp, offset) -%}
+    {%- set filtered_sql = clickhouse__get_period_sql(sql, period_column, period, start_timestamp, stop_timestamp, offset) -%}
 
     {% call statement('main') %}
       {% if offset == 0 %}

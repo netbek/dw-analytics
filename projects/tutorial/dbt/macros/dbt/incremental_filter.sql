@@ -1,6 +1,17 @@
-{% macro incremental_filter(watermark_column='modified_at') %}
+{% macro incremental_filter(source_watermark_columns, target_watermark_column=None, operator='or') %}
     {% if is_incremental() %}
-        {{ watermark_column }} > (select max({{ watermark_column }}) from {{ this }})
+        (
+            {% for source_watermark_column in source_watermark_columns %}
+                {% if not loop.first %}{{ operator }} {% endif %}
+                {{ source_watermark_column }} > (select toString(max(
+                    {%- if target_watermark_column is none -%}
+                        {{ source_watermark_column }}
+                    {%- else -%}
+                        {{ target_watermark_column }}
+                    {%- endif -%}
+                )) from {{ this }})
+            {% endfor %}
+        )
     {% else %}
         true
     {% endif %}
