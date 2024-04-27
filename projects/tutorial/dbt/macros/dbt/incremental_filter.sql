@@ -1,6 +1,6 @@
-{% macro incremental_filter(time_column='modified_at') %}
+{% macro incremental_filter(watermark_column='modified_at') %}
     {% if is_incremental() %}
-        {{ time_column }} > (select max({{ time_column }}) from {{ this }})
+        {{ watermark_column }} > (select max({{ watermark_column }}) from {{ this }})
     {% else %}
         true
     {% endif %}
