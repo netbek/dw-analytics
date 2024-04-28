@@ -138,7 +138,9 @@
 
 {% macro clickhouse__get_batch_load_min_max(model, column) -%}
   {% set sql %}
-    select min({{ column }}) as min, max({{ column }}) as max
+    select
+      min({{ column }}) as min,
+      max({{ column }}) as max
     from {{ model }}
   {% endset %}
   {{ return(dbt_utils.get_query_results_as_dict(sql)) }}
@@ -186,8 +188,16 @@
 {% macro clickhouse__batch_load_period_create_table(temporary, relation, sql) %}
   {%- set batch_load_period = config.get('batch_load_period', 'week') -%}
   {%- set batch_load_column = config.require('batch_load_column') -%}
-  {%- set batch_load_start = config.require('batch_load_start') -%}
-  {%- set batch_load_end = config.get('batch_load_end') -%}
+  {%- set batch_load_source_model = config.get('batch_load_source_model') -%}
+
+  {%- if batch_load_source_model -%}
+    {%- set min_max = clickhouse__get_batch_load_min_max(batch_load_source_model, batch_load_column) | as_native -%}
+    {%- set batch_load_start = min_max['min'][0].strftime('%Y-%m-%d') -%}
+    {%- set batch_load_end = min_max['max'][0].strftime('%Y-%m-%d') -%}
+  {%- else -%}
+    {%- set batch_load_start = config.require('batch_load_start') -%}
+    {%- set batch_load_end = config.get('batch_load_end') -%}
+  {%- endif -%}
 
   {%- if sql.find('__BATCH_LOAD_PREDICATES__') == -1 -%}
     {%- set error_message -%}
