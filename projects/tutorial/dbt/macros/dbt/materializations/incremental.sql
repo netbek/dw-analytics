@@ -148,22 +148,22 @@
 
 
 {# Adapted from https://github.com/dbt-labs/dbt-labs-experimental-features/blob/42f36a4418dd4f7f6b0bd36c03dcc3ec01bb3304/insert_by_period/macros/get_period_boundaries.sql #}
-{% macro clickhouse__get_period_boundaries(period, start_value, end_value) -%}
+{% macro clickhouse__get_period_boundaries(period, min_value, max_value) -%}
   {% set sql %}
     with data as (
       select
-        toDateTime64('{{ start_value|trim }}', 6) as start_value,
-        {% if end_value -%}
-          toDateTime64('{{ end_value|trim }}', 6) + interval '1 day' - interval '1 microsecond'
+        toDateTime64('{{ min_value|trim }}', 6) as min_value,
+        {% if max_value -%}
+          toDateTime64('{{ max_value|trim }}', 6) + interval '1 day' - interval '1 microsecond'
         {% else %}
           toDateTime64({{ dbt.current_timestamp() }}, 6)
-        {%- endif %} as end_value
+        {%- endif %} as max_value
     )
 
     select
-      start_value,
-      end_value,
-      {{ datediff('start_value', 'end_value', period) }} + 1 as num_batches
+      min_value,
+      max_value,
+      {{ datediff('min_value', 'max_value', period) }} + 1 as num_batches
     from data
   {% endset %}
   {{ return(dbt_utils.get_query_results_as_dict(sql)) }}
@@ -171,12 +171,12 @@
 
 
 {# Adapted from https://github.com/dbt-labs/dbt-labs-experimental-features/blob/42f36a4418dd4f7f6b0bd36c03dcc3ec01bb3304/insert_by_period/macros/get_period_sql.sql #}
-{% macro clickhouse__get_period_sql(sql, column, period, start_value, end_value, offset) -%}
+{% macro clickhouse__get_period_sql(sql, column, period, min_value, max_value, offset) -%}
   {%- set batch_load_predicates -%}
     (
-      "{{ column }}" >= toDateTime64('{{ start_value }}', 6) + interval '{{ offset }} {{ period }}' and
-      "{{ column }}" <  toDateTime64('{{ start_value }}', 6) + interval '{{ offset + 1 }} {{ period }}' and
-      "{{ column }}" <= toDateTime64('{{ end_value }}', 6)
+      "{{ column }}" >= toDateTime64('{{ min_value }}', 6) + interval '{{ offset }} {{ period }}' and
+      "{{ column }}" <  toDateTime64('{{ min_value }}', 6) + interval '{{ offset + 1 }} {{ period }}' and
+      "{{ column }}" <= toDateTime64('{{ max_value }}', 6)
     )
   {%- endset -%}
   {%- set filtered_sql = sql | replace('__BATCH_LOAD_PREDICATES__', batch_load_predicates) -%}
@@ -192,11 +192,11 @@
 
   {%- if batch_load_source_model -%}
     {%- set min_max = clickhouse__get_batch_load_min_max(batch_load_source_model, batch_load_column) | as_native -%}
-    {%- set batch_load_start = min_max['min'][0].strftime('%Y-%m-%d') -%}
-    {%- set batch_load_end = min_max['max'][0].strftime('%Y-%m-%d') -%}
+    {%- set batch_load_min_value = min_max['min'][0].strftime('%Y-%m-%d') -%}
+    {%- set batch_load_max_value = min_max['max'][0].strftime('%Y-%m-%d') -%}
   {%- else -%}
-    {%- set batch_load_start = config.require('batch_load_start') -%}
-    {%- set batch_load_end = config.get('batch_load_end') -%}
+    {%- set batch_load_min_value = config.require('batch_load_min_value') -%}
+    {%- set batch_load_max_value = config.get('batch_load_max_value') -%}
   {%- endif -%}
 
   {%- if sql.find('__BATCH_LOAD_PREDICATES__') == -1 -%}
@@ -206,9 +206,9 @@
     {{ exceptions.raise_compiler_error(error_message) }}
   {%- endif -%}
 
-  {%- set boundaries = clickhouse__get_period_boundaries(batch_load_period, batch_load_start, batch_load_end) | as_native -%}
-  {%- set start_value = boundaries['start_value'][0] -%}
-  {%- set end_value = boundaries['end_value'][0] -%}
+  {%- set boundaries = clickhouse__get_period_boundaries(batch_load_period, batch_load_min_value, batch_load_max_value) | as_native -%}
+  {%- set min_value = boundaries['min_value'][0] -%}
+  {%- set max_value = boundaries['max_value'][0] -%}
   {%- set num_batches = boundaries['num_batches'][0] | int -%}
 
   -- commit each batch as a separate transaction
@@ -216,7 +216,7 @@
     {%- set msg = "Loading batch " ~ (offset + 1) ~ " of " ~ (num_batches) -%}
     {{ print(msg) }}
 
-    {%- set filtered_sql = clickhouse__get_period_sql(sql, batch_load_column, batch_load_period, start_value, end_value, offset) -%}
+    {%- set filtered_sql = clickhouse__get_period_sql(sql, batch_load_column, batch_load_period, min_value, max_value, offset) -%}
 
     {% call statement('main') %}
       {% if offset == 0 %}
@@ -229,23 +229,23 @@
 {% endmacro %}
 
 
-{% macro clickhouse__get_sequence_boundaries(batch_size, start_value, end_value) -%}
+{% macro clickhouse__get_sequence_boundaries(batch_size, min_value, max_value) -%}
   {% set sql %}
     select
-      {{ start_value }} as start_value,
-      {{ end_value }} as end_value,
-      ceil(({{ end_value }} - {{ start_value }})::real / {{ batch_size }})::integer as num_batches
+      {{ min_value }} as min_value,
+      {{ max_value }} as max_value,
+      ceil(({{ max_value }} - {{ min_value }})::real / {{ batch_size }})::integer as num_batches
   {% endset %}
   {{ return(dbt_utils.get_query_results_as_dict(sql)) }}
 {%- endmacro %}
 
 
-{% macro clickhouse__get_sequence_sql(sql, column, batch_size, start_value, end_value, offset) -%}
+{% macro clickhouse__get_sequence_sql(sql, column, batch_size, min_value, max_value, offset) -%}
   {%- set batch_load_predicates -%}
     (
-      "{{ column }}" >= {{ start_value }} + ({{ batch_size }} * {{ offset }}) and
-      "{{ column }}" <  {{ start_value }} + ({{ batch_size }} * {{ offset + 1 }}) and
-      "{{ column }}" <= {{ end_value }}
+      "{{ column }}" >= {{ min_value }} + ({{ batch_size }} * {{ offset }}) and
+      "{{ column }}" <  {{ min_value }} + ({{ batch_size }} * {{ offset + 1 }}) and
+      "{{ column }}" <= {{ max_value }}
     )
   {%- endset -%}
   {%- set filtered_sql = sql | replace('__BATCH_LOAD_PREDICATES__', batch_load_predicates) -%}
@@ -260,11 +260,11 @@
 
   {%- if batch_load_source_model -%}
     {%- set min_max = clickhouse__get_batch_load_min_max(batch_load_source_model, batch_load_column) | as_native -%}
-    {%- set batch_load_start = min_max['min'][0] | int -%}
-    {%- set batch_load_end = min_max['max'][0] | int -%}
+    {%- set batch_load_min_value = min_max['min'][0] | int -%}
+    {%- set batch_load_max_value = min_max['max'][0] | int -%}
   {%- else -%}
-    {%- set batch_load_start = config.require('batch_load_start') -%}
-    {%- set batch_load_end = config.get('batch_load_end') -%}
+    {%- set batch_load_min_value = config.require('batch_load_min_value') -%}
+    {%- set batch_load_max_value = config.get('batch_load_max_value') -%}
   {%- endif -%}
 
   {%- if sql.find('__BATCH_LOAD_PREDICATES__') == -1 -%}
@@ -274,9 +274,9 @@
     {{ exceptions.raise_compiler_error(error_message) }}
   {%- endif -%}
 
-  {%- set boundaries = clickhouse__get_sequence_boundaries(batch_load_size, batch_load_start, batch_load_end) | as_native -%}
-  {%- set start_value = boundaries['start_value'][0] | int -%}
-  {%- set end_value = boundaries['end_value'][0] | int -%}
+  {%- set boundaries = clickhouse__get_sequence_boundaries(batch_load_size, batch_load_min_value, batch_load_max_value) | as_native -%}
+  {%- set min_value = boundaries['min_value'][0] | int -%}
+  {%- set max_value = boundaries['max_value'][0] | int -%}
   {%- set num_batches = boundaries['num_batches'][0] | int -%}
 
   -- commit each batch as a separate transaction
@@ -284,7 +284,7 @@
     {%- set msg = "Loading batch " ~ (offset + 1) ~ " of " ~ (num_batches) -%}
     {{ print(msg) }}
 
-    {%- set filtered_sql = clickhouse__get_sequence_sql(sql, batch_load_column, batch_load_size, start_value, end_value, offset) -%}
+    {%- set filtered_sql = clickhouse__get_sequence_sql(sql, batch_load_column, batch_load_size, min_value, max_value, offset) -%}
 
     {% call statement('main') %}
       {% if offset == 0 %}
