@@ -166,14 +166,14 @@
 
 {# Adapted from https://github.com/dbt-labs/dbt-labs-experimental-features/blob/42f36a4418dd4f7f6b0bd36c03dcc3ec01bb3304/insert_by_period/macros/get_period_sql.sql #}
 {% macro clickhouse__get_period_sql(sql, column, period, start_value, end_value, offset) -%}
-  {%- set batch_load_filter -%}
+  {%- set batch_load_predicates -%}
     (
       "{{ column }}" >= toDateTime64('{{ start_value }}', 6) + interval '{{ offset }} {{ period }}' and
       "{{ column }}" <  toDateTime64('{{ start_value }}', 6) + interval '{{ offset + 1 }} {{ period }}' and
       "{{ column }}" <= toDateTime64('{{ end_value }}', 6)
     )
   {%- endset -%}
-  {%- set filtered_sql = sql | replace('__BATCH_LOAD_FILTER__', batch_load_filter) -%}
+  {%- set filtered_sql = sql | replace('__BATCH_LOAD_PREDICATES__', batch_load_predicates) -%}
   {{ return(filtered_sql) }}
 {%- endmacro %}
 
@@ -185,9 +185,9 @@
   {%- set batch_load_start = config.require('batch_load_start') -%}
   {%- set batch_load_end = config.get('batch_load_end') -%}
 
-  {%- if sql.find('__BATCH_LOAD_FILTER__') == -1 -%}
+  {%- if sql.find('__BATCH_LOAD_PREDICATES__') == -1 -%}
     {%- set error_message -%}
-      Model '{{ model.unique_id }}' does not include the required string '__BATCH_LOAD_FILTER__' in its sql
+      Model '{{ model.unique_id }}' does not include the required string '__BATCH_LOAD_PREDICATES__' in its sql
     {%- endset -%}
     {{ exceptions.raise_compiler_error(error_message) }}
   {%- endif -%}
@@ -227,14 +227,14 @@
 
 
 {% macro clickhouse__get_sequence_sql(sql, column, batch_size, start_value, end_value, offset) -%}
-  {%- set batch_load_filter -%}
+  {%- set batch_load_predicates -%}
     (
       "{{ column }}" >= {{ start_value }} + ({{ batch_size }} * {{ offset }}) and
       "{{ column }}" <  {{ start_value }} + ({{ batch_size }} * {{ offset + 1 }}) and
       "{{ column }}" <= {{ end_value }}
     )
   {%- endset -%}
-  {%- set filtered_sql = sql | replace('__BATCH_LOAD_FILTER__', batch_load_filter) -%}
+  {%- set filtered_sql = sql | replace('__BATCH_LOAD_PREDICATES__', batch_load_predicates) -%}
   {{ return(filtered_sql) }}
 {%- endmacro %}
 
@@ -253,9 +253,9 @@
     {%- set batch_load_end = config.get('batch_load_end') -%}
   {%- endif -%}
 
-  {%- if sql.find('__BATCH_LOAD_FILTER__') == -1 -%}
+  {%- if sql.find('__BATCH_LOAD_PREDICATES__') == -1 -%}
     {%- set error_message -%}
-      Model '{{ model.unique_id }}' does not include the required string '__BATCH_LOAD_FILTER__' in its sql
+      Model '{{ model.unique_id }}' does not include the required string '__BATCH_LOAD_PREDICATES__' in its sql
     {%- endset -%}
     {{ exceptions.raise_compiler_error(error_message) }}
   {%- endif -%}
