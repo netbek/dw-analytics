@@ -151,7 +151,11 @@
     with data as (
       select
         toDateTime64('{{ start_value|trim }}', 6) as start_value,
-        {% if end_value %}toDateTime64('{{ end_value|trim }}', 6) + interval '1 day' - interval '1 microsecond'{% else %}toDateTime64({{ dbt.current_timestamp() }}, 6){% endif %} as end_value
+        {% if end_value -%}
+          toDateTime64('{{ end_value|trim }}', 6) + interval '1 day' - interval '1 microsecond'
+        {% else %}
+          toDateTime64({{ dbt.current_timestamp() }}, 6)
+        {%- endif %} as end_value
     )
 
     select
