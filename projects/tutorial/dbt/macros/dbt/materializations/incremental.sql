@@ -240,7 +240,7 @@
 
 
 {% macro clickhouse__batch_load_sequence_create_table(temporary, relation, sql) %}
-  {%- set batch_load_size = config.get('batch_load_size', 1000) | int -%}
+  {%- set batch_load_size = config.get('batch_load_size', 100000) | int -%}
   {%- set batch_load_column = config.require('batch_load_column') -%}
   {%- set batch_load_source_model = config.get('batch_load_source_model') -%}
 
