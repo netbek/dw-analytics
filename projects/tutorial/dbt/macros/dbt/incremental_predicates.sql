@@ -3,7 +3,7 @@
         (
             {% for source_watermark_column in source_watermark_columns %}
                 {% set column = target_watermark_column if target_watermark_column is not none else source_watermark_column %}
-                {% set data_type = model['columns'][column]['data_type'] %}
+                {% set data_type = model['columns'][source_watermark_column]['data_type'] %}
                 {% if not loop.first %}{{ operator }} {% endif %}
                 {{ source_watermark_column }} > (
                     {# For ClickHouse >= v24.3 #}
