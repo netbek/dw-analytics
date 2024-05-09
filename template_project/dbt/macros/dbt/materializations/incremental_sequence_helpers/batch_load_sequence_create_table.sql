@@ -9,7 +9,7 @@
     {%- set batch_load_max_value = min_max['max'][0] | int -%}
   {%- else -%}
     {%- set batch_load_min_value = config.require('batch_load_min_value') -%}
-    {%- set batch_load_max_value = config.get('batch_load_max_value') -%}
+    {%- set batch_load_max_value = config.require('batch_load_max_value') -%}
   {%- endif -%}
 
   {%- if sql.find('__BATCH_LOAD_PREDICATES__') == -1 -%}
