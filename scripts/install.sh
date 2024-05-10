@@ -59,6 +59,9 @@ autocrlf = input
 [pull]
 rebase = false
 
+[push]
+autoSetupRemote = true
+
 [user]
 email = $(git config --get --global user.email)
 name = $(git config --get --global user.name)
