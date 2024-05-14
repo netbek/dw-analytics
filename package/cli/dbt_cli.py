@@ -79,7 +79,6 @@ def generate_model_yaml(models: List[str]):
         new_model = yaml.safe_load(output)["models"][0]
         new_model = {
             "name": new_model["name"],
-            "config": {"contract": {"enforced": True}},
             "columns": [
                 {
                     "name": column["name"],
