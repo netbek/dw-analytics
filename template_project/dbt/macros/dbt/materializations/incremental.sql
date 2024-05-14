@@ -1,7 +1,7 @@
 {# Adapted from https://github.com/ClickHouse/dbt-clickhouse/blob/v1.6.2/dbt/include/clickhouse/macros/materializations/incremental/incremental.sql #}
 {% materialization incremental, adapter='clickhouse' %}
 
-  {%- set batch_load_type = config.get('batch_load_type') -%}
+  {%- set batch_type = config.get('batch_type') -%}
   {%- set existing_relation = load_cached_relation(this) -%}
   {%- set target_relation = this.incorporate(type='table') -%}
 
@@ -37,9 +37,9 @@
     {% endcall %} #}
 
     {# See original logic above #}
-    {% if batch_load_type == 'period' %}
-      {{ clickhouse__batch_load_period_create_table(False, target_relation, sql) }}
-    {% elif batch_load_type == 'sequence' %}
+    {% if batch_type == 'period' %}
+      {{ clickhouse__batch_period_create_table(False, target_relation, sql) }}
+    {% elif batch_type == 'sequence' %}
       {{ clickhouse__batch_load_sequence_create_table(False, target_relation, sql) }}
     {% else %}
       {% call statement('main') %}
@@ -54,9 +54,9 @@
     {% endcall %} #}
 
     {# See original logic above #}
-    {% if batch_load_type == 'period' %}
-      {{ clickhouse__batch_load_period_create_table(False, intermediate_relation, sql) }}
-    {% elif batch_load_type == 'sequence' %}
+    {% if batch_type == 'period' %}
+      {{ clickhouse__batch_period_create_table(False, intermediate_relation, sql) }}
+    {% elif batch_type == 'sequence' %}
       {{ clickhouse__batch_load_sequence_create_table(False, intermediate_relation, sql) }}
     {% else %}
       {% call statement('main') %}
