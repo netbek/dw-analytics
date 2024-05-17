@@ -5,11 +5,11 @@
         {%- set masking_policy = meta.get('masking_policy') -%}
 
         {%- if masking_policy -%}
-            {{ context.get(masking_policy)(expression, data_type) }} as {{ column_name }}
+            {{ context.get(masking_policy)(expression, data_type) }}
         {%- else -%}
-            {{ expression }} as {{ column_name }}
+            {{ expression }}
         {%- endif -%}
     {%- else -%}
-        {{ expression }} as {{ column_name }}
+        {{ expression }}
     {%- endif -%}
 {%- endmacro %}
