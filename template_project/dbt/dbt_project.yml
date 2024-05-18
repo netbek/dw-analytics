@@ -15,3 +15,6 @@ clean-targets: [logs, target, dbt_packages]
 models:
   {{ project_name }}:
     +materialized: view
+
+vars:
+  dbt_audit_column_names: [_dbt_build_time, _dbt_build_type, _dbt_build_num, _dbt_last_full_refresh]
