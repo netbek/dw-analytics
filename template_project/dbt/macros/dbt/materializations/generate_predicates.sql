@@ -4,8 +4,9 @@
     {%- set range_min = config.get('range_min') -%}
     {%- set range_max = config.get('range_max') -%}
     {%- set batch_type = config.get('batch_type') -%}
+    {%- set relation_alias = config.get('batch_source_relation_alias') -%}
     {%- set incremental_source_columns = config.get('incremental_source_columns') -%}
-    {%- set incremental_target_column = config.get('incremental_target_column') -%}
+    {%- set incremental_target_expression = config.get('incremental_target_expression') -%}
     {%- set incremental_operator = config.get('incremental_operator', 'or') -%}
 
     {% if materialized == 'incremental' and batch_type and not is_incremental() %}
@@ -27,20 +28,21 @@
         {% if range_column %}
             {%- if range_min or range_max -%}
                 {%- set data_type = model['columns'][range_column]['data_type'] -%}
+                {%- set range_col %}{% if relation_alias %}{{ relation_alias }}.{% endif %}{{ adapter.quote(range_column) }}{% endset -%}
                 {%- set meta = model['columns'][range_column].get('meta', {}) -%}
                 {%- set min_value = meta.get('min_value') -%}
 
                 {%- if 'DateTime' in data_type -%}
                     {%- if range_min -%}
                         {%- if min_value is not none -%}
-                            and {{ range_column }} >= greatest(toDateTime64('{{ min_value }}', 6), toDateTime64('{{ range_min }}', 6))
+                            and {{ range_col }} >= greatest(toDateTime64('{{ min_value }}', 6), toDateTime64('{{ range_min }}', 6))
                         {%- else -%}
-                            and {{ range_column }} >= toDateTime64('{{ range_min }}', 6)
+                            and {{ range_col }} >= toDateTime64('{{ range_min }}', 6)
                         {%- endif -%}
                     {%- endif -%}
 
                     {%- if range_max %}
-                        and {{ range_column }} <= least(toDateTime64(current_date(), 6), toDateTime64('{{ range_max }}', 6)) + interval '1 day' - interval '1 microsecond'
+                        and {{ range_col }} <= least(toDateTime64(current_date(), 6), toDateTime64('{{ range_max }}', 6)) + interval '1 day' - interval '1 microsecond'
                     {%- endif -%}
                 {%- else -%}
                     {{ exceptions.raise_compiler_error('"' ~ data_type ~ '" data type is not supported') }}
@@ -55,17 +57,18 @@
         {# Restrict incremental refresh to range greater than maximum value in target database #}
         and (
             {%- for source_column in incremental_source_columns -%}
-                {%- set target_column = incremental_target_column if incremental_target_column is not none else source_column -%}
-                {%- set data_type = model['columns'][source_column]['data_type'] %}
-                {% if not loop.first -%}{{ incremental_operator }} {%- endif %}
-                {{ source_column }} > (
+                {%- set data_type = model['columns'][source_column]['data_type'] -%}
+                {%- set source_col %}{% if relation_alias %}{{ relation_alias }}.{% endif %}{{ adapter.quote(source_column) }}{% endset -%}
+                {%- set target_expr = incremental_target_expression if incremental_target_expression is not none else source_column -%}
+
+                {{ source_col }} > (
                     {# For ClickHouse >= v24.3 #}
                     {%- if 'DateTime' in data_type -%}
-                        select toString(max({{ target_column }})) from {{ this }}
+                        select toString(max({{ target_expr }})) from {{ this }}
                     {%- else -%}
-                        select max({{ target_column }}) from {{ this }}
+                        select max({{ target_expr }}) from {{ this }}
                     {%- endif -%}
-                )
+                ) {% if not loop.last %}{{ incremental_operator }} {% endif %}
             {%- endfor -%}
         )
     {% endif %}
