@@ -1,10 +1,11 @@
 {% macro clickhouse__batch_load_sequence_create_table(temporary, relation, sql) %}
   {%- set batch_size = config.get('batch_size', 100000) | int -%}
   {%- set batch_column = config.require('batch_column') -%}
-  {%- set batch_source_model = config.get('batch_source_model') -%}
+  {%- set batch_source_relation = config.get('batch_source_relation') -%}
+  {%- set batch_source_relation_alias = config.get('batch_source_relation_alias') -%}
 
-  {%- if batch_source_model -%}
-    {%- set min_max = select_min_max(batch_source_model, batch_column) | as_native -%}
+  {%- if batch_source_relation -%}
+    {%- set min_max = select_min_max(batch_source_relation, batch_column) | as_native -%}
     {%- set range_min = min_max['min'][0] | int -%}
     {%- set range_max = min_max['max'][0] | int -%}
   {%- else -%}
@@ -30,7 +31,7 @@
     {%- set msg = "Loading batch " ~ (offset + 1) ~ " of " ~ (num_batches) -%}
     {{ print(msg) }}
 
-    {%- set filtered_sql = clickhouse__get_sequence_sql(sql, batch_column, batch_size, range_min, range_max, offset) -%}
+    {%- set filtered_sql = clickhouse__get_sequence_sql(sql, batch_column, batch_size, range_min, range_max, offset, model_alias=batch_source_relation_alias) -%}
 
     {% call statement('main') %}
       {% if offset == 0 %}
