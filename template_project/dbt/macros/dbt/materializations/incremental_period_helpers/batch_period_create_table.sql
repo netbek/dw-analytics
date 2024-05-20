@@ -32,7 +32,7 @@
     {%- set msg = "Loading batch " ~ (offset + 1) ~ " of " ~ (num_batches) -%}
     {{ print(msg) }}
 
-    {%- set filtered_sql = clickhouse__get_period_sql(sql, batch_column, batch_period, range_min, range_max, offset, model_alias=batch_source_relation_alias) -%}
+    {%- set filtered_sql = clickhouse__get_period_sql(sql, batch_column, batch_period, range_min, range_max, offset, relation_alias=batch_source_relation_alias) -%}
 
     {% call statement('main') %}
       {% if offset == 0 %}

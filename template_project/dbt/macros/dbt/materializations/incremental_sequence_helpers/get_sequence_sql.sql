@@ -1,5 +1,5 @@
-{% macro clickhouse__get_sequence_sql(sql, column, batch_size, range_min, range_max, offset, model_alias=none) -%}
-  {%- set col %}{% if model_alias %}{{ model_alias }}.{% endif %}{{ adapter.quote(column) }}{% endset -%}
+{% macro clickhouse__get_sequence_sql(sql, column, batch_size, range_min, range_max, offset, relation_alias=none) -%}
+  {%- set col %}{% if relation_alias %}{{ relation_alias }}.{% endif %}{{ adapter.quote(column) }}{% endset -%}
   {%- set batch_predicates -%}
     (
       {{ col }} >= {{ range_min }} + ({{ batch_size }} * {{ offset }}) and
