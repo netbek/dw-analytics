@@ -20,6 +20,10 @@ class Database:
         return self
 
     def __exit__(self, exc_type, exc_value, exc_tb):
+        if exc_type is not None:
+            self.rollback()
+        else:
+            self.commit()
         self.disconnect()
 
     @property
@@ -32,6 +36,10 @@ class Database:
     def disconnect(self):
         if self._client:
             self._client.close()
+
+    def commit(self):
+        # https://clickhouse.com/docs/en/guides/developer/transactional#transactions-commit-and-rollback
+        pass
 
     def rollback(self):
         # https://clickhouse.com/docs/en/guides/developer/transactional#transactions-commit-and-rollback
