@@ -1,15 +1,11 @@
-clickhouse-driver==0.2.7
-clickhouse-sqlalchemy==0.3.1
+clickhouse-connect==0.7.10
 dbt-clickhouse==1.7.6
-# dbt-semantic-interfaces==0.5.1 # TODO Check whether package can be removed
 pandas==2.2.2
-prefect==2.17.1
+prefect==2.19.2
 prefect-jupyter==0.3.1
-prefect-shell==0.2.2
-psycopg2-binary==2.9.9
-pydantic==2.7.0
+prefect-shell==0.2.5
+pydantic==2.7.1
 PyYAML==6.0.1
 rich==13.7.1
-SQLAlchemy==2.0.29
 sqlparse==0.4.4 # dbt-core 1.7.12 depends on sqlparse < 0.5
-typer==0.12.1
+typer==0.12.3

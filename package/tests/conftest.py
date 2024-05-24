@@ -34,15 +34,15 @@ def generate_test_database_connection_url(
     quoted_db_name = f'"{test_db_name}"'
 
     with Database(database_connection_url) as db:
-        db.execute(f"drop database if exists {quoted_db_name}")
-        db.execute(f"create database {quoted_db_name}")
+        db.client.command(f"drop database if exists {quoted_db_name}")
+        db.client.command(f"create database {quoted_db_name}")
 
     new_url = urlunsplit((scheme, netloc, test_db_name, query, fragment))
 
     yield new_url
 
     with Database(database_connection_url) as db:
-        db.execute(f"drop database if exists {quoted_db_name}")
+        db.client.command(f"drop database if exists {quoted_db_name}")
 
 
 @pytest.fixture(scope="session")

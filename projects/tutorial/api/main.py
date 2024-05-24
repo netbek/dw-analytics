@@ -2,8 +2,6 @@ from fastapi import FastAPI
 from package.database import Database
 from projects.tutorial.constants import CLICKHOUSE_URL
 
-import pandas as pd
-
 app = FastAPI()
 
 
@@ -20,7 +18,6 @@ def read_databases():
     """
 
     with Database(CLICKHOUSE_URL) as db:
-        result = db.execute(query)
-        df = pd.DataFrame(result.all())
+        df = db.client.query_df(query)
 
     return df.to_dict(orient="records")

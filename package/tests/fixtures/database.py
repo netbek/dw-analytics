@@ -11,4 +11,4 @@ def db(test_database_connection_url):
     yield db
 
     db.rollback()
-    db.close()
+    db.disconnect()
