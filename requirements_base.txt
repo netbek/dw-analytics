@@ -4,7 +4,6 @@ pandas==2.2.2
 prefect==2.19.2
 prefect-jupyter==0.3.1
 prefect-shell==0.2.5
-pydantic==2.7.1
 PyYAML==6.0.1
 rich==13.7.1
 sqlparse==0.4.4 # dbt-core 1.7.12 depends on sqlparse < 0.5

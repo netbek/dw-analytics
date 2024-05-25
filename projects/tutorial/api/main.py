@@ -1,17 +1,15 @@
-from fastapi import FastAPI
+from litestar import get, Litestar
 from package.database import Database
 from projects.tutorial.constants import CLICKHOUSE_URL
 
-app = FastAPI()
 
-
-@app.get("/")
-def root():
+@get("/")
+async def index() -> dict[str, str]:
     return {"hello": "world"}
 
 
-@app.get("/databases")
-def read_databases():
+@get("/databases")
+async def get_databases() -> list[dict[str, str]]:
     query = """
     select name, engine
     from system.databases
@@ -21,3 +19,6 @@ def read_databases():
         df = db.client.query_df(query)
 
     return df.to_dict(orient="records")
+
+
+app = Litestar([index, get_databases])

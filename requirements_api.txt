@@ -1,2 +1,1 @@
-fastapi[all]==0.110.1
-uvicorn[standard]==0.29.0
+litestar[pydantic]==2.8.3
