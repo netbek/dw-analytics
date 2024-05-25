@@ -14,25 +14,25 @@
 
 ```shell
 .
-├── .dbt
+├── .dbt/
 │   └── # dbt profiles
-├── .devcontainer
+├── .devcontainer/
 │   └── # VS Code dev container configuration
-├── .env_files
+├── .env_files/
 │   └── # .env files used in Docker containers
-├── .prefect
+├── .prefect/
 │   └── # Prefect profiles
-├── docker
+├── docker/
 │   └── # Docker container configurations
-├── package
+├── package/
 │   └── # Supplementary CLI and common utilities
-├── projects
+├── projects/
 │   └── # Data models, Python tasks, workflows, notebooks and tests
-├── scripts
+├── scripts/
 │   └── # Installation and convenience scripts
-├── template_env
+├── template_env/
 │   └── # Template for new .env files
-├── template_project
+├── template_project/
 │   └── # Template for new projects
 ├── .bashrc # Shell configuration used in CLI container
 ├── .env # Environment variables used by Docker Compose (not containers)
