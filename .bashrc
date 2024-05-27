@@ -1,4 +1,6 @@
-source /usr/local/dbt/dbt-completion.bash
+if [ -f "/usr/local/dbt/dbt-completion.bash" ]; then
+    source /usr/local/dbt/dbt-completion.bash
+fi
 
 ansi_reset="\[\033[0m\]"
 ansi_green="\[\033[1;32m\]"
