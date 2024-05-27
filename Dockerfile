@@ -1,4 +1,4 @@
-FROM python:3.11.9-slim-bookworm AS python-builder
+FROM python:3.12.3-slim-bookworm AS python-builder
 
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir --upgrade pip wheel setuptools && \
     pip install --no-cache-dir --requirement /build/requirements_base.txt && \
     pip install --no-cache-dir --requirement /build/requirements_dev.txt
 
-WORKDIR "${VIRTUAL_ENV}/lib/python3.11/site-packages"
+WORKDIR "${VIRTUAL_ENV}/lib/python3.12/site-packages"
 RUN patch -p1 < /build/patches/dbt-clickhouse/columns_in_query.diff
 RUN patch -p1 < /build/patches/dbt-clickhouse/format_columns.diff
 
@@ -30,7 +30,7 @@ RUN apt-get autoremove --yes && \
 
 ####################################################################################################
 
-FROM prefecthq/prefect:2.19.2-python3.11 AS prefect-common
+FROM prefecthq/prefect:2.19.2-python3.12 AS prefect-common
 
 ARG DOCKER_UID
 ARG DOCKER_GID
@@ -67,7 +67,7 @@ WORKDIR /home/${DOCKER_USER}
 
 ####################################################################################################
 
-FROM python:3.11.9-slim-bookworm AS jupyter
+FROM python:3.12.3-slim-bookworm AS jupyter
 
 ARG DOCKER_UID
 ARG DOCKER_GID
@@ -98,7 +98,7 @@ CMD ["jupyter", "nbclassic", "--ip='0.0.0.0'", "--port=8888", "--no-browser"]
 
 ####################################################################################################
 
-FROM python:3.11.9-slim-bookworm AS api
+FROM python:3.12.3-slim-bookworm AS api
 
 ARG DOCKER_UID
 ARG DOCKER_GID
