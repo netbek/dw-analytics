@@ -2,11 +2,11 @@
 force_alphabetical_sort = true
 line_length = 100
 profile = "black"
-py_version = 311
+py_version = 312
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 ignore = ["D100", "D101", "D102", "D103", "D104", "D107", "D205"]
