@@ -46,6 +46,10 @@ ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 COPY --from=python-builder "${VIRTUAL_ENV}" "${VIRTUAL_ENV}"
 COPY --from=python-builder /build /build
 
+# This is only needed to make IntelliSense in the VS Code dev container work for the API packages
+# This could be removed if using multiple containers: https://code.visualstudio.com/remote/advancedcontainers/connect-multiple-containers
+RUN pip install --no-cache-dir --requirement /build/requirements_api.txt
+
 WORKDIR /usr/local/dbt
 RUN curl -O https://raw.githubusercontent.com/dbt-labs/dbt-completion.bash/915cdc5e301f5bc4c89324d3bd790320476728cf/dbt-completion.bash
 
