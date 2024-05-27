@@ -1,14 +1,11 @@
-from package.database import Database
-
+import clickhouse_connect
 import pytest
 
 
 @pytest.fixture(scope="function")
-def db(test_database_connection_url):
-    db = Database(test_database_connection_url)
-    db.connect()
-
-    yield db
-
-    db.rollback()
-    db.disconnect()
+def db_client(test_database_connection_url):
+    client = clickhouse_connect.get_client(dsn=test_database_connection_url)
+    try:
+        yield client
+    finally:
+        client.close()

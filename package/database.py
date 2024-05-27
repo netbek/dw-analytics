@@ -1,3 +1,6 @@
+from clickhouse_connect.driver.client import Client
+from collections.abc import Generator
+from contextlib import contextmanager
 from jinja2 import Environment
 from typing import Any, Dict, Optional
 
@@ -10,40 +13,13 @@ RE_HAS_JINJA = re.compile(r"({[{%#]|[#}%]})")
 jinja_env = Environment(extensions=["jinja2.ext.do", "jinja2.ext.loopcontrols"])
 
 
-class Database:
-    def __init__(self, dsn: str):
-        self._dsn = dsn
-        self._client = None
-
-    def __enter__(self):
-        self.connect()
-        return self
-
-    def __exit__(self, exc_type, exc_value, exc_tb):
-        if exc_type is not None:
-            self.rollback()
-        else:
-            self.commit()
-        self.disconnect()
-
-    @property
-    def client(self):
-        return self._client
-
-    def connect(self):
-        self._client = clickhouse_connect.get_client(dsn=self._dsn)
-
-    def disconnect(self):
-        if self._client:
-            self._client.close()
-
-    def commit(self):
-        # https://clickhouse.com/docs/en/guides/developer/transactional#transactions-commit-and-rollback
-        pass
-
-    def rollback(self):
-        # https://clickhouse.com/docs/en/guides/developer/transactional#transactions-commit-and-rollback
-        pass
+@contextmanager
+def get_client(dsn: str) -> Generator[Client | None]:
+    client = clickhouse_connect.get_client(dsn=dsn)
+    try:
+        yield client
+    finally:
+        client.close()
 
 
 def build_connection_url(

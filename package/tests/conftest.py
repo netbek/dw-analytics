@@ -1,4 +1,4 @@
-from package.database import build_connection_url, Database
+from package.database import build_connection_url, get_client
 from typing import Generator, Optional
 from urllib.parse import urlsplit, urlunsplit
 
@@ -33,16 +33,16 @@ def generate_test_database_connection_url(
     test_db_name = database.strip("/") + "_testing"
     quoted_db_name = f'"{test_db_name}"'
 
-    with Database(database_connection_url) as db:
-        db.client.command(f"drop database if exists {quoted_db_name}")
-        db.client.command(f"create database {quoted_db_name}")
+    with get_client(database_connection_url) as client:
+        client.command(f"drop database if exists {quoted_db_name}")
+        client.command(f"create database {quoted_db_name}")
 
     new_url = urlunsplit((scheme, netloc, test_db_name, query, fragment))
 
     yield new_url
 
-    with Database(database_connection_url) as db:
-        db.client.command(f"drop database if exists {quoted_db_name}")
+    with get_client(database_connection_url) as client:
+        client.command(f"drop database if exists {quoted_db_name}")
 
 
 @pytest.fixture(scope="session")
