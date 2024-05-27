@@ -1,5 +1,5 @@
 from prefect_shell import ShellOperation
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import json
 
@@ -12,8 +12,8 @@ def dbt_run_command(
     select: Optional[str] = None,
     selector: Optional[str] = None,
     target: Optional[str] = None,
-    vars: Optional[Dict[str, Any]] = None,
-) -> List[str]:
+    vars: Optional[dict[str, Any]] = None,
+) -> list[str]:
     cmd = ["dbt", "run", "--no-use-colors", "--fail-fast"]
     cmd.extend(["--profiles-dir", profiles_dir])
     cmd.extend(["--project-dir", project_dir])
@@ -47,7 +47,7 @@ async def dbt_run(
     select: Optional[str] = None,
     selector: Optional[str] = None,
     target: Optional[str] = None,
-    vars: Optional[Dict[str, Any]] = None,
+    vars: Optional[dict[str, Any]] = None,
 ) -> str:
     cmd = dbt_run_command(
         profiles_dir=profiles_dir,

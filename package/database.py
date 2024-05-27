@@ -2,7 +2,7 @@ from clickhouse_connect.driver.client import Client
 from collections.abc import Generator
 from contextlib import contextmanager
 from jinja2 import Environment
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import clickhouse_connect
 import re
@@ -40,7 +40,7 @@ def build_connection_url(
 
 
 def render_statement(
-    statement: str, context: Optional[Dict[str, Any]] = None, pretty: bool = False
+    statement: str, context: Optional[dict[str, Any]] = None, pretty: bool = False
 ) -> str:
     if RE_HAS_JINJA.search(statement):
         statement = jinja_env.from_string(statement, context).render()

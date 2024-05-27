@@ -2,7 +2,6 @@ from package.cli.root import app
 from package.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPES
 from package.utils.filesystem import find_up
 from pathlib import Path
-from typing import List
 
 import dbt.version
 import json
@@ -21,7 +20,7 @@ def version():
 
 
 @dbt_app.command()
-def generate_model_yaml(models: List[str]):
+def generate_model_yaml(models: list[str]):
     cwd = os.getcwd()
     dbt_project_file = find_up(cwd, "dbt_project.yml")
 

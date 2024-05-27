@@ -7,7 +7,7 @@ from prefect import get_client
 from prefect._vendor.starlette import status
 from prefect.client.orchestration import PrefectClient
 from prefect.client.schemas.actions import WorkPoolCreate, WorkPoolUpdate
-from typing import List, Optional
+from typing import Optional
 from uuid import UUID
 
 import httpx
@@ -110,10 +110,10 @@ async def provision(
 @prefect_app.command()
 @typer_async
 async def deploy(
-    project_names: Optional[List[str]] = typer.Option(
+    project_names: Optional[list[str]] = typer.Option(
         None, "-p", "--project-name", help="1 or more project names"
     ),
-    deployment_names: Optional[List[str]] = typer.Option(
+    deployment_names: Optional[list[str]] = typer.Option(
         None, "-d", "--deployment-name", help="1 or more deployment names"
     ),
     pause: Optional[bool] = typer.Option(
@@ -194,10 +194,10 @@ async def deploy(
 @typer_async
 async def deployment(
     action: DeploymentAction,
-    project_names: Optional[List[str]] = typer.Option(
+    project_names: Optional[list[str]] = typer.Option(
         None, "-p", "--project-name", help="1 or more project names"
     ),
-    deployment_names: Optional[List[str]] = typer.Option(
+    deployment_names: Optional[list[str]] = typer.Option(
         None, "-d", "--deployment-name", help="1 or more deployment names"
     ),
 ):
@@ -284,7 +284,7 @@ async def delete_flow(client: PrefectClient, flow_id: UUID):
 
 
 def _load_deploy_configs(
-    project_names: Optional[List[str]] = None, deployment_names: Optional[List[str]] = None
+    project_names: Optional[list[str]] = None, deployment_names: Optional[list[str]] = None
 ):
     deploy_configs = []
     all_projects = Project.list_projects()
@@ -315,8 +315,8 @@ def _load_deploy_configs(
 
 def _build_deployment_actions(
     action: DeployAction | DeploymentAction,
-    selected_names: List[str],
-    existing_names: Optional[List[str]] = None,
+    selected_names: list[str],
+    existing_names: Optional[list[str]] = None,
 ):
     result = []
 
