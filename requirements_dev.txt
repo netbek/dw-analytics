@@ -2,6 +2,6 @@ isort==5.13.2
 pre-commit==3.7.1
 pytest==8.2.1
 ruff==0.4.5
-sqlfluff==2.3.5
-sqlfluff-templater-dbt==2.3.5
+sqlfluff==3.0.7
+sqlfluff-templater-dbt==3.0.7
 yamllint==1.35.1
