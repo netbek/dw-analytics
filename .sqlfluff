@@ -11,6 +11,7 @@ exclude_rules = aliasing.forbid, aliasing.self_alias.column
 
 [sqlfluff:indentation]
 indent_unit = space
+indented_on_contents = False
 tab_space_size = 4
 
 [sqlfluff:layout:type:comma]
