@@ -1,11 +1,11 @@
 # Based on https://github.com/sqlfluff/sqlfluff/blob/2.3.5/src/sqlfluff/core/default_config.cfg
-# Excluded rule aliasing.self_alias.column because of false positives
 
 [sqlfluff]
 dialect = clickhouse
 templater = dbt
-exclude_rules = aliasing.forbid, aliasing.self_alias.column, references.from, structure.column_order, structure.using
 max_line_length = 100
+# Excluded rule aliasing.self_alias.column because of false positives
+exclude_rules = aliasing.forbid, aliasing.self_alias.column, references.from, structure.column_order, structure.using
 
 [sqlfluff:indentation]
 indent_unit = space
