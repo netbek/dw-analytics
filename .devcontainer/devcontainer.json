@@ -34,6 +34,7 @@
         "files.eol": "\n",
         "git.openRepositoryInParentFolders": "always",
         "isort.args": ["--settings-path", "/home/analyst/pyproject.toml"],
+        "isort.importStrategy": "fromEnvironment",
         "python.defaultInterpreterPath": "/opt/venv/bin/python",
         "python.experiments.enabled": false,
         "python.languageServer": "Pylance",
