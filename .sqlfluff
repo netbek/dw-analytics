@@ -4,8 +4,10 @@
 dialect = clickhouse
 templater = dbt
 max_line_length = 100
-# Excluded rule aliasing.self_alias.column because of false positives
-exclude_rules = aliasing.forbid, aliasing.self_alias.column, references.from, structure.column_order, structure.using
+
+# Excluded aliasing.forbid to make queries less verbose
+# Excluded aliasing.self_alias.column because of false positives
+exclude_rules = aliasing.forbid, aliasing.self_alias.column
 
 [sqlfluff:indentation]
 indent_unit = space
