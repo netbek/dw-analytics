@@ -7,7 +7,8 @@ max_line_length = 100
 
 # Excluded aliasing.forbid to make queries less verbose
 # Excluded aliasing.self_alias.column because of false positives
-exclude_rules = aliasing.forbid, aliasing.self_alias.column
+# Excluded structure.column_order because of false positives
+exclude_rules = aliasing.forbid, aliasing.self_alias.column, structure.column_order
 
 [sqlfluff:indentation]
 indent_unit = space
