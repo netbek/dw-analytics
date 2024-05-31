@@ -1,6 +1,6 @@
 from enum import Enum
 from package.cli.root import app
-from package.constants import PREFECT_PROFILES_PATH, PREFECT_PROVISION_PATH
+from package.config.constants import PREFECT_PROFILES_PATH, PREFECT_PROVISION_PATH
 from package.project import Project
 from package.utils.typer_utils import typer_async
 from prefect import get_client

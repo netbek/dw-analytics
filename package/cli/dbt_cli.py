@@ -1,5 +1,5 @@
 from package.cli.root import app
-from package.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPES
+from package.config.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPES
 from package.utils.filesystem import find_up
 from pathlib import Path
 

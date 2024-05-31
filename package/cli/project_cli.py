@@ -1,5 +1,5 @@
 from package.cli.root import app
-from package.constants import DBT_PROFILES_FILE, HOME_DIR
+from package.config.constants import DBT_PROFILES_FILE, HOME_DIR
 from package.project import Project
 from package.utils.typer_utils import typer_async
 

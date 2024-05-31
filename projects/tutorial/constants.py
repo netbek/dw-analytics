@@ -1,4 +1,4 @@
-from package.constants import DBT_PROFILES_DIR  # noqa: F401
+from package.config.constants import DBT_PROFILES_DIR  # noqa: F401
 from package.project import Project
 
 project = Project.from_path(__file__)

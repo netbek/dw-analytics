@@ -1,4 +1,4 @@
-from package.dbt import dbt_run
+from package.utils.dbt_utils import dbt_run
 from prefect import flow
 from projects.tutorial.constants import DBT_PROFILES_DIR, DBT_PROJECT_DIR
 from typing import Optional
