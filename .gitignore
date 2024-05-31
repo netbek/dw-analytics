@@ -17,6 +17,7 @@
 .Rproj.user
 .ruff_cache
 .ssh
+.Trash-1000
 .vscode-server
 .~*
 __pycache__
