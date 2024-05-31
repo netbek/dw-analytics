@@ -85,6 +85,8 @@ services:
     working_dir: /home/analyst/projects
     extra_hosts:
       - host.docker.internal:host-gateway # Used for connection to ClickHouse
+    ports:
+      - ${DW_DBT_DOCS_PORT:-8090}:8080
     volumes:
       - .:/home/analyst:rw
       - ${SSH_AUTH_SOCK}:/ssh-agent:ro

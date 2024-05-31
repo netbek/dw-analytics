@@ -63,12 +63,13 @@ The resource usage of the Docker containers can be monitored with [https://githu
 
 Ports can optionally be exposed. The configuration is loaded from `./.env` during startup.
 
-| Service            | Port  | Protocol              |
-|--------------------|-------|-----------------------|
-| `prefect-postgres` | 29010 | Postgres              |
-| `prefect-server`   | 29020 | HTTP                  |
-| `jupyter`          | 29030 | HTTP                  |
-| `api`              | 29040 | HTTP                  |
+| Service            | Port  | Protocol    | Description           |
+|--------------------|-------|-------------|-----------------------|
+| `prefect-postgres` | 29010 | Postgres    | Postgres              |
+| `prefect-server`   | 29020 | HTTP        | Prefect               |
+| `jupyter`          | 29030 | HTTP        | Jupyter Notebook      |
+| `api`              | 29040 | HTTP        | API                   |
+| `cli`              | 29050 | HTTP        | dbt docs              |
 
 ## Resources
 
