@@ -1,6 +1,6 @@
 from package.utils.dbt_utils import dbt_run
 from prefect import flow
-from projects.tutorial.constants import DBT_PROFILES_DIR, DBT_PROJECT_DIR
+from projects.tutorial.config.constants import DBT_PROFILES_DIR, DBT_PROJECT_DIR
 from typing import Optional
 
 import asyncio

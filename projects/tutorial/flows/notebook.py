@@ -1,6 +1,6 @@
 from prefect import flow, get_run_logger
 from prefect_jupyter import notebook
-from projects.tutorial.constants import NOTEBOOKS_DIR
+from projects.tutorial.config.constants import NOTEBOOKS_DIR
 
 import os
 

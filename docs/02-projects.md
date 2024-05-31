@@ -13,6 +13,8 @@ Projects are structured as follows. To explore, open `./projects/tutorial`.
     └── <PROJECT_NAME>
         ├── api
         │   └── # API
+        ├── config
+        │   └── constants.py # Python constants specific to this project
         ├── dbt
         │   └── # dbt configuration, models, and tests
         ├── flows
@@ -21,7 +23,6 @@ Projects are structured as follows. To explore, open `./projects/tutorial`.
         │   └── # Jupyter notebooks
         ├── tests
         │   └── # Tests of Python code
-        ├── constants.py # Python constants specific to this project
         ├── prefect.yaml # Deployment configuration, including parameterization and scheduling
         └── README.md # Project documentation
 ```

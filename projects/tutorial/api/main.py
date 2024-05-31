@@ -1,6 +1,6 @@
 from litestar import get, Litestar
 from package.database import get_client
-from projects.tutorial.constants import CLICKHOUSE_URL
+from projects.tutorial.config.constants import CLICKHOUSE_URL
 
 
 @get("/")
