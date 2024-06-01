@@ -24,4 +24,4 @@ on-run-end:
   - "{{ upload_run_results(results) }}"
 
 vars:
-  dbt_audit_column_names: [_dbt_build_time, _dbt_build_type, _dbt_build_num, _dbt_last_full_refresh]
+  dbt_audit_column_names: [_dbt_run_time, _dbt_run_type, _dbt_run_num, _dbt_last_full_refresh_time]
