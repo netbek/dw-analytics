@@ -14,19 +14,19 @@ with final as (
 select
     cityHash64('') as id,
     generateUUIDv4() as invocation_id,
-    '' as thread_id,
     '' as node_id,
+    '' as thread_id,
+    '' as resource_type,
     '' as schema,
     '' as name,
     '' as alias,
     '' as materialization,
     '' as run_type,
     cast(now(), 'DateTime64(6)') as run_start_time,
-    cast(now(), 'DateTime64(6)') as compile_start_time,
-    {# cast(null, 'Nullable(DateTime64(6))') as compile_end_time, #}
-    {# cast(null, 'Nullable(DateTime64(6))') as query_start_time, #}
-    cast(now(), 'DateTime64(6)') as query_end_time,
-    cast(0, 'Float32') as execution_interval, -- 2024-06-01: Database driver does not support interval type
+    cast(null, 'Nullable(DateTime64(6))') as compile_start_time,
+    cast(null, 'Nullable(UInt64)') as compile_duration,
+    cast(null, 'Nullable(DateTime64(6))') as execute_start_time,
+    cast(null, 'Nullable(UInt64)') as execute_duration,
     '' as status,
     '' as message,
     cast(null, 'Nullable(UInt64)') as rows_affected,
