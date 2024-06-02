@@ -60,7 +60,7 @@ async def refresh(project_name: str):
 
     subprocess.run("dbt clean", shell=True, cwd=project.dbt_directory)
     subprocess.run("dbt deps", shell=True, cwd=project.dbt_directory)
-    subprocess.run("dbt run -s tag:dbt_artifacts", shell=True, cwd=project.dbt_directory)
+    subprocess.run("dbt run -s tag:dbt_audit", shell=True, cwd=project.dbt_directory)
     subprocess.run("dbt seed", shell=True, cwd=project.dbt_directory)
 
 
