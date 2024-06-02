@@ -139,12 +139,11 @@ class Project:
             os.path.join(self.dbt_directory, ".sqlfluffignore"),
         )
 
-        for directory in ["macros", "models"]:
-            rmtree(os.path.join(self.dbt_directory, directory, "dbt"))
-            shutil.copytree(
-                os.path.join(TEMPLATE_PROJECT_DIR, "dbt", directory, "dbt"),
-                os.path.join(self.dbt_directory, directory, "dbt"),
-            )
+        rmtree(os.path.join(self.dbt_directory, "macros", "dbt"))
+        shutil.copytree(
+            os.path.join(TEMPLATE_PROJECT_DIR, "dbt", "macros", "dbt"),
+            os.path.join(self.dbt_directory, "macros", "dbt"),
+        )
 
     def load_prefect_config(self) -> dict:
         with open(self.prefect_config_path) as file:

@@ -13,6 +13,9 @@ snapshot-paths: [snapshots]
 clean-targets: [logs, target, dbt_packages]
 
 models:
+  dbt_audit:
+    +schema: dbt_audit
+
   tutorial:
     +materialized: view
 
