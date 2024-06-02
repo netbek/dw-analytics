@@ -1,4 +1,4 @@
-{% macro select_min_max(model, column) -%}
+{% macro min_max_select(model, column) -%}
   {% set sql %}
     select
       min({{ column }}) as min,

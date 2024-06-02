@@ -5,7 +5,7 @@
   {%- set batch_source_relation_alias = config.get('batch_source_relation_alias') -%}
 
   {%- if batch_source_relation -%}
-    {%- set min_max = select_min_max(batch_source_relation, batch_column) | as_native -%}
+    {%- set min_max = min_max_select(batch_source_relation, batch_column) | as_native -%}
     {%- set range_min = min_max['min'][0] | int -%}
     {%- set range_max = min_max['max'][0] | int -%}
   {%- else -%}
