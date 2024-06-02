@@ -33,7 +33,10 @@ def generate_model_yaml(models: list[str]):
 
     for model_path in model_paths:
         model_name = os.path.splitext(os.path.basename(model_path))[0]
-        schema_file = os.path.join(Path(model_path).parent, "schema.yml")
+        schema_file = os.path.join(Path(model_path).parent, "schema", f"{model_name}.yml")
+        schema_dir = os.path.dirname(schema_file)
+
+        os.makedirs(schema_dir, exist_ok=True)
 
         # Load existing schema
         if os.path.exists(schema_file):
