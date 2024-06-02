@@ -20,4 +20,4 @@ models:
     +materialized: view
 
 vars:
-  dbt_audit_column_names: [dbt_run_id]
+  dbt_audit_columns: [dbt_run_id]
