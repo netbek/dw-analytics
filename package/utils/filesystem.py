@@ -21,13 +21,26 @@ def find_up(path: str, pattern: str):
     return find_up(path.parent, pattern)
 
 
+def copy(src: str, dst: str):
+    if os.path.isdir(src):
+        if os.path.exists(dst):
+            shutil.rmtree(dst)
+        shutil.copytree(src, dst, symlinks=True)
+    else:
+        shutil.copy2(src, dst)
+
+
 def symlink(src: str, dst: str):
     if os.path.islink(dst):
         os.unlink(dst)
-
     os.symlink(src, dst)
 
 
 def rmtree(path: str):
     if os.path.exists(path):
         shutil.rmtree(path)
+
+
+def touch(path: str):
+    with open(path, "a"):
+        os.utime(path, None)

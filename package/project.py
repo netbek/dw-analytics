@@ -4,6 +4,7 @@ from package.database import build_connection_url
 from package.utils.environ_utils import get_env_var
 from package.utils.filesystem import rmtree, symlink
 from package.utils.template import render_template
+from pathlib import Path
 from prefect import get_client
 from prefect.client.schemas.filters import DeploymentFilter, DeploymentFilterTags
 from typing import Optional
@@ -77,28 +78,38 @@ class Project:
 
     @property
     @lru_cache
-    def directory(self) -> str:
-        return os.path.join(PROJECTS_DIR, self.name)
+    def directory(self) -> Path:
+        return Path(os.path.join(PROJECTS_DIR, self.name))
 
     @property
     @lru_cache
-    def prefect_config_path(self) -> str:
-        return os.path.join(self.directory, "prefect.yaml")
+    def dbt_directory(self) -> Path:
+        return Path(os.path.join(self.directory, "dbt"))
 
     @property
     @lru_cache
-    def dbt_directory(self) -> str:
-        return os.path.join(self.directory, "dbt")
+    def dbt_config_path(self) -> Path:
+        return Path(os.path.join(self.directory, "dbt", "dbt_project.yml"))
 
     @property
     @lru_cache
-    def flows_directory(self) -> str:
-        return os.path.join(self.directory, "flows")
+    def dbt_docs_directory(self) -> Path:
+        return Path(os.path.join(self.directory, "dbt", "docs"))
 
     @property
     @lru_cache
-    def notebooks_directory(self) -> str:
-        return os.path.join(self.directory, "notebooks")
+    def flows_directory(self) -> Path:
+        return Path(os.path.join(self.directory, "flows"))
+
+    @property
+    @lru_cache
+    def notebooks_directory(self) -> Path:
+        return Path(os.path.join(self.directory, "notebooks"))
+
+    @property
+    @lru_cache
+    def prefect_config_path(self) -> Path:
+        return Path(os.path.join(self.directory, "prefect.yaml"))
 
     @property
     @lru_cache
@@ -145,9 +156,15 @@ class Project:
             os.path.join(self.dbt_directory, "macros", "dbt"),
         )
 
+    def load_dbt_config(self) -> dict:
+        with open(self.dbt_config_path, "rt") as fp:
+            config = yaml.safe_load(fp)
+
+        return config
+
     def load_prefect_config(self) -> dict:
-        with open(self.prefect_config_path) as file:
-            config = yaml.safe_load(file)
+        with open(self.prefect_config_path, "rt") as fp:
+            config = yaml.safe_load(fp)
 
         return config
 

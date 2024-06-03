@@ -1,5 +1,7 @@
+from package.cli.dbt_docs_cli import docs_app
 from package.cli.root import app
 from package.config.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPES
+from package.project import Project
 from package.utils.filesystem import find_up
 from pathlib import Path
 
@@ -11,6 +13,7 @@ import typer
 import yaml
 
 dbt_app = typer.Typer(name="dbt", add_completion=False)
+dbt_app.add_typer(docs_app)
 app.add_typer(dbt_app)
 
 
@@ -27,9 +30,9 @@ def generate_model_yaml(models: list[str]):
     if not dbt_project_file:
         raise Exception(f"No dbt_project.yml found in {cwd} or higher")
 
-    dbt_dir = dbt_project_file.parent
+    project = Project.from_path(cwd)
     patterns = [f"models/**/{model}.sql" for model in models]
-    model_paths = [file for pattern in patterns for file in dbt_dir.glob(pattern)]
+    model_paths = [file for pattern in patterns for file in project.dbt_directory.glob(pattern)]
 
     for model_path in model_paths:
         model_name = os.path.splitext(os.path.basename(model_path))[0]
@@ -56,7 +59,7 @@ def generate_model_yaml(models: list[str]):
             "--full-refresh",
         ]
         try:
-            subprocess.check_output(cmd, cwd=dbt_dir)
+            subprocess.check_output(cmd, cwd=project.dbt_directory)
         except subprocess.CalledProcessError as e:
             output = e.output.decode().strip()
             print(output)
@@ -72,7 +75,7 @@ def generate_model_yaml(models: list[str]):
             json.dumps({"model_names": [model_name]}),
         ]
         try:
-            output = subprocess.check_output(cmd, cwd=dbt_dir).decode().strip()
+            output = subprocess.check_output(cmd, cwd=project.dbt_directory).decode().strip()
         except subprocess.CalledProcessError as e:
             output = e.output.decode().strip()
             print(output)

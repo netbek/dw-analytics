@@ -7,7 +7,7 @@ root_dir="${scripts_dir}/.."
 source "${scripts_dir}/variables.sh"
 source "${scripts_dir}/functions.sh"
 
-name_choices=("jupyter" "prefect-server" "vscode")
+name_choices=("dbt-docs" "jupyter" "prefect-server" "vscode")
 
 if ([ "$1" == "--help" ] || [ -z "$1" ]); then
     echo "Usage: $0 NAME"
@@ -28,7 +28,9 @@ cd "${root_dir}"
 
 source .env
 
-if [ "${name}" == "jupyter" ]; then
+if [ "${name}" == "dbt-docs" ]; then
+    open_cmd "http://localhost:${DW_DBT_DOCS_PORT}"
+elif [ "${name}" == "jupyter" ]; then
     open_cmd "http://localhost:${DW_JUPYTER_PORT}/nbclassic/tree"
 elif [ "${name}" == "prefect-server" ]; then
     open_cmd "http://localhost:${DW_PREFECT_SERVER_PORT}"

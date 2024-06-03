@@ -22,6 +22,32 @@ To explore:
     cli dbt --help
     ```
 
+## Documentation
+
+The dbt documentation is stored in `./projects/<PROJECT_NAME>/dbt/docs`.
+
+To view the docs:
+
+1. Start the LiveReload server:
+
+    ```shell
+    cli dbt docs serve
+    ```
+
+2. Go to [http://localhost:29050](http://localhost:29050) or run the `open` script:
+
+    ```shell
+    ./scripts/open.sh dbt-docs
+    ```
+
+After saving changes to the project configuration, macro files, or model files, the docs will be regenerated and the browser will reload the page.
+
+To only generate the docs, run:
+
+```shell
+cli dbt docs generate
+```
+
 ## Resources
 
 - [ClickHouse SQL reference](https://clickhouse.com/docs/en/sql-reference)
