@@ -1,5 +1,26 @@
 # dbt
 
+## Overview
+
+dbt projects are structured as follows:
+
+```shell
+.
+└── projects
+    └── <PROJECT_NAME>
+        └── dbt
+            ├── analyses # https://docs.getdbt.com/docs/build/analyses
+            ├── docs # Documentation
+            ├── macros # https://docs.getdbt.com/docs/build/jinja-macros#macros
+            ├── models # https://docs.getdbt.com/docs/build/models
+            ├── seeds # https://docs.getdbt.com/docs/build/seeds
+            ├── snapshots # https://docs.getdbt.com/docs/build/snapshots
+            ├── tests # https://docs.getdbt.com/docs/build/data-tests
+            ├── dbt_project.yml # https://docs.getdbt.com/reference/dbt_project.yml
+            ├── dependencies.yml # https://docs.getdbt.com/docs/build/packages
+            └── selectors.yml # https://docs.getdbt.com/reference/node-selection/yaml-selectors
+```
+
 ## CLI
 
 The CLI container has 2 CLIs for interacting with dbt:
@@ -24,8 +45,6 @@ To explore:
 
 ## Documentation
 
-The dbt documentation is stored in `./projects/<PROJECT_NAME>/dbt/docs`.
-
 To view the docs:
 
 1. Start the LiveReload server:
@@ -42,7 +61,7 @@ To view the docs:
 
 After saving changes to the project configuration, macro files, or model files, the docs will be regenerated and the browser will reload the page.
 
-To only generate the docs, run:
+To generate only the docs, run:
 
 ```shell
 cli dbt docs generate

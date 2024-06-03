@@ -1,6 +1,6 @@
 from livereload import Server
 from package.project import Project
-from package.utils.filesystem import find_up, rmtree, touch
+from package.utils.filesystem import find_up
 
 import json
 import os
@@ -30,9 +30,6 @@ def generate():
         print(output)
         raise e
 
-    rmtree(project.dbt_docs_directory)
-    os.makedirs(project.dbt_docs_directory, exist_ok=True)
-    touch(os.path.join(project.dbt_docs_directory, ".gitkeep"))
     bundle_docs(project.dbt_directory)
     docs_app.console.print(f"Generated docs '{project.dbt_docs_directory}'", style="green")
 
@@ -80,13 +77,13 @@ def bundle_docs(dbt_dir: str):
 
     Adapted from https://data-banana.github.io/dbt-generate-doc-in-one-static-html-file.html
     """
-    index_path = os.path.join(dbt_dir, "target", "index.html")
+    html_path = os.path.join(dbt_dir, "target", "index.html")
     manifest_path = os.path.join(dbt_dir, "target", "manifest.json")
     catalog_path = os.path.join(dbt_dir, "target", "catalog.json")
     dest_path = os.path.join(dbt_dir, "docs", "index.html")
 
-    with open(index_path, "rt") as fp:
-        index = fp.read()
+    with open(html_path, "rt") as fp:
+        html = fp.read()
 
     with open(manifest_path, "rt") as fp:
         manifest = json.load(fp)
@@ -102,6 +99,7 @@ def bundle_docs(dbt_dir: str):
         + json.dumps(catalog)
         + "}]"
     )
+    html = html.replace(search_str, replace_str)
+
     with open(dest_path, "wt") as fp:
-        index = index.replace(search_str, replace_str)
-        fp.write(index)
+        fp.write(html)
