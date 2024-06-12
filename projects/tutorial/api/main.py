@@ -1,6 +1,8 @@
 from litestar import get, Litestar
 from package.database import get_client
-from projects.tutorial.config.constants import CLICKHOUSE_URL
+from projects.tutorial.config.settings import get_settings
+
+settings = get_settings()
 
 
 @get("/")
@@ -15,7 +17,7 @@ async def get_databases() -> list[dict[str, str]]:
     from system.databases
     """
 
-    with get_client(CLICKHOUSE_URL) as client:
+    with get_client(settings.database.URL) as client:
         df = client.query_df(query)
 
     return df.to_dict(orient="records")

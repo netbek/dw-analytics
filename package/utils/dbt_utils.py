@@ -36,7 +36,7 @@ def dbt_run_command(
     if vars:
         cmd.extend(["--vars", f"'{json.dumps(vars)}'"])
 
-    return cmd
+    return list(map(str, cmd))
 
 
 async def dbt_run(
