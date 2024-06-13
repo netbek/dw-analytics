@@ -1,12 +1,13 @@
+from pathlib import Path
 from prefect_shell import ShellOperation
 from typing import Any, Optional
 
 import json
 
 
-def dbt_run_command(
-    profiles_dir: str,
-    project_dir: str,
+def dbt_run_args(
+    fail_fast=True,
+    use_colors=False,
     exclude: Optional[str] = None,
     models: Optional[str] = None,
     select: Optional[str] = None,
@@ -14,29 +15,62 @@ def dbt_run_command(
     target: Optional[str] = None,
     vars: Optional[dict[str, Any]] = None,
 ) -> list[str]:
-    cmd = ["dbt", "run", "--no-use-colors", "--fail-fast"]
-    cmd.extend(["--profiles-dir", profiles_dir])
-    cmd.extend(["--project-dir", project_dir])
+    args = []
+
+    if fail_fast:
+        args.extend(["--fail-fast"])
+    else:
+        args.extend(["--no-fail-fast"])
+
+    if use_colors:
+        args.extend(["--use-colors"])
+    else:
+        args.extend(["--no-use-colors"])
 
     if exclude:
-        cmd.extend(["--exclude", exclude])
+        args.extend(["--exclude", exclude])
 
     if models:
-        cmd.extend(["--models", models])
+        args.extend(["--models", models])
 
     if select:
-        cmd.extend(["--select", select])
+        args.extend(["--select", select])
 
     if selector:
-        cmd.extend(["--selector", selector])
+        args.extend(["--selector", selector])
 
     if target:
-        cmd.extend(["--target", target])
+        args.extend(["--target", target])
 
     if vars:
-        cmd.extend(["--vars", f"'{json.dumps(vars)}'"])
+        args.extend(["--vars", f"'{json.dumps(vars)}'"])
 
-    return list(map(str, cmd))
+    return args
+
+
+def dbt_run_command(
+    profiles_dir: Path | str,
+    project_dir: Path | str,
+    exclude: Optional[str] = None,
+    models: Optional[str] = None,
+    select: Optional[str] = None,
+    selector: Optional[str] = None,
+    target: Optional[str] = None,
+    vars: Optional[dict[str, Any]] = None,
+) -> list[str]:
+    cmd = ["dbt", "run", "--profiles-dir", str(profiles_dir), "--project-dir", str(project_dir)]
+    cmd.extend(
+        dbt_run_args(
+            exclude=exclude,
+            models=models,
+            select=select,
+            selector=selector,
+            target=target,
+            vars=vars,
+        )
+    )
+
+    return cmd
 
 
 async def dbt_run(
