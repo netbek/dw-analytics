@@ -5,7 +5,7 @@ from typing import Any, Optional
 import json
 
 
-def dbt_run_args(
+def dbt_run_command_args(
     fail_fast=True,
     use_colors=False,
     exclude: Optional[str] = None,
@@ -60,7 +60,7 @@ def dbt_run_command(
 ) -> list[str]:
     cmd = ["dbt", "run", "--profiles-dir", str(profiles_dir), "--project-dir", str(project_dir)]
     cmd.extend(
-        dbt_run_args(
+        dbt_run_command_args(
             exclude=exclude,
             models=models,
             select=select,
