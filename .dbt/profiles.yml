@@ -1,4 +1,6 @@
+# TODO Move to project flags after upgrading to 1.8+ https://docs.getdbt.com/reference/global-configs/project-flags
 config:
+  fail_fast: true
   partial_parse: true
   send_anonymous_usage_stats: false
   use_colors: true
