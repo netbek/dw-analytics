@@ -29,6 +29,8 @@ services:
     command: prefect server start
     env_file:
       - ./.env_files/prefect-server.env
+    environment:
+      - PREFECT_UI_URL=http://localhost:${DW_PREFECT_SERVER_PORT:-4200}
     ports:
       - ${DW_PREFECT_SERVER_PORT:-4200}:4200
     volumes:
