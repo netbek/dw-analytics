@@ -30,7 +30,7 @@ services:
     env_file:
       - ./.env_files/prefect-server.env
     environment:
-      - PREFECT_UI_URL=http://localhost:${DW_PREFECT_SERVER_PORT:-4200}
+      - PREFECT_UI_URL=http://localhost:${DW_PREFECT_SERVER_PORT:-4200} # Used for flow run URL in notifications
     ports:
       - ${DW_PREFECT_SERVER_PORT:-4200}:4200
     volumes:
