@@ -12,6 +12,12 @@ macro-paths: [macros]
 snapshot-paths: [snapshots]
 clean-targets: [logs, target, dbt_packages]
 
+flags:
+  fail_fast: true
+  partial_parse: true
+  send_anonymous_usage_stats: false
+  use_colors: true
+
 models:
   dbt_audit:
     +schema: dbt_audit
