@@ -1,12 +1,12 @@
-clickhouse-connect==0.7.11
+clickhouse-connect==0.7.12
 dbt-artifacts-parser==0.7.0
-dbt-clickhouse==1.7.6
+dbt-clickhouse==1.8.0
 pandas==2.2.2
-prefect==2.19.4
+prefect==2.19.5
 prefect-dbt==0.5.0
 prefect-jupyter==0.3.1
 prefect-shell==0.2.5
 PyYAML==6.0.1
 rich==13.7.1
-sqlparse==0.4.4 # dbt-core 1.7.12 depends on sqlparse < 0.5
+sqlparse==0.5.0
 typer==0.12.3

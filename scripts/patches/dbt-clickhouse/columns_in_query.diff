@@ -1,5 +1,5 @@
 diff --git a/dbt/adapters/clickhouse/httpclient.py b/dbt/adapters/clickhouse/httpclient.py
-index a34e5a6..0fb1db8 100644
+index e809bca..001e5c6 100644
 --- a/dbt/adapters/clickhouse/httpclient.py
 +++ b/dbt/adapters/clickhouse/httpclient.py
 @@ -26,7 +26,7 @@ class ChHttpClient(ChClientWrapper):
@@ -12,7 +12,7 @@ index a34e5a6..0fb1db8 100644
              )
              return [
 diff --git a/dbt/adapters/clickhouse/nativeclient.py b/dbt/adapters/clickhouse/nativeclient.py
-index 772c8e9..4d921eb 100644
+index e2864cf..b5d8c72 100644
 --- a/dbt/adapters/clickhouse/nativeclient.py
 +++ b/dbt/adapters/clickhouse/nativeclient.py
 @@ -35,7 +35,7 @@ class ChNativeClient(ChClientWrapper):

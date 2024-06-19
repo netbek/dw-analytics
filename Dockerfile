@@ -20,7 +20,6 @@ RUN pip install --no-cache-dir --upgrade pip wheel setuptools && \
 
 WORKDIR "${VIRTUAL_ENV}/lib/python3.12/site-packages"
 RUN patch -p1 < /build/patches/dbt-clickhouse/columns_in_query.diff
-RUN patch -p1 < /build/patches/dbt-clickhouse/format_columns.diff
 
 RUN apt-get purge --yes \
     gcc git patch
@@ -30,7 +29,7 @@ RUN apt-get autoremove --yes && \
 
 ####################################################################################################
 
-FROM prefecthq/prefect:2.19.4-python3.12 AS prefect-common
+FROM prefecthq/prefect:2.19.5-python3.12 AS prefect-common
 
 ARG DOCKER_UID
 ARG DOCKER_GID
