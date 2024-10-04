@@ -22,7 +22,7 @@ WORKDIR "${VIRTUAL_ENV}/lib/python3.12/site-packages"
 RUN patch -p1 < /build/patches/dbt-clickhouse/columns_in_query.diff
 
 RUN apt-get purge --yes \
-    gcc git patch
+    gcc git libpq-dev patch python-dev-is-python3
 RUN apt-get autoremove --yes && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -38,7 +38,7 @@ ENV DOCKER_USER=analyst
 
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
-    ca-certificates curl git openssh-client
+    ca-certificates curl git libpq-dev openssh-client
 
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
