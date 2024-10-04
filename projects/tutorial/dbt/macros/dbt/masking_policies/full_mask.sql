@@ -1,6 +1,3 @@
 {% macro full_mask(expression, data_type) -%}
-    case
-        when false then {{ expression }}
-        else {{ dbt_privacy.mask(expression) }}
-    end
+    {{ adapter.dispatch('full_mask', 'default')(expression, data_type) }}
 {%- endmacro %}
