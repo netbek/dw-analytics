@@ -2,7 +2,7 @@ FROM python:3.12.3-slim-bookworm AS python-builder
 
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
-    gcc git patch
+    gcc git libpq-dev patch python-dev-is-python3
 
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"

@@ -1,6 +1,4 @@
-clickhouse-connect==0.7.12
 dbt-artifacts-parser==0.7.0
-dbt-clickhouse==1.8.0
 pandas==2.2.2
 prefect==2.19.5
 prefect-dbt==0.5.0
@@ -10,3 +8,10 @@ PyYAML==6.0.1
 rich==13.7.1
 sqlparse==0.5.0
 typer==0.12.3
+
+# ClickHouse target
+clickhouse-connect==0.7.12
+dbt-clickhouse==1.8.0
+
+# Postgres target
+dbt-postgres==1.8.0
