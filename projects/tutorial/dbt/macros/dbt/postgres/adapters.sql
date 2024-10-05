@@ -1,4 +1,7 @@
-{# Source: https://github.com/dbt-labs/dbt-postgres/blob/v1.8.2/dbt/include/postgres/macros/adapters.sql #}
+{#
+  Source: https://github.com/dbt-labs/dbt-postgres/blob/v1.8.2/dbt/include/postgres/macros/adapters.sql
+  - Added "access_method" config parameter
+#}
 {% macro postgres__create_table_as(temporary, relation, sql) -%}
   {%- set unlogged = config.get('unlogged', default=false) -%}
   {%- set sql_header = config.get('sql_header', none) -%}
