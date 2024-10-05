@@ -1,4 +1,4 @@
-{# Adapted from https://github.com/ClickHouse/dbt-clickhouse/blob/v1.6.2/dbt/include/clickhouse/macros/materializations/incremental/incremental.sql #}
+{# Source: https://github.com/ClickHouse/dbt-clickhouse/blob/v1.6.2/dbt/include/clickhouse/macros/materializations/incremental/incremental.sql #}
 {% materialization incremental, adapter='clickhouse' %}
 
   {%- set batch_type = config.get('batch_type') -%}
