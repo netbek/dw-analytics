@@ -1,4 +1,4 @@
-{# Adapted from https://github.com/dbt-labs/dbt-labs-experimental-features/blob/42f36a4418dd4f7f6b0bd36c03dcc3ec01bb3304/insert_by_period/macros/insert_by_period_materialization.sql #}
+{# Source: https://github.com/dbt-labs/dbt-labs-experimental-features/blob/42f36a4418dd4f7f6b0bd36c03dcc3ec01bb3304/insert_by_period/macros/insert_by_period_materialization.sql #}
 {% macro clickhouse__batch_period_create_table(temporary, relation, sql) %}
   {%- set batch_period = config.get('batch_period', 'week') -%}
   {%- set batch_column = config.require('batch_column') -%}

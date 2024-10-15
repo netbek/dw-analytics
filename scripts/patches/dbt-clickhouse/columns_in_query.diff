@@ -12,7 +12,7 @@ index e809bca..001e5c6 100644
              )
              return [
 diff --git a/dbt/adapters/clickhouse/nativeclient.py b/dbt/adapters/clickhouse/nativeclient.py
-index e2864cf..b5d8c72 100644
+index d0d7fdd..29b5cb7 100644
 --- a/dbt/adapters/clickhouse/nativeclient.py
 +++ b/dbt/adapters/clickhouse/nativeclient.py
 @@ -35,7 +35,7 @@ class ChNativeClient(ChClientWrapper):
