@@ -1,6 +1,6 @@
 clickhouse-connect==0.8.3
 dbt-artifacts-parser==0.7.0
-dbt-clickhouse==1.8.3
+dbt-clickhouse==1.8.4
 dbt-core==1.8.7
 pandas==2.2.3
 prefect==2.20.9
@@ -8,6 +8,6 @@ prefect-dbt==0.5.3
 prefect-jupyter==0.3.1
 prefect-shell==0.2.6
 PyYAML==6.0.2
-rich==13.9.1
+rich==13.9.2
 sqlparse==0.5.1
 typer==0.12.5
