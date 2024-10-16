@@ -1,4 +1,4 @@
-{# Adapted from https://github.com/dbt-labs/dbt-labs-experimental-features/blob/42f36a4418dd4f7f6b0bd36c03dcc3ec01bb3304/insert_by_period/macros/get_period_sql.sql #}
+{# Source: https://github.com/dbt-labs/dbt-labs-experimental-features/blob/42f36a4418dd4f7f6b0bd36c03dcc3ec01bb3304/insert_by_period/macros/get_period_sql.sql #}
 {% macro clickhouse__get_period_sql(sql, column, period, range_min, range_max, offset, relation_alias=none) -%}
   {%- set col %}{% if relation_alias %}{{ relation_alias }}.{% endif %}{{ adapter.quote(column) }}{% endset -%}
   {%- set batch_predicates -%}

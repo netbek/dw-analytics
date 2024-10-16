@@ -75,7 +75,7 @@ def bundle_docs(dbt_dir: str):
     """
     Transform output from `dbt docs generate` into a single HTML file.
 
-    Adapted from https://data-banana.github.io/dbt-generate-doc-in-one-static-html-file.html
+    Source: https://data-banana.github.io/dbt-generate-doc-in-one-static-html-file.html
     """
     html_path = os.path.join(dbt_dir, "target", "index.html")
     manifest_path = os.path.join(dbt_dir, "target", "manifest.json")
