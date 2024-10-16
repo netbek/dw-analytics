@@ -13,6 +13,7 @@ from uuid import UUID
 import httpx
 import os
 import prefect
+import pydash
 import subprocess
 import typer
 import yaml
@@ -218,6 +219,10 @@ async def deployment(
     async with get_client() as client:
         existing = await client.read_deployments()
         existing_names = [d.name for d in existing]
+
+        if action == DeploymentAction.delete:
+            # Remove selected deployments that have not been deployed
+            selected_names = pydash.intersection(selected_names, existing_names)
 
         try:
             deployment_actions = _build_deployment_actions(action, selected_names, existing_names)
