@@ -1,5 +1,5 @@
 from pathlib import Path
-from prefect_shell import ShellOperation
+from prefect_shell.commands import ShellOperation
 from typing import Any, Optional
 
 import json
