@@ -12,12 +12,12 @@ pytest_plugins = "package.tests.fixtures.database"
 def database_connection_url():
     return build_connection_url(
         type="clickhouse",
-        driver=os.getenv("DEFAULT_CLICKHOUSE_DRIVER"),
-        host=os.getenv("DEFAULT_CLICKHOUSE_HOST"),
-        port=os.getenv("DEFAULT_CLICKHOUSE_PORT"),
-        username=os.getenv("DEFAULT_CLICKHOUSE_USERNAME"),
-        password=os.getenv("DEFAULT_CLICKHOUSE_PASSWORD"),
-        database=os.getenv("DEFAULT_CLICKHOUSE_DATABASE"),
+        driver=os.getenv("DEFAULT_TARGET_CLICKHOUSE_DRIVER"),
+        host=os.getenv("DEFAULT_TARGET_CLICKHOUSE_HOST"),
+        port=os.getenv("DEFAULT_TARGET_CLICKHOUSE_PORT"),
+        username=os.getenv("DEFAULT_TARGET_CLICKHOUSE_USERNAME"),
+        password=os.getenv("DEFAULT_TARGET_CLICKHOUSE_PASSWORD"),
+        database=os.getenv("DEFAULT_TARGET_CLICKHOUSE_DATABASE"),
     )
 
 
