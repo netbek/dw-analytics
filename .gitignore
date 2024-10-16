@@ -7,6 +7,7 @@
 .dotnet
 .env*
 .gitconfig
+.gk
 .ipynb_checkpoints
 .local
 .prefect/flows.json
