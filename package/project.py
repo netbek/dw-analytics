@@ -115,12 +115,12 @@ class Project:
     @lru_cache
     def database_connection_url(self) -> str:
         namespace = self.name.upper()
-        driver = get_env_var(f"{namespace}_CLICKHOUSE_DRIVER")
-        host = get_env_var(f"{namespace}_CLICKHOUSE_HOST")
-        port = get_env_var(f"{namespace}_CLICKHOUSE_PORT")
-        username = get_env_var(f"{namespace}_CLICKHOUSE_USERNAME")
-        password = get_env_var(f"{namespace}_CLICKHOUSE_PASSWORD")
-        database = get_env_var(f"{namespace}_CLICKHOUSE_DATABASE")
+        driver = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_DRIVER")
+        host = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_HOST")
+        port = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_PORT")
+        username = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_USERNAME")
+        password = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_PASSWORD")
+        database = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_DATABASE")
 
         return build_connection_url(
             type="clickhouse",
