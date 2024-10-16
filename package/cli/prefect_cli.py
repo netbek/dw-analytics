@@ -144,8 +144,8 @@ async def deploy(
             deployment_actions = _build_deployment_actions(
                 DeployAction.create, selected_names, existing_names
             )
-        except Exception as e:
-            app.console.print(e.message, style="red")
+        except Exception as exc:
+            app.console.print(exc.message, style="red")
             return
 
         create_names = [d["name"] for d in deployment_actions if d["action"] == DeployAction.create]
@@ -221,8 +221,8 @@ async def deployment(
 
         try:
             deployment_actions = _build_deployment_actions(action, selected_names, existing_names)
-        except Exception as e:
-            app.console.print(e.message, style="red")
+        except Exception as exc:
+            app.console.print(exc.message, style="red")
             return
 
         deployment_names = [d["name"] for d in deployment_actions if d["action"] == action]
@@ -276,9 +276,9 @@ async def resume_deployment(client: PrefectClient, deployment_id: UUID):
 async def delete_flow(client: PrefectClient, flow_id: UUID):
     try:
         await client._client.delete(f"/flows/{flow_id}")
-    except httpx.HTTPStatusError as e:
-        if e.response.status_code == status.HTTP_404_NOT_FOUND:
-            raise prefect.exceptions.ObjectNotFound(http_exc=e) from e
+    except httpx.HTTPStatusError as exc:
+        if exc.response.status_code == status.HTTP_404_NOT_FOUND:
+            raise prefect.exceptions.ObjectNotFound(http_exc=exc) from exc
         else:
             raise
 
