@@ -1,4 +1,4 @@
-FROM python:3.12.3-slim-bookworm AS python-builder
+FROM python:3.12.7-slim-bookworm AS python-builder
 
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
@@ -66,7 +66,7 @@ WORKDIR /home/${DOCKER_USER}
 
 ####################################################################################################
 
-FROM python:3.12.3-slim-bookworm AS jupyter
+FROM python:3.12.7-slim-bookworm AS jupyter
 
 ARG DOCKER_UID
 ARG DOCKER_GID
@@ -97,7 +97,7 @@ CMD ["jupyter", "nbclassic", "--ip='0.0.0.0'", "--port=8888", "--no-browser"]
 
 ####################################################################################################
 
-FROM python:3.12.3-slim-bookworm AS api
+FROM python:3.12.7-slim-bookworm AS api
 
 ARG DOCKER_UID
 ARG DOCKER_GID
