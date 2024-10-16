@@ -4,9 +4,9 @@ from package.config.constants import PREFECT_PROFILES_PATH, PREFECT_PROVISION_PA
 from package.project import Project
 from package.utils.typer_utils import typer_async
 from prefect import get_client
-from prefect._vendor.starlette import status
 from prefect.client.orchestration import PrefectClient
 from prefect.client.schemas.actions import WorkPoolCreate, WorkPoolUpdate
+from starlette import status
 from typing import Optional
 from uuid import UUID
 

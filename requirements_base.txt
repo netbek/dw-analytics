@@ -3,10 +3,10 @@ dbt-artifacts-parser==0.7.0
 dbt-clickhouse==1.8.4
 dbt-core==1.8.7
 pandas==2.2.3
-prefect==2.20.9
-prefect-dbt==0.5.3
+prefect==3.0.10
+prefect-dbt==0.6.2
 prefect-jupyter==0.3.1
-prefect-shell==0.2.6
+prefect-shell==0.3.0
 PyYAML==6.0.2
 rich==13.9.2
 sqlparse==0.5.1

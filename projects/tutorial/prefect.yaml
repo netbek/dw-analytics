@@ -1,5 +1,5 @@
 name: tutorial
-prefect-version: 2.20.9
+prefect-version: 3.0.10
 
 build: null
 
