@@ -19,7 +19,6 @@
 - [Jinja syntax reference](https://jinja.palletsprojects.com/en/3.1.x/templates/)
 - [Jupyter Notebook docs](https://jupyter-notebook.readthedocs.io/en/latest/)
 - [PeerDB docs](https://docs.peerdb.io)
-- [Prefect docs](https://docs.prefect.io)
 - [Postgres docs](https://www.postgresql.org/docs/current/index.html)
 - [Postgres SQL reference](https://www.postgresql.org/docs/current/sql-commands.html)
 - [Prefect docs](https://docs.prefect.io)
