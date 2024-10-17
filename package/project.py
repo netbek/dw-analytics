@@ -1,6 +1,5 @@
 from functools import lru_cache
 from package.config.constants import HOME_DIR, PROJECTS_DIR, TEMPLATE_PROJECT_DIR
-from package.database import build_connection_url
 from package.utils.environ_utils import get_env_var
 from package.utils.filesystem import rmtree, symlink
 from package.utils.template import render_template
