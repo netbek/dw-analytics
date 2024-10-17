@@ -7,8 +7,9 @@
 - [dbt](03-dbt.md)
 - [Jupyter Notebook](04-jupyter.md)
 - [API](05-api.md)
-- [Prefect](06-prefect.md)
-- [Operations](07-operations.md)
+- [PeerDB](06-peerdb.md)
+- [Prefect](07-prefect.md)
+- [Operations](08-operations.md)
 
 ## Resources
 
@@ -17,6 +18,8 @@
 - [dbt reference](https://docs.getdbt.com/reference/references-overview)
 - [Jinja syntax reference](https://jinja.palletsprojects.com/en/3.1.x/templates/)
 - [Jupyter Notebook docs](https://jupyter-notebook.readthedocs.io/en/latest/)
+- [PeerDB docs](https://docs.peerdb.io)
+- [Prefect docs](https://docs.prefect.io)
 - [Postgres docs](https://www.postgresql.org/docs/current/index.html)
 - [Postgres SQL reference](https://www.postgresql.org/docs/current/sql-commands.html)
 - [Prefect docs](https://docs.prefect.io)
