@@ -4,7 +4,20 @@ import unittest
 
 
 class TestConfigProcess:
-    def test_peers(self):
+    def test_empty_config(self):
+        actual = PeerDBConfig.process({})
+
+        expected = {
+            "mirrors": {},
+            "peers": {},
+            "publication_schemas": [],
+            "publications": {},
+            "users": {},
+        }
+
+        unittest.TestCase().assertDictEqual(actual, expected)
+
+    def test_peers_node(self):
         actual = PeerDBConfig.process(
             {
                 "peers": {
@@ -53,7 +66,7 @@ class TestConfigProcess:
 
         unittest.TestCase().assertDictEqual(actual, expected)
 
-    def test_mirrors(self):
+    def test_mirrors_node(self):
         actual = PeerDBConfig.process(
             {
                 "mirrors": {
@@ -129,7 +142,7 @@ class TestConfigProcess:
 
         unittest.TestCase().assertDictEqual(actual, expected)
 
-    def test_publications(self):
+    def test_publications_node(self):
         actual = PeerDBConfig.process(
             {
                 "peers": {},
@@ -166,11 +179,11 @@ class TestConfigProcess:
                 },
                 "publications": {
                     "publication_1": [
-                        "public.table_1",
-                        "public.table_2",
+                        "private.table_1",
+                        "private.table_2",
                     ],
                     "publication_2": [
-                        "public.table_3",
+                        "private.table_3",
                     ],
                 },
             }
@@ -212,19 +225,19 @@ class TestConfigProcess:
                 },
             },
             "peers": {},
-            "publication_schemas": ["public"],
+            "publication_schemas": ["private", "public"],
             "publications": {
                 "publication_1": {
                     "name": "publication_1",
                     "table_identifiers": [
-                        "public.table_1",
-                        "public.table_2",
+                        "private.table_1",
+                        "private.table_2",
                     ],
                 },
                 "publication_2": {
                     "name": "publication_2",
                     "table_identifiers": [
-                        "public.table_3",
+                        "private.table_3",
                     ],
                 },
             },

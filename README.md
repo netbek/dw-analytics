@@ -7,8 +7,9 @@
 - [dbt](docs/03-dbt.md)
 - [Jupyter Notebook](docs/04-jupyter.md)
 - [API](docs/05-api.md)
-- [Prefect](docs/06-prefect.md)
-- [Operations](docs/07-operations.md)
+- [PeerDB](docs/06-peerdb.md)
+- [Prefect](docs/07-prefect.md)
+- [Operations](docs/08-operations.md)
 
 ## Overview
 

@@ -75,5 +75,6 @@ Ports can optionally be exposed. The configuration is loaded from `./.env` durin
 
 - [ClickHouse docs](https://clickhouse.com/docs)
 - [Jupyter Notebook docs](https://jupyter-notebook.readthedocs.io/en/latest/)
+- [PeerDB docs](https://docs.peerdb.io)
 - [Postgres docs](https://www.postgresql.org/docs/current/index.html)
 - [Prefect docs](https://docs.prefect.io)

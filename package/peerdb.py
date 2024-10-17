@@ -16,7 +16,7 @@ class PeerDBConfig:
     @lru_cache
     def load(self):
         with open(self._path, "rt") as fp:
-            config = yaml.safe_load(fp)
+            config = yaml.safe_load(fp) or {}
             config = self.process(config)
 
         return config
@@ -80,7 +80,7 @@ class PeerDBConfig:
                 if len(parts) == 2:
                     publication_schemas.append(parts[0])
 
-        result["publication_schemas"] = pydash.uniq(publication_schemas)
+        result["publication_schemas"] = sorted(pydash.uniq(publication_schemas))
 
         return result
 

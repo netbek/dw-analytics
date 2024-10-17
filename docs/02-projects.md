@@ -14,7 +14,7 @@ Projects are structured as follows. To explore, open `./projects/tutorial`.
         ├── api
         │   └── # API
         ├── config
-        │   └── constants.py # Python constants specific to this project
+        │   └── settings.py # Settings specific to this project
         ├── dbt
         │   └── # dbt configuration, models, and tests
         ├── flows
@@ -23,7 +23,8 @@ Projects are structured as follows. To explore, open `./projects/tutorial`.
         │   └── # Jupyter notebooks
         ├── tests
         │   └── # Tests of Python code
-        ├── prefect.yaml # Deployment configuration, including parameterization and scheduling
+        ├── peerdb.yaml # PeerDB configuration
+        ├── prefect.yaml # Prefect configuration
         └── README.md # Project documentation
 ```
 
@@ -116,4 +117,4 @@ cli project delete PROJECT_NAME
 
 ## Resources
 
-- [pytest docs](https://docs.pytest.org/en/7.4.x/)
+- [pytest docs](https://docs.pytest.org/en/8.3.x/)
