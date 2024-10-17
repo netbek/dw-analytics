@@ -22,4 +22,4 @@
 - [Postgres docs](https://www.postgresql.org/docs/current/index.html)
 - [Postgres SQL reference](https://www.postgresql.org/docs/current/sql-commands.html)
 - [Prefect docs](https://docs.prefect.io)
-- [pytest docs](https://docs.pytest.org/en/7.4.x/)
+- [pytest docs](https://docs.pytest.org/en/8.3.x/)
