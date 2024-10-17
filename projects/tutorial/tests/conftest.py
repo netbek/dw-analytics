@@ -12,4 +12,4 @@ settings = get_settings()
 
 @pytest.fixture(scope="session")
 def database_connection_url() -> str:
-    return settings.database.URL
+    return settings.db.URL

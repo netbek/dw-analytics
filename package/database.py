@@ -5,6 +5,7 @@ from jinja2 import Environment
 from typing import Any, Optional
 
 import clickhouse_connect
+import psycopg2
 import re
 import sqlparse
 
@@ -14,12 +15,23 @@ jinja_env = Environment(extensions=["jinja2.ext.do", "jinja2.ext.loopcontrols"])
 
 
 @contextmanager
-def get_client(dsn: str) -> Generator[Client | None]:
+def get_clickhouse_client(dsn: str) -> Generator[Client | None]:
     client = clickhouse_connect.get_client(dsn=dsn)
     try:
         yield client
     finally:
         client.close()
+
+
+@contextmanager
+def get_postgres_client(dsn: str):
+    conn = psycopg2.connect(dsn=dsn)
+    try:
+        conn.autocommit = True
+        with conn.cursor() as cur:
+            yield conn, cur
+    finally:
+        conn.close()
 
 
 def build_connection_url(

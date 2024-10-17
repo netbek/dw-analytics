@@ -1,6 +1,5 @@
 from functools import lru_cache
 from package.config.constants import HOME_DIR, PROJECTS_DIR, TEMPLATE_PROJECT_DIR
-from package.database import build_connection_url
 from package.utils.environ_utils import get_env_var
 from package.utils.filesystem import rmtree, symlink
 from package.utils.template import render_template
@@ -108,29 +107,57 @@ class Project:
 
     @property
     @lru_cache
+    def peerdb_api_url(self) -> str:
+        return get_env_var("PEERDB_API_URL")
+
+    @property
+    @lru_cache
+    def peerdb_config_path(self) -> Path:
+        return Path(os.path.join(self.directory, "peerdb.yaml"))
+
+    @property
+    @lru_cache
     def prefect_config_path(self) -> Path:
         return Path(os.path.join(self.directory, "prefect.yaml"))
 
     @property
     @lru_cache
-    def database_connection_url(self) -> str:
-        namespace = self.name.upper()
-        driver = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_DRIVER")
-        host = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_HOST")
-        port = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_PORT")
-        username = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_USERNAME")
-        password = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_PASSWORD")
-        database = get_env_var(f"{namespace}_TARGET_CLICKHOUSE_DATABASE")
+    def source_db_settings(self) -> dict:
+        host = get_env_var("SOURCE_POSTGRES_HOST")
+        port = get_env_var("SOURCE_POSTGRES_PORT")
+        username = get_env_var("SOURCE_POSTGRES_USERNAME")
+        password = get_env_var("SOURCE_POSTGRES_PASSWORD")
+        database = get_env_var("SOURCE_POSTGRES_DATABASE")
 
-        return build_connection_url(
-            type="clickhouse",
-            driver=driver,
-            host=host,
-            port=port,
-            username=username,
-            password=password,
-            database=database,
-        )
+        return {
+            "type": "postgresql",
+            "host": host,
+            "port": port,
+            "username": username,
+            "password": password,
+            "database": database,
+        }
+
+    @property
+    @lru_cache
+    def destination_db_settings(self) -> dict:
+        namespace = self.name.upper()
+        driver = get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_DRIVER")
+        host = get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_HOST")
+        port = get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_PORT")
+        username = get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_USERNAME")
+        password = get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_PASSWORD")
+        database = get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_DATABASE")
+
+        return {
+            "type": "clickhouse",
+            "driver": driver,
+            "host": host,
+            "port": port,
+            "username": username,
+            "password": password,
+            "database": database,
+        }
 
     def init_directory(self):
         """Copy template project files to the project directory."""
