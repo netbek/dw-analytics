@@ -153,12 +153,12 @@ class PeerDBClient:
 
 class Peer:
     def __init__(self, database_config: dict) -> None:
-        self._database_config = database_config
+        self._database_settings = database_config
         self._database_url = build_connection_url(**database_config)
 
     @property
     def database(self) -> str:
-        return self._database_config["database"]
+        return self._database_settings["database"]
 
 
 class SourcePeer(Peer):

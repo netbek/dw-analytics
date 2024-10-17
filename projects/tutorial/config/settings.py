@@ -13,8 +13,15 @@ class ProjectSettings:
 
 @dataclass
 class DatabaseSettings:
+    TYPE: str = field(default_factory=lambda: project.destination_database_settings["type"])
+    DRIVER: str = field(default_factory=lambda: project.destination_database_settings["driver"])
+    HOST: str = field(default_factory=lambda: project.destination_database_settings["host"])
+    PORT: str = field(default_factory=lambda: project.destination_database_settings["port"])
+    USERNAME: str = field(default_factory=lambda: project.destination_database_settings["username"])
+    PASSWORD: str = field(default_factory=lambda: project.destination_database_settings["password"])
+    DATABASE: str = field(default_factory=lambda: project.destination_database_settings["database"])
     URL: str = field(
-        default_factory=lambda: build_connection_url(**project.destination_database_config)
+        default_factory=lambda: build_connection_url(**project.destination_database_settings)
     )
 
 
