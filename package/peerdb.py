@@ -102,18 +102,34 @@ class PeerDBClient:
                     f"Failed to set {key}={value} (error {response.status_code}: {response.text})"
                 )
 
-    def create_peer(self, peer: dict) -> None:
-        url = f"{self._api_url}/v1/peers/create"
-        data = {"peer": peer}
-        response = httpx.post(url, json=data, headers=self._headers)
+    def has_peer(self, peer: dict) -> bool:
+        url = f"{self._api_url}/v1/peers/list"
+        response = httpx.get(url, headers=self._headers)
+        matches = [item for item in response.json()["items"] if item["name"] == peer["name"]]
 
-        if not (response.status_code == 200 and response.json()["status"] == "CREATED"):
-            raise Exception(
-                f"Failed to create peer '{peer['name']}' (error {response.status_code}: {response.text})"
-            )
+        return bool(matches)
+
+    def create_peer(self, peer: dict) -> None:
+        if not self.has_peer(peer):
+            url = f"{self._api_url}/v1/peers/create"
+            data = {"peer": peer}
+            response = httpx.post(url, json=data, headers=self._headers)
+
+            if not (response.status_code == 200 and response.json()["status"] == "CREATED"):
+                raise Exception(
+                    f"Failed to create peer '{peer['name']}' (error {response.status_code}: {response.text})"
+                )
 
     def drop_peer(self, peer: dict) -> None:
-        raise NotImplementedError()
+        if self.has_peer(peer):
+            url = f"{self._api_url}/v1/peers/drop"
+            data = {"peerName": peer["name"]}
+            response = httpx.post(url, json=data, headers=self._headers, timeout=None)
+
+            if not (response.status_code == 200 and response.json()["ok"]):
+                raise Exception(
+                    f"Failed to drop peer '{peer['name']}' (error {response.status_code}: {response.text})"
+                )
 
     def has_mirror(self, mirror: dict) -> bool:
         return self.get_mirror_status(mirror) != "STATUS_UNKNOWN"
@@ -143,7 +159,7 @@ class PeerDBClient:
                 "flowJobName": mirror["flow_job_name"],
                 "requestedFlowState": "STATUS_TERMINATED",
             }
-            response = httpx.post(url, json=data, headers=self._headers)
+            response = httpx.post(url, json=data, headers=self._headers, timeout=None)
 
             if not (response.status_code == 200 and response.json()["ok"]):
                 raise Exception(
