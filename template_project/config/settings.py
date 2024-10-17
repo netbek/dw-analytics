@@ -12,16 +12,14 @@ class ProjectSettings:
 
 
 @dataclass
-class DatabaseSettings:
-    TYPE: str = field(default_factory=lambda: project.destination_database_settings["type"])
-    DRIVER: str = field(default_factory=lambda: project.destination_database_settings["driver"])
-    HOST: str = field(default_factory=lambda: project.destination_database_settings["host"])
-    PORT: str = field(default_factory=lambda: project.destination_database_settings["port"])
-    USERNAME: str = field(default_factory=lambda: project.destination_database_settings["username"])
-    PASSWORD: str = field(default_factory=lambda: project.destination_database_settings["password"])
-    DATABASE: str = field(default_factory=lambda: project.destination_database_settings["database"])
+class SourceDbSettings:
+    URL: str = field(default_factory=lambda: build_connection_url(**project.source_db_settings))
+
+
+@dataclass
+class DestinationDbSettings:
     URL: str = field(
-        default_factory=lambda: build_connection_url(**project.destination_database_settings)
+        default_factory=lambda: build_connection_url(**project.destination_db_settings)
     )
 
 
@@ -38,7 +36,8 @@ class NotebookSettings:
 @dataclass
 class Settings:
     project: ProjectSettings = field(default_factory=ProjectSettings)
-    database: DatabaseSettings = field(default_factory=DatabaseSettings)
+    source_db: SourceDbSettings = field(default_factory=SourceDbSettings)
+    destination_db: DestinationDbSettings = field(default_factory=DestinationDbSettings)
     dbt: DbtSettings = field(default_factory=DbtSettings)
     notebook: NotebookSettings = field(default_factory=NotebookSettings)
 

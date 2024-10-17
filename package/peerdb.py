@@ -152,18 +152,18 @@ class PeerDBClient:
 
 
 class Peer:
-    def __init__(self, database_config: dict) -> None:
-        self._database_settings = database_config
-        self._database_url = build_connection_url(**database_config)
+    def __init__(self, db_settings: dict) -> None:
+        self._db_settings = db_settings
+        self._db_url = build_connection_url(**db_settings)
 
     @property
     def database(self) -> str:
-        return self._database_settings["database"]
+        return self._db_settings["database"]
 
 
 class SourcePeer(Peer):
     def has_publication(self, publication_name: str) -> None:
-        with get_postgres_client(self._database_url) as (conn, cur):
+        with get_postgres_client(self._db_url) as (conn, cur):
             cur.execute("select 1 from pg_publication where pubname = %s;", [publication_name])
             return bool(cur.fetchall())
 
@@ -171,24 +171,24 @@ class SourcePeer(Peer):
         if self.has_publication(publication_name):
             self.drop_publication(publication_name)
 
-        with get_postgres_client(self._database_url) as (conn, cur):
+        with get_postgres_client(self._db_url) as (conn, cur):
             cur.execute(
                 f"create publication {publication_name} for table {", ".join(table_identifiers)};"
             )
 
     def drop_publication(self, publication_name: str) -> None:
         if self.has_publication(publication_name):
-            with get_postgres_client(self._database_url) as (conn, cur):
+            with get_postgres_client(self._db_url) as (conn, cur):
                 cur.execute(f"drop publication {publication_name};")
 
     def has_user(self, username: str) -> None:
-        with get_postgres_client(self._database_url) as (conn, cur):
+        with get_postgres_client(self._db_url) as (conn, cur):
             cur.execute("select 1 from pg_roles where rolname = %s;", [username])
             return bool(cur.fetchall())
 
     def create_user(self, username: str, password: str) -> None:
         if not self.has_user(username):
-            with get_postgres_client(self._database_url) as (conn, cur):
+            with get_postgres_client(self._db_url) as (conn, cur):
                 cur.execute(
                     f"""
                     create role {username} with replication login password %(password)s;
@@ -198,7 +198,7 @@ class SourcePeer(Peer):
 
     def drop_user(self, username: str) -> None:
         if self.has_user(username):
-            with get_postgres_client(self._database_url) as (conn, cur):
+            with get_postgres_client(self._db_url) as (conn, cur):
                 cur.execute(
                     f"""
                     drop owned by {username} cascade;
@@ -207,7 +207,7 @@ class SourcePeer(Peer):
                 )
 
     def grant_privileges(self, username: str, schema: str) -> None:
-        with get_postgres_client(self._database_url) as (conn, cur):
+        with get_postgres_client(self._db_url) as (conn, cur):
             cur.execute(
                 f"""
                 grant usage on schema {schema} to {username};
@@ -218,7 +218,7 @@ class SourcePeer(Peer):
 
     def revoke_privileges(self, username: str, schema: str) -> None:
         if self.has_user(username):
-            with get_postgres_client(self._database_url) as (conn, cur):
+            with get_postgres_client(self._db_url) as (conn, cur):
                 cur.execute(
                     f"""
                     alter default privileges for role {username} in schema {schema} revoke select on tables from {username};
@@ -231,7 +231,7 @@ class SourcePeer(Peer):
 
 class DestinationPeer(Peer):
     def has_database(self, db_name: str) -> bool:
-        with get_clickhouse_client(self._database_url) as client:
+        with get_clickhouse_client(self._db_url) as client:
             result = client.query(
                 "select 1 from system.databases where name = {db_name:String};",
                 parameters={"db_name": db_name},
@@ -240,7 +240,7 @@ class DestinationPeer(Peer):
 
     def create_database(self, db_name: str) -> None:
         if not self.has_database(db_name):
-            with get_clickhouse_client(self._database_url) as client:
+            with get_clickhouse_client(self._db_url) as client:
                 client.command(
                     "create database {db_name:Identifier};",
                     parameters={"db_name": db_name},
@@ -248,21 +248,21 @@ class DestinationPeer(Peer):
 
     def drop_database(self, db_name: str) -> None:
         if self.has_database(db_name):
-            with get_clickhouse_client(self._database_url) as client:
+            with get_clickhouse_client(self._db_url) as client:
                 client.command(
                     "drop database {db_name:Identifier};",
                     parameters={"db_name": db_name},
                 )
 
     def create_user(self, username: str, password: str):
-        with get_clickhouse_client(self._database_url) as client:
+        with get_clickhouse_client(self._db_url) as client:
             client.command(
                 "create user {username:Identifier} identified by {password:String};",
                 parameters={"username": username, "password": password},
             )
 
     def drop_user(self, username: str):
-        with get_clickhouse_client(self._database_url) as client:
+        with get_clickhouse_client(self._db_url) as client:
             client.command(
                 "drop user {username:Identifier};",
                 parameters={"username": username},

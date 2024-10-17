@@ -122,7 +122,7 @@ class Project:
 
     @property
     @lru_cache
-    def source_database_settings(self) -> dict:
+    def source_db_settings(self) -> dict:
         host = get_env_var("SOURCE_POSTGRES_HOST")
         port = get_env_var("SOURCE_POSTGRES_PORT")
         username = get_env_var("SOURCE_POSTGRES_USERNAME")
@@ -140,7 +140,7 @@ class Project:
 
     @property
     @lru_cache
-    def destination_database_settings(self) -> dict:
+    def destination_db_settings(self) -> dict:
         namespace = self.name.upper()
         driver = get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_DRIVER")
         host = get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_HOST")
