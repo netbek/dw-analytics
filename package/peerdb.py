@@ -151,17 +151,10 @@ class PeerDBClient:
                 )
 
 
-class Peer:
+class SourcePeer:
     def __init__(self, db_settings: dict) -> None:
-        self._db_settings = db_settings
         self._db_url = build_connection_url(**db_settings)
 
-    @property
-    def database(self) -> str:
-        return self._db_settings["database"]
-
-
-class SourcePeer(Peer):
     def has_publication(self, publication_name: str) -> None:
         with get_postgres_client(self._db_url) as (conn, cur):
             cur.execute("select 1 from pg_publication where pubname = %s;", [publication_name])
@@ -229,7 +222,15 @@ class SourcePeer(Peer):
                 )
 
 
-class DestinationPeer(Peer):
+class DestinationPeer:
+    def __init__(self, db_settings: dict, database: str) -> None:
+        self._db_url = build_connection_url(**db_settings)
+        self._database = database
+
+    @property
+    def database(self) -> str:
+        return self._database
+
     def has_database(self, db_name: str) -> bool:
         with get_clickhouse_client(self._db_url) as client:
             result = client.query(

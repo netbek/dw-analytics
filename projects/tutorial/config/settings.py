@@ -12,12 +12,7 @@ class ProjectSettings:
 
 
 @dataclass
-class SourceDbSettings:
-    URL: str = field(default_factory=lambda: build_connection_url(**project.source_db_settings))
-
-
-@dataclass
-class DestinationDbSettings:
+class DatabaseSettings:
     URL: str = field(
         default_factory=lambda: build_connection_url(**project.destination_db_settings)
     )
@@ -36,8 +31,7 @@ class NotebookSettings:
 @dataclass
 class Settings:
     project: ProjectSettings = field(default_factory=ProjectSettings)
-    source_db: SourceDbSettings = field(default_factory=SourceDbSettings)
-    destination_db: DestinationDbSettings = field(default_factory=DestinationDbSettings)
+    db: DatabaseSettings = field(default_factory=DatabaseSettings)
     dbt: DbtSettings = field(default_factory=DbtSettings)
     notebook: NotebookSettings = field(default_factory=NotebookSettings)
 
