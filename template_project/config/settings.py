@@ -1,5 +1,6 @@
 from dataclasses import dataclass, field
 from functools import lru_cache
+from package.database import build_connection_url
 from package.project import Project
 
 project = Project.from_path(__file__)
@@ -12,7 +13,9 @@ class ProjectSettings:
 
 @dataclass
 class DatabaseSettings:
-    URL: str = field(default_factory=lambda: project.database_connection_url)
+    URL: str = field(
+        default_factory=lambda: build_connection_url(**project.destination_database_config)
+    )
 
 
 @dataclass

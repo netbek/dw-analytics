@@ -1,4 +1,4 @@
-from package.database import build_connection_url, get_client
+from package.database import build_connection_url, get_clickhouse_client
 from typing import Generator, Optional
 from urllib.parse import urlsplit, urlunsplit
 
@@ -12,12 +12,12 @@ pytest_plugins = "package.tests.fixtures.database"
 def database_connection_url():
     return build_connection_url(
         type="clickhouse",
-        driver=os.getenv("DEFAULT_TARGET_CLICKHOUSE_DRIVER"),
-        host=os.getenv("DEFAULT_TARGET_CLICKHOUSE_HOST"),
-        port=os.getenv("DEFAULT_TARGET_CLICKHOUSE_PORT"),
-        username=os.getenv("DEFAULT_TARGET_CLICKHOUSE_USERNAME"),
-        password=os.getenv("DEFAULT_TARGET_CLICKHOUSE_PASSWORD"),
-        database=os.getenv("DEFAULT_TARGET_CLICKHOUSE_DATABASE"),
+        driver=os.getenv("DEFAULT_DESTINATION_CLICKHOUSE_DRIVER"),
+        host=os.getenv("DEFAULT_DESTINATION_CLICKHOUSE_HOST"),
+        port=os.getenv("DEFAULT_DESTINATION_CLICKHOUSE_PORT"),
+        username=os.getenv("DEFAULT_DESTINATION_CLICKHOUSE_USERNAME"),
+        password=os.getenv("DEFAULT_DESTINATION_CLICKHOUSE_PASSWORD"),
+        database=os.getenv("DEFAULT_DESTINATION_CLICKHOUSE_DATABASE"),
     )
 
 
@@ -33,7 +33,7 @@ def generate_test_database_connection_url(
     test_db_name = database.strip("/") + "_testing"
     quoted_db_name = f'"{test_db_name}"'
 
-    with get_client(database_connection_url) as client:
+    with get_clickhouse_client(database_connection_url) as client:
         client.command(f"drop database if exists {quoted_db_name}")
         client.command(f"create database {quoted_db_name}")
 
@@ -41,7 +41,7 @@ def generate_test_database_connection_url(
 
     yield new_url
 
-    with get_client(database_connection_url) as client:
+    with get_clickhouse_client(database_connection_url) as client:
         client.command(f"drop database if exists {quoted_db_name}")
 
 
