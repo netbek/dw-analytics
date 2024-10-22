@@ -27,4 +27,4 @@ models:
 
 vars:
   dbt_audit_schema: dbt_audit
-  dbt_audit_columns: [dbt_run_id]
+  dbt_audit_columns: [_dbt_run_id]
