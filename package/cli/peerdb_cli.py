@@ -35,6 +35,17 @@ async def install(project_name: str):
                 style="green",
             )
 
+    for mirror in peerdb_config["mirrors"].values():
+        for table_mapping in mirror["table_mappings"]:
+            if "replica_identity" in table_mapping:
+                source_peer.set_table_replica_identity(
+                    table_mapping["source_table_identifier"], table_mapping["replica_identity"]
+                )
+                app.console.print(
+                    f"Set replica identity of '{table_mapping["source_table_identifier"]}' to '{table_mapping["replica_identity"]}'",
+                    style="green",
+                )
+
     for publication in peerdb_config["publications"].values():
         source_peer.create_publication(publication["name"], publication["table_identifiers"])
         app.console.print(
@@ -98,6 +109,17 @@ async def uninstall(project_name: str):
             f"Dropped publication '{publication["name"]}' on source",
             style="green",
         )
+
+    for mirror in peerdb_config["mirrors"].values():
+        for table_mapping in mirror["table_mappings"]:
+            if "replica_identity" in table_mapping:
+                source_peer.set_table_replica_identity(
+                    table_mapping["source_table_identifier"], "default"
+                )
+                app.console.print(
+                    f"Set replica identity of '{table_mapping["source_table_identifier"]}' to 'default'",
+                    style="green",
+                )
 
     if "source" in peerdb_config["users"]:
         for schema in peerdb_config["publication_schemas"]:

@@ -171,6 +171,10 @@ class SourcePeer:
     def __init__(self, db_settings: dict) -> None:
         self._db_url = build_connection_url(**db_settings)
 
+    def set_table_replica_identity(self, table_identifier: str, replica_identity: str):
+        with get_postgres_client(self._db_url) as (conn, cur):
+            cur.execute(f"alter table {table_identifier} replica identity {replica_identity};")
+
     def has_publication(self, publication_name: str) -> None:
         with get_postgres_client(self._db_url) as (conn, cur):
             cur.execute("select 1 from pg_publication where pubname = %s;", [publication_name])
