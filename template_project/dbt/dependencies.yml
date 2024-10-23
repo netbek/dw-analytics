@@ -4,7 +4,7 @@ packages:
   - git: https://github.com/netbek/dbt_audit
     revision: 0.1.4
   - git: https://github.com/netbek/dbt_peerdb
-    revision: 0.0.1
+    revision: 0.0.2
   - package: dbt-labs/dbt_utils
     version: 1.3.0
   - package: pvcy/dbt_privacy
