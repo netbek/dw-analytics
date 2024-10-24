@@ -2,7 +2,7 @@ isort==5.13.2
 livereload==2.7.0
 pre-commit==3.8.0
 pytest==8.3.3
-ruff==0.6.9
+ruff==0.7.1
 sqlfluff==3.2.4
 sqlfluff-templater-dbt==3.2.4
 yamllint==1.35.1
