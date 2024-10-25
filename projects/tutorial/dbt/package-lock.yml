@@ -2,11 +2,11 @@ packages:
   - package: dbt-labs/codegen
     version: 0.12.1
   - git: https://github.com/netbek/dbt_audit
-    revision: d15994a8a8c2dcb63bc9b4fcb6ac072b4f71aa0f
+    revision: 1d8971be25dae13e6e930550355ef962ba8dac3b
   - git: https://github.com/netbek/dbt_peerdb
     revision: 7d4e557a690fafe2d5e018162f91476c1d7859d6
   - package: dbt-labs/dbt_utils
     version: 1.3.0
   - package: pvcy/dbt_privacy
     version: 0.3.1
-sha1_hash: 30733bc1ee395260003dfb155744f44ff220176e
+sha1_hash: d974d86df2a848474b77e1f6bb53ef28f207826c
