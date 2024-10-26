@@ -2,13 +2,12 @@ FROM python:3.12.7-slim-bookworm AS python-builder
 
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
-    gcc git libpq-dev patch python-dev-is-python3
+    gcc git libpq-dev python-dev-is-python3
 
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"
 RUN python -m venv ${VIRTUAL_ENV}
 
-COPY scripts/patches /build/patches
 COPY requirements_api.txt /build/requirements_api.txt
 COPY requirements_base.txt /build/requirements_base.txt
 COPY requirements_dev.txt /build/requirements_dev.txt
@@ -17,9 +16,6 @@ COPY requirements_jupyter.txt /build/requirements_jupyter.txt
 RUN pip install --no-cache-dir --upgrade pip wheel setuptools && \
     pip install --no-cache-dir --requirement /build/requirements_base.txt && \
     pip install --no-cache-dir --requirement /build/requirements_dev.txt
-
-WORKDIR "${VIRTUAL_ENV}/lib/python3.12/site-packages"
-RUN patch -p1 < /build/patches/dbt-clickhouse/columns_in_query.diff
 
 RUN apt-get purge --yes \
     gcc git libpq-dev patch python-dev-is-python3
