@@ -1,6 +1,6 @@
 clickhouse-connect==0.8.5
 dbt-artifacts-parser==0.7.0
-dbt-clickhouse==1.8.4
+git+https://github.com/netbek/dbt-clickhouse.git@v1.8.4-batch
 dbt-core==1.8.8
 httpx==0.27.2
 pandas==2.2.3
