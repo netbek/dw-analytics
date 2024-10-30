@@ -3,7 +3,7 @@ from package.peerdb import PeerDBConfig
 import unittest
 
 
-class TestConfigProcess:
+class TestConfigProcess(unittest.TestCase):
     def test_empty_config(self):
         actual = PeerDBConfig.process({})
 
@@ -15,7 +15,7 @@ class TestConfigProcess:
             "users": {},
         }
 
-        unittest.TestCase().assertDictEqual(actual, expected)
+        self.assertDictEqual(actual, expected)
 
     def test_peers_node(self):
         actual = PeerDBConfig.process(
@@ -64,7 +64,7 @@ class TestConfigProcess:
             "users": {},
         }
 
-        unittest.TestCase().assertDictEqual(actual, expected)
+        self.assertDictEqual(actual, expected)
 
     def test_mirrors_node(self):
         actual = PeerDBConfig.process(
@@ -140,7 +140,7 @@ class TestConfigProcess:
             "users": {},
         }
 
-        unittest.TestCase().assertDictEqual(actual, expected)
+        self.assertDictEqual(actual, expected)
 
     def test_publications_node(self):
         actual = PeerDBConfig.process(
@@ -244,4 +244,4 @@ class TestConfigProcess:
             "users": {},
         }
 
-        unittest.TestCase().assertDictEqual(actual, expected)
+        self.assertDictEqual(actual, expected)
