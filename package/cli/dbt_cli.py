@@ -2,7 +2,7 @@ from package.cli.dbt_docs_cli import docs_app
 from package.cli.root import app
 from package.config.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPES
 from package.project import Project
-from package.utils.filesystem import find_up
+from package.utils.filesystem import find_up, get_file_name
 from pathlib import Path
 from typing import Optional
 
@@ -68,7 +68,7 @@ def model_yaml(models: list[str]):
     model_paths = [file for pattern in patterns for file in project.dbt_directory.glob(pattern)]
 
     for model_path in model_paths:
-        model_name = os.path.splitext(os.path.basename(model_path))[0]
+        model_name = get_file_name(model_path)
         schema_file = os.path.join(Path(model_path).parent, "schema", f"{model_name}.yml")
         schema_dir = os.path.dirname(schema_file)
 
