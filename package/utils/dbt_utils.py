@@ -1,4 +1,5 @@
 from package.project import Project
+from package.utils.filesystem import rmtree
 from package.utils.pydantic_utils import dump_csv
 from pathlib import Path
 from prefect_shell.commands import ShellOperation
@@ -27,12 +28,13 @@ def dump_test_fixtures(project: Project, fixtures):
 
     for fixture in fixtures:
         fixture_path = os.path.join(fixtures_path, fixture["model"])
+        rmtree(fixture_path)
         os.makedirs(fixture_path, exist_ok=True)
 
         # Given
         for value in fixture["given"]:
             model_name = extract_model_name(value["input"])
-            csv_filename = f'{fixture["name"]}__{model_name}.csv'
+            csv_filename = f'{fixture["model"]}__{fixture["name"]}__{model_name}.csv'
             csv_path = os.path.join(fixture_path, csv_filename)
             csv_data = dump_csv(*value["data"])
 
@@ -40,7 +42,7 @@ def dump_test_fixtures(project: Project, fixtures):
                 fp.write(csv_data)
 
         # Expected
-        csv_filename = f'{fixture["name"]}__expect.csv'
+        csv_filename = f'{fixture["model"]}__{fixture["name"]}__expect.csv'
         csv_path = os.path.join(fixture_path, csv_filename)
         csv_data = dump_csv(*fixture["expect"]["data"])
 
