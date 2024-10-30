@@ -20,7 +20,7 @@ app.add_typer(dbt_app)
 
 @dbt_app.command(help="Print version.")
 def version():
-    print(dbt.version.__version__)
+    app.console.print(dbt.version.__version__)
 
 
 @dbt_app.command(help="Generate test fixtures.")
