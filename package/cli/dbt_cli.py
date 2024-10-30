@@ -17,13 +17,35 @@ dbt_app.add_typer(docs_app)
 app.add_typer(dbt_app)
 
 
-@dbt_app.command()
+@dbt_app.command(help="Print version.")
 def version():
     print(dbt.version.__version__)
 
 
-@dbt_app.command()
-def generate_model_yaml(models: list[str]):
+@dbt_app.command(help="Generate test fixtures.")
+def fixtures():
+    cwd = os.getcwd()
+    dbt_project_file = find_up(cwd, "dbt_project.yml")
+
+    if not dbt_project_file:
+        raise Exception(f"No dbt_project.yml found in {cwd} or higher")
+
+    project = Project.from_path(cwd)
+    script_paths = list(project.dbt_tests_directory.glob(os.path.join("fixtures", "*.py")))
+
+    for script_path in script_paths:
+        try:
+            cmd = ["python", script_path]
+            subprocess.check_output(cmd, cwd=project.dbt_directory)
+            app.console.print(f"Generated test fixtures from {script_path}", style="green")
+        except subprocess.CalledProcessError as exc:
+            output = exc.output.decode().strip()
+            app.console.print(output, style="red")
+            raise exc
+
+
+@dbt_app.command(help="Generate model YAML.")
+def model_yaml(models: list[str]):
     cwd = os.getcwd()
     dbt_project_file = find_up(cwd, "dbt_project.yml")
 
@@ -60,10 +82,10 @@ def generate_model_yaml(models: list[str]):
         ]
         try:
             subprocess.check_output(cmd, cwd=project.dbt_directory)
-        except subprocess.CalledProcessError as e:
-            output = e.output.decode().strip()
-            print(output)
-            raise e
+        except subprocess.CalledProcessError as exc:
+            output = exc.output.decode().strip()
+            app.console.print(output, style="red")
+            raise exc
 
         # Generate schema YAML
         cmd = [
@@ -76,10 +98,10 @@ def generate_model_yaml(models: list[str]):
         ]
         try:
             output = subprocess.check_output(cmd, cwd=project.dbt_directory).decode().strip()
-        except subprocess.CalledProcessError as e:
-            output = e.output.decode().strip()
-            print(output)
-            raise e
+        except subprocess.CalledProcessError as exc:
+            output = exc.output.decode().strip()
+            app.console.print(output, style="red")
+            raise exc
 
         new_model = yaml.safe_load(output)["models"][0]
         new_model = {
