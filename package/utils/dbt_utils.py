@@ -13,16 +13,22 @@ import re
 import yaml
 
 RE_REF = r"^ref\(['\"](.*?)['\"]\)$"
+RE_SOURCE = r"^source\(['\"](.*?)['\"], ['\"](.*?)['\"]\)$"
 
 
-def extract_model_name(string: str) -> str | None:
-    """Extract the model name from a string that contains a dbt ref function."""
+def extract_table_name(string: str) -> str | None:
+    """Extract the table name from a string that contains a dbt ref or source function."""
     matches = re.search(RE_REF, string)
 
     if matches:
         return matches.group(1)
-    else:
-        return None
+
+    matches = re.search(RE_SOURCE, string)
+
+    if matches:
+        return matches.group(2)
+
+    return None
 
 
 def find_model_sql(project: Project, model: str) -> str | None:
@@ -57,7 +63,7 @@ def dump_fixtures_csv(project: Project, fixtures: list[dict]):
 
             # Given
             for value in fixture["given"]:
-                input_name = extract_model_name(value["input"])
+                input_name = extract_table_name(value["input"])
                 csv_filename = f'{model_name}__{fixture["name"]}__{input_name}.csv'
                 csv_path = os.path.join(fixture_path, csv_filename)
                 csv_data = dump_csv(*value["data"])
@@ -91,7 +97,7 @@ def update_model_unit_tests(project: Project, fixtures: list[dict]):
             # Given
             unit_test["given"] = []
             for value in fixture["given"]:
-                input_name = extract_model_name(value["input"])
+                input_name = extract_table_name(value["input"])
                 unit_test["given"].append(
                     {
                         "input": value["input"],
