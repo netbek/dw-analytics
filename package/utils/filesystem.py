@@ -4,6 +4,12 @@ import os
 import shutil
 
 
+def get_file_name(path: str) -> str:
+    basename = os.path.basename(path)
+    name, ext = os.path.splitext(basename)
+    return name
+
+
 def find_up(path: str, pattern: str):
     path = Path(path)
 
