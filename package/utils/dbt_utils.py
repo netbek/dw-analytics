@@ -1,8 +1,51 @@
+from package.project import Project
+from package.utils.pydantic_utils import dump_csv
 from pathlib import Path
 from prefect_shell.commands import ShellOperation
 from typing import Any, Optional
 
 import json
+import os
+import re
+
+RE_REF = r"^ref\(['\"](.*?)['\"]\)$"
+
+
+def extract_model_name(string: str) -> str | None:
+    """Extract the model name from a string that contains a dbt ref function."""
+    matches = re.search(RE_REF, string)
+
+    if matches:
+        return matches.group(1)
+    else:
+        return None
+
+
+def dump_test_fixtures(project: Project, fixtures):
+    """Dump test fixtures to CSV."""
+    fixtures_path = os.path.join(project.dbt_tests_directory, "fixtures")
+
+    for fixture in fixtures:
+        fixture_path = os.path.join(fixtures_path, fixture["model"])
+        os.makedirs(fixture_path, exist_ok=True)
+
+        # Given
+        for value in fixture["given"]:
+            model_name = extract_model_name(value["input"])
+            csv_filename = f'{fixture["name"]}__{model_name}.csv'
+            csv_path = os.path.join(fixture_path, csv_filename)
+            csv_data = dump_csv(*value["data"])
+
+            with open(csv_path, "wt") as fp:
+                fp.write(csv_data)
+
+        # Expected
+        csv_filename = f'{fixture["name"]}__expect.csv'
+        csv_path = os.path.join(fixture_path, csv_filename)
+        csv_data = dump_csv(*fixture["expect"]["data"])
+
+        with open(csv_path, "wt") as fp:
+            fp.write(csv_data)
 
 
 def dbt_run_command_args(
