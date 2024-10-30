@@ -71,15 +71,15 @@ def model_yaml(models: list[str]):
 
     for model_path in model_paths:
         model_name = get_file_name(model_path)
-        schema_file = os.path.join(Path(model_path).parent, "schema", f"{model_name}.yml")
-        schema_dir = os.path.dirname(schema_file)
+        schema_path = os.path.join(Path(model_path).parent, "schema", f"{model_name}.yml")
+        schema_dir = os.path.dirname(schema_path)
 
         os.makedirs(schema_dir, exist_ok=True)
 
         # Load existing schema
-        if os.path.exists(schema_file):
-            with open(schema_file, "rt") as file:
-                schema = yaml.safe_load(file)
+        if os.path.exists(schema_path):
+            with open(schema_path, "rt") as fp:
+                schema = yaml.safe_load(fp)
         else:
             schema = {"version": 2, "models": []}
 
@@ -142,6 +142,6 @@ def model_yaml(models: list[str]):
         schema["models"] = sorted(schema["models"], key=lambda x: x["name"])
 
         # Write schema file
-        with open(schema_file, "wt") as file:
+        with open(schema_path, "wt") as fp:
             data = yaml.safe_dump(schema, sort_keys=False)
-            file.write(data)
+            fp.write(data)
