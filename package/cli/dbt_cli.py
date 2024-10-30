@@ -4,6 +4,7 @@ from package.config.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPES
 from package.project import Project
 from package.utils.filesystem import find_up
 from pathlib import Path
+from typing import Optional
 
 import dbt.version
 import json
@@ -23,7 +24,9 @@ def version():
 
 
 @dbt_app.command(help="Generate test fixtures.")
-def fixtures():
+def fixtures(
+    models: Optional[list[str]] = typer.Option(None, "-m", "--model", help="1 or more model names"),
+):
     cwd = os.getcwd()
     dbt_project_file = find_up(cwd, "dbt_project.yml")
 
@@ -31,7 +34,15 @@ def fixtures():
         raise Exception(f"No dbt_project.yml found in {cwd} or higher")
 
     project = Project.from_path(cwd)
-    script_paths = list(project.dbt_tests_directory.glob(os.path.join("fixtures", "*.py")))
+
+    if models:
+        patterns = [os.path.join("fixtures", f"{model}.py") for model in models]
+    else:
+        patterns = [os.path.join("fixtures", "*.py")]
+
+    script_paths = [
+        file for pattern in patterns for file in project.dbt_tests_directory.glob(pattern)
+    ]
 
     for script_path in script_paths:
         try:
