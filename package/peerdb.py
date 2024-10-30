@@ -11,7 +11,7 @@ import yaml
 
 
 class PeerDBModel(BaseModel):
-    # See https://github.com/litestar-org/polyfactory/issues/577
+    # See https://github.com/litestar-org/polyfactory/issues/577#issuecomment-2387818509
     model_config = ConfigDict(populate_by_name=True)
 
     peerdb_synced_at: Annotated[PastDatetime, Field(alias="_peerdb_synced_at")]
