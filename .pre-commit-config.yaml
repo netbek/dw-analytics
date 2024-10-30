@@ -1,9 +1,8 @@
 repos:
-  - repo: https://github.com/PyCQA/autoflake
+  - repo: https://github.com/pycqa/autoflake
     rev: v2.3.1
     hooks:
       - id: autoflake
-        alias: autoflake
         args: [--remove-all-unused-imports, --in-place]
         stages: [manual, pre-commit]
   - repo: https://github.com/pycqa/isort
