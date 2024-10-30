@@ -3,6 +3,7 @@ repos:
     rev: v2.3.1
     hooks:
       - id: autoflake
+        alias: autoflake
         args: [--remove-all-unused-imports]
         stages: [manual]
   - repo: https://github.com/pycqa/isort
