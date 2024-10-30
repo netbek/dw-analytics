@@ -22,7 +22,21 @@ def extract_model_name(string: str) -> str | None:
         return None
 
 
-def dump_test_fixtures(project: Project, fixtures):
+def find_model_sql(project: Project, model: str):
+    model_paths = list(project.dbt_directory.glob(os.path.join("models", "**", f"{model}.sql")))
+
+    # TODO Raise exception if multiple matches
+    return model_paths[:1]
+
+
+def find_model_yaml(project: Project, model: str):
+    model_paths = list(project.dbt_directory.glob(os.path.join("models", "**", f"{model}.yml")))
+
+    # TODO Raise exception if multiple matches
+    return model_paths[:1]
+
+
+def dump_test_fixtures(project: Project, fixtures: list[dict]):
     """Dump test fixtures to CSV."""
     fixtures_path = os.path.join(project.dbt_tests_directory, "fixtures")
 

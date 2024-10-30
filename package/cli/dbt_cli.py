@@ -2,6 +2,7 @@ from package.cli.dbt_docs_cli import docs_app
 from package.cli.root import app
 from package.config.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPES
 from package.project import Project
+from package.utils.dbt_utils import find_model_sql
 from package.utils.filesystem import find_up, get_file_name
 from pathlib import Path
 from typing import Optional
@@ -64,8 +65,9 @@ def model_yaml(models: list[str]):
         raise Exception(f"No dbt_project.yml found in {cwd} or higher")
 
     project = Project.from_path(cwd)
-    patterns = [f"models/**/{model}.sql" for model in models]
-    model_paths = [file for pattern in patterns for file in project.dbt_directory.glob(pattern)]
+    model_paths = []
+    for model in models:
+        model_paths.extend(find_model_sql(project, model))
 
     for model_path in model_paths:
         model_name = get_file_name(model_path)
