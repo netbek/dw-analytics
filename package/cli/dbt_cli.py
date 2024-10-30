@@ -65,11 +65,13 @@ def model_yaml(models: list[str]):
         raise Exception(f"No dbt_project.yml found in {cwd} or higher")
 
     project = Project.from_path(cwd)
-    model_paths = []
-    for model in models:
-        model_paths.extend(find_model_sql(project, model))
 
-    for model_path in model_paths:
+    for model in models:
+        model_path = find_model_sql(project, model)
+
+        if not model_path:
+            continue
+
         model_name = get_file_name(model_path)
         schema_path = os.path.join(Path(model_path).parent, "schema", f"{model_name}.yml")
         schema_dir = os.path.dirname(schema_path)
