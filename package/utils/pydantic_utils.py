@@ -1,3 +1,5 @@
+from pydantic import BaseModel
+
 import csv
 import io
 import json
@@ -5,7 +7,7 @@ import json
 LINE_TERMINATOR = "\n"
 
 
-def dump_csv(*models) -> str:
+def dump_csv(*models: BaseModel) -> str:
     """Serialize the model(s) to a CSV string."""
     if not models:
         return ""
