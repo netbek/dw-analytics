@@ -12,7 +12,10 @@ def dump_csv(*models: BaseModel) -> str:
     if not models:
         return ""
 
-    data = [model.model_dump() for model in models]
+    # PeerDB and dbt fields are prefixed with an underscore in the table schema.
+    # Pydantic treats underscored model attributes as private and omits them from the dumped data.
+    # To work around this, the model attributes are aliased with an underscore.
+    data = [model.model_dump(by_alias=True) for model in models]
 
     output = io.StringIO()
     writer = csv.writer(output, lineterminator=LINE_TERMINATOR)

@@ -1,12 +1,23 @@
+from datetime import datetime
 from functools import lru_cache
 from package.database import build_connection_url, get_clickhouse_client, get_postgres_client
 from pathlib import Path
-from typing import List
+from pydantic import BaseModel, ConfigDict, Field
+from typing import Annotated, List
 
 import copy
 import httpx
 import pydash
 import yaml
+
+
+class PeerDBModel(BaseModel):
+    # See https://github.com/litestar-org/polyfactory/issues/577
+    model_config = ConfigDict(populate_by_name=True)
+
+    peerdb_synced_at: Annotated[datetime, Field(alias="_peerdb_synced_at")]
+    peerdb_is_deleted: Annotated[bool, Field(alias="_peerdb_is_deleted")]
+    peerdb_version: Annotated[int, Field(alias="_peerdb_version")]
 
 
 class PeerDBConfig:
