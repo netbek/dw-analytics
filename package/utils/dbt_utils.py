@@ -1,13 +1,16 @@
 from package.project import Project
 from package.utils.filesystem import rmtree
 from package.utils.pydantic_utils import dump_csv
+from package.utils.yaml_utils import PrettySafeDumper
 from pathlib import Path
 from prefect_shell.commands import ShellOperation
 from typing import Any, Optional
 
 import json
 import os
+import pydash
 import re
+import yaml
 
 RE_REF = r"^ref\(['\"](.*?)['\"]\)$"
 
@@ -22,46 +25,102 @@ def extract_model_name(string: str) -> str | None:
         return None
 
 
-def find_model_sql(project: Project, model: str):
+def find_model_sql(project: Project, model: str) -> str | None:
     paths = list(project.dbt_directory.glob(os.path.join("models", "**", f"{model}.sql")))
 
-    # TODO Raise exception if multiple matches
-    return paths[:1]
+    if paths:
+        # TODO Raise exception if multiple matches
+        return paths[0]
+    else:
+        return None
 
 
-def find_model_yaml(project: Project, model: str):
+def find_model_yaml(project: Project, model: str) -> str | None:
     paths = list(project.dbt_directory.glob(os.path.join("models", "**", f"{model}.yml")))
 
-    # TODO Raise exception if multiple matches
-    return paths[:1]
+    if paths:
+        # TODO Raise exception if multiple matches
+        return paths[0]
+    else:
+        return None
 
 
-def dump_test_fixtures(project: Project, fixtures: list[dict]):
-    """Dump test fixtures to CSV."""
+def dump_fixtures_csv(project: Project, fixtures: list[dict]):
     fixtures_path = os.path.join(project.dbt_tests_directory, "fixtures")
 
-    for fixture in fixtures:
-        fixture_path = os.path.join(fixtures_path, fixture["model"])
-        rmtree(fixture_path)
-        os.makedirs(fixture_path, exist_ok=True)
+    for model_name, model_fixtures in pydash.group_by(fixtures, "model").items():
+        for fixture in model_fixtures:
+            fixture_path = os.path.join(fixtures_path, model_name)
 
-        # Given
-        for value in fixture["given"]:
-            model_name = extract_model_name(value["input"])
-            csv_filename = f'{fixture["model"]}__{fixture["name"]}__{model_name}.csv'
+            rmtree(fixture_path)
+            os.makedirs(fixture_path, exist_ok=True)
+
+            # Given
+            for value in fixture["given"]:
+                input_name = extract_model_name(value["input"])
+                csv_filename = f'{model_name}__{fixture["name"]}__{input_name}.csv'
+                csv_path = os.path.join(fixture_path, csv_filename)
+                csv_data = dump_csv(*value["data"])
+
+                with open(csv_path, "wt") as fp:
+                    fp.write(csv_data)
+
+            # Expected
+            csv_filename = f'{model_name}__{fixture["name"]}__expect.csv'
             csv_path = os.path.join(fixture_path, csv_filename)
-            csv_data = dump_csv(*value["data"])
+            csv_data = dump_csv(*fixture["expect"]["data"])
 
             with open(csv_path, "wt") as fp:
                 fp.write(csv_data)
 
-        # Expected
-        csv_filename = f'{fixture["model"]}__{fixture["name"]}__expect.csv'
-        csv_path = os.path.join(fixture_path, csv_filename)
-        csv_data = dump_csv(*fixture["expect"]["data"])
 
-        with open(csv_path, "wt") as fp:
-            fp.write(csv_data)
+def update_model_unit_tests(project: Project, fixtures: list[dict]):
+    for model_name, model_fixtures in pydash.group_by(fixtures, "model").items():
+        schema_path = find_model_yaml(project, model_name)
+
+        if not schema_path:
+            continue
+
+        unit_tests = []
+        for fixture in model_fixtures:
+            unit_test = {
+                "model": model_name,
+                "name": fixture["name"],
+            }
+
+            # Given
+            unit_test["given"] = []
+            for value in fixture["given"]:
+                input_name = extract_model_name(value["input"])
+                unit_test["given"].append(
+                    {
+                        "input": value["input"],
+                        "format": value["format"],
+                        "fixture": f'{model_name}__{fixture["name"]}__{input_name}',
+                    }
+                )
+
+            # Expected
+            unit_test["expect"] = {
+                "format": value["format"],
+                "fixture": f'{model_name}__{fixture["name"]}__expect',
+            }
+
+            unit_tests.append(unit_test)
+
+        with open(schema_path, "rt") as fp:
+            schema = yaml.safe_load(fp) or {}
+
+        schema["unit_tests"] = unit_tests
+        data = yaml.dump(schema, sort_keys=False, Dumper=PrettySafeDumper)
+
+        with open(schema_path, "wt") as fp:
+            fp.write(data)
+
+
+def export_fixtures(project: Project, fixtures: list[dict]):
+    dump_fixtures_csv(project, fixtures)
+    update_model_unit_tests(project, fixtures)
 
 
 def dbt_run_command_args(
