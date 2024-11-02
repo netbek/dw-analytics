@@ -1,7 +1,7 @@
 version: "3.8"
 
 volumes:
-  prefect_postgres_data:
+  prefect-postgres-data:
 
 services:
   prefect-postgres:
@@ -14,7 +14,7 @@ services:
     {%- endif %}
     volumes:
       - ./docker/prefect-postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
-      - prefect_postgres_data:/var/lib/postgresql/data:rw
+      - prefect-postgres-data:/var/lib/postgresql/data:rw
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
       interval: 1s

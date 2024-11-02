@@ -42,7 +42,7 @@ The default settings for the Prefect Postgres server are:
 
 ```yaml
 Host: localhost
-Port: 29010
+Port: 29110
 Username: prefect
 Password: prefect
 Database: prefect
@@ -52,7 +52,7 @@ Examples:
 
 | Description                          | Command                                                           |
 |--------------------------------------|-------------------------------------------------------------------|
-| Use `psql` installed on host machine | `psql -h localhost -p 29010 -U prefect -d prefect`                |
+| Use `psql` installed on host machine | `psql -h localhost -p 29110 -U prefect -d prefect`                |
 | Use `psql` installed in container    | `docker compose exec prefect-postgres psql -U prefect -d prefect` |
 
 ## Monitoring
@@ -65,11 +65,11 @@ Ports can optionally be exposed. The configuration is loaded from `./.env` durin
 
 | Service            | Port  | Protocol    | Description           |
 |--------------------|-------|-------------|-----------------------|
-| `prefect-postgres` | 29010 | Postgres    | Postgres              |
-| `prefect-server`   | 29020 | HTTP        | Prefect               |
-| `jupyter`          | 29030 | HTTP        | Jupyter Notebook      |
-| `api`              | 29040 | HTTP        | API                   |
-| `cli`              | 29050 | HTTP        | dbt docs              |
+| `prefect-postgres` | 29110 | Postgres    | Postgres              |
+| `prefect-server`   | 29120 | HTTP        | Prefect               |
+| `jupyter`          | 29130 | HTTP        | Jupyter Notebook      |
+| `api`              | 29140 | HTTP        | API                   |
+| `cli`              | 29150 | HTTP        | dbt docs              |
 
 ## Resources
 

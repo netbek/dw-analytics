@@ -53,7 +53,7 @@ To view the docs:
     cli dbt docs serve
     ```
 
-2. Go to [http://localhost:29050](http://localhost:29050) or run the `open` script:
+2. Go to [http://localhost:29150](http://localhost:29150) or run the `open` script:
 
     ```shell
     ./scripts/open.sh dbt-docs

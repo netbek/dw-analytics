@@ -13,7 +13,7 @@ The Prefect server provides a dashboard of flows, deployments and more. To view 
     docker compose up -d prefect-postgres prefect-server prefect-worker cli
     ```
 
-2. Go to [http://localhost:29020](http://localhost:29020) or run the `open` script:
+2. Go to [http://localhost:29120](http://localhost:29120) or run the `open` script:
 
     ```shell
     ./scripts/open.sh prefect-server
@@ -45,7 +45,7 @@ To explore:
 
 Flows exist as Python functions and flow entities. Python functions are stored in `./projects/<PROJECT_NAME>/flows`, and the flow entities are stored in the Prefect database.
 
-Flow entities appear on the Prefect dashboard under [Flows](http://localhost:29020/flows) and in the CLI at `prefect flows ls`. Flows that have not been deployed won't be listed.
+Flow entities appear on the Prefect dashboard under [Flows](http://localhost:29120/flows) and in the CLI at `prefect flows ls`. Flows that have not been deployed won't be listed.
 
 The Python files in `./projects/<PROJECT_NAME>/flows` contain 1 main flow function, optionally subflows, and 1 or more task functions that are used in the flow.
 
@@ -58,7 +58,7 @@ Further reading:
 
 Deployments of flows exist as configuration files and deployment entities. The configuration is stored in `./projects/<PROJECT_NAME>/prefect.yaml`, and the deployment entities are stored in the Prefect database.
 
-Deployment entities appear on the Prefect dashboard under [Deployments](http://localhost:29020/deployments) and in the CLI at `prefect deployments ls`. Deployments that exist only in configuration won't be listed.
+Deployment entities appear on the Prefect dashboard under [Deployments](http://localhost:29120/deployments) and in the CLI at `prefect deployments ls`. Deployments that exist only in configuration won't be listed.
 
 Further reading:
 
