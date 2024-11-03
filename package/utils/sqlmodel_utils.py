@@ -125,20 +125,20 @@ def parse_ddl(ddl: str) -> dict:
     return results
 
 
-def get_field_name(name: str) -> str:
-    return name.lstrip("_")
+def to_field_name(column_name: str) -> str:
+    return column_name.lstrip("_")
 
 
-def get_class_name(class_) -> str | None:
-    if class_ is None:
+def to_field_type(python_type) -> str:
+    if python_type is None:
         return "None"
-    elif class_.__module__ in ["datetime"]:
-        return f"{class_.__module__}.{class_.__qualname__}"
+    elif python_type.__module__ in ["datetime"]:
+        return f"{python_type.__module__}.{python_type.__qualname__}"
     else:
-        return class_.__qualname__
+        return python_type.__qualname__
 
 
-def get_class_import(class_) -> str | None:
+def get_class_import_string(class_) -> str | None:
     if class_.__module__ == "builtins":
         return None
     elif class_.__module__ in ["datetime"]:
@@ -244,8 +244,8 @@ def create_model_code(dsn: str, database: str, table: str, class_: str) -> str:
         elif isinstance(column.type, types.UUID):
             python_type = uuid.UUID
 
-        field_name = get_field_name(column.name)
-        field_type = get_class_name(python_type)
+        field_name = to_field_name(column.name)
+        field_type = to_field_type(python_type)
 
         sa_column_kwargs = {
             "name": f"'{column.name}'",
@@ -269,7 +269,7 @@ def create_model_code(dsn: str, database: str, table: str, class_: str) -> str:
         column_def = f"{field_name}: {field_type} = Field({serialize_dict(field_kwargs)})"
         columns.append(column_def)
 
-        class_import = get_class_import(python_type)
+        class_import = get_class_import_string(python_type)
         if class_import:
             imports.append(class_import)
 
