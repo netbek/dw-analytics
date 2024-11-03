@@ -1,5 +1,5 @@
 from functools import lru_cache
-from package.database import build_connection_url, get_clickhouse_client, get_postgres_client
+from package.database import create_connection_url, get_clickhouse_client, get_postgres_client
 from pathlib import Path
 from typing import List
 
@@ -169,7 +169,7 @@ class PeerDBClient:
 
 class SourcePeer:
     def __init__(self, db_settings: dict) -> None:
-        self._db_url = build_connection_url(**db_settings)
+        self._db_url = create_connection_url(**db_settings)
 
     def set_table_replica_identity(self, table_identifier: str, replica_identity: str):
         with get_postgres_client(self._db_url) as (conn, cur):
@@ -244,7 +244,7 @@ class SourcePeer:
 
 class DestinationPeer:
     def __init__(self, db_settings: dict, database: str) -> None:
-        self._db_url = build_connection_url(**db_settings)
+        self._db_url = create_connection_url(**db_settings)
         self._database = database
 
     @property

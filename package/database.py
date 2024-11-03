@@ -34,7 +34,7 @@ def get_postgres_client(dsn: str):
         conn.close()
 
 
-def build_connection_url(
+def create_connection_url(
     type: str,
     host: str,
     port: int,

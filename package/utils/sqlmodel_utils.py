@@ -200,8 +200,8 @@ def serialize_dict(data: dict) -> str:
     return ", ".join(f"{key}={value}" for key, value in data.items())
 
 
-def generate_model_code(dsn: str, database: str, table: str, class_: str) -> str:
-    """Generate a SQLModel class from a table schema."""
+def create_model_code(dsn: str, database: str, table: str, class_: str) -> str:
+    """Create a SQLModel class from a table schema."""
     schema = get_table_schema(dsn, database, table)
 
     ddl = get_table_ddl(dsn, database, table)
@@ -273,11 +273,11 @@ def generate_model_code(dsn: str, database: str, table: str, class_: str) -> str
         if class_import:
             imports.append(class_import)
 
-    # Generate model code
+    # Create model code
     lines = []
 
     # Add DDL for reference
-    lines.append('"""\nGenerated from:\n\n' + ddl + '\n"""')
+    lines.append('"""\nCreated from:\n\n' + ddl + '\n"""')
     lines.append("")
 
     # Add imports
@@ -303,8 +303,8 @@ def generate_model_code(dsn: str, database: str, table: str, class_: str) -> str
     return "\n".join(lines) + "\n"
 
 
-def generate_factory_code(model_class: str, random_seed: int = 0) -> str:
-    """Generate a Pydantic model factory."""
+def create_factory_code(model_class: str, random_seed: int = 0) -> str:
+    """Create a Pydantic model factory."""
     imports = [
         f"from ..models import {model_class}",
         "from polyfactory.factories.pydantic_factory import ModelFactory",

@@ -1,4 +1,4 @@
-from package.database import build_connection_url
+from package.database import create_connection_url
 from package.tests.fixtures.database import *  # noqa
 from typing import Any, Generator
 
@@ -8,7 +8,7 @@ import pytest
 
 @pytest.fixture(scope="session")
 def clickhouse_url() -> Generator[str, Any, None]:
-    yield build_connection_url(
+    yield create_connection_url(
         type="clickhouse",
         driver=os.getenv("DEFAULT_TEST_CLICKHOUSE_DRIVER"),
         host=os.getenv("DEFAULT_TEST_CLICKHOUSE_HOST"),
