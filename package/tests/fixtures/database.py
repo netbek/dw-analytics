@@ -21,7 +21,7 @@ def clickhouse_client(clickhouse_url: str) -> Generator[Client, Any, None]:
 
 @pytest.fixture(scope="session")
 def clickhouse_engine(clickhouse_url: str) -> Generator[Engine, Any, None]:
-    yield create_engine(clickhouse_url, echo=True)
+    yield create_engine(clickhouse_url, echo=False)
 
 
 @pytest.fixture(scope="session")
@@ -80,7 +80,7 @@ def postgres_cursor(
 
 @pytest.fixture(scope="session")
 def postgres_engine(postgres_url: str) -> Generator[Engine, Any, None]:
-    yield create_engine(postgres_url, echo=True)
+    yield create_engine(postgres_url, echo=False)
 
 
 @pytest.fixture(scope="session")
