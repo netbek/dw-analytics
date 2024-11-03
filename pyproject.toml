@@ -5,6 +5,7 @@ profile = "black"
 py_version = 312
 
 [tool.ruff]
+extend-exclude = ["*.ipynb"]
 line-length = 100
 target-version = "py312"
 
