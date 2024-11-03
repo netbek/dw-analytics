@@ -111,4 +111,3 @@ alias la="ls -A"
 alias l="ls -CF"
 
 alias cli="python ${HOME}/package/cli"
-alias rum="pre-commit run --config ${HOME}/.pre-commit-config.yaml --hook-stage manual --all-files"
