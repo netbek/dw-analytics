@@ -113,6 +113,11 @@ class Project:
 
     @property
     @lru_cache
+    def tests_directory(self) -> Path:
+        return Path(os.path.join(self.directory, "tests"))
+
+    @property
+    @lru_cache
     def peerdb_api_url(self) -> str:
         return get_env_var("PEERDB_API_URL")
 
