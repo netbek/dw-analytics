@@ -1,20 +1,13 @@
-__all__ = [
-    "generate_test_database_connection_url",
-    "test_database_connection_url",
-]
-
-from ..config.settings import get_settings
-from package.tests.conftest import (
-    generate_test_database_connection_url,
-    test_database_connection_url,
-)
+from package.database import build_connection_url
+from package.project import Project
+from package.tests.fixtures.database import *  # noqa
+from typing import Any, Generator
 
 import pytest
 
-pytest_plugins = "package.tests.fixtures.database"
-settings = get_settings()
+project = Project.from_path(__file__)
 
 
 @pytest.fixture(scope="session")
-def database_connection_url() -> str:
-    return settings.db.URL
+def clickhouse_url() -> Generator[str, Any, None]:
+    yield build_connection_url(**project.test_db_settings)

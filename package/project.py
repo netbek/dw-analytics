@@ -165,6 +165,27 @@ class Project:
             "database": database,
         }
 
+    @property
+    @lru_cache
+    def test_db_settings(self) -> dict:
+        namespace = self.name.upper()
+        driver = get_env_var(f"{namespace}_TEST_CLICKHOUSE_DRIVER")
+        host = get_env_var(f"{namespace}_TEST_CLICKHOUSE_HOST")
+        port = get_env_var(f"{namespace}_TEST_CLICKHOUSE_PORT")
+        username = get_env_var(f"{namespace}_TEST_CLICKHOUSE_USERNAME")
+        password = get_env_var(f"{namespace}_TEST_CLICKHOUSE_PASSWORD")
+        database = get_env_var(f"{namespace}_TEST_CLICKHOUSE_DATABASE")
+
+        return {
+            "type": "clickhouse",
+            "driver": driver,
+            "host": host,
+            "port": port,
+            "username": username,
+            "password": password,
+            "database": database,
+        }
+
     def init_directory(self):
         """Copy template project files to the project directory."""
         rmtree(self.directory)

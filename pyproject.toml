@@ -29,4 +29,4 @@ norecursedirs = [
 python_classes = ["Test*"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-testpaths = ["tests"]
+# testpaths = ["tests"]
