@@ -51,9 +51,6 @@ def clickhouse_database(clickhouse_engine: Engine, clickhouse_session: Session):
 
     yield
 
-    # Drop tables
-    SQLModel.metadata.drop_all(clickhouse_engine)
-
     # Drop databases
     for schema in schemas:
         clickhouse_session.exec(text("DROP DATABASE IF EXISTS {};".format(f'"{schema}"')))
