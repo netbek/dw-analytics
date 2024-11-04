@@ -1,5 +1,6 @@
 from clickhouse_sqlalchemy import types
 from package.database import get_clickhouse_client
+from package.types import DbtSourceTable
 from package.utils.python_utils import is_python_keyword
 from sqlmodel import create_engine, MetaData, Table
 
@@ -366,17 +367,19 @@ def create_factory_file(model_name: str, directory: str) -> None:
         fp.write(code)
 
 
-def create_init_file(models: list, directory: str) -> None:
+def create_init_file(tables: list[DbtSourceTable], directory: str) -> None:
     file_path = os.path.join(directory, "__init__.py")
     all = []
     imports = []
 
-    for model_table, model_name in models:
-        model_filename = create_class_filename(model_name)
-        all.append(model_name)
-        imports.append(f"from .{model_filename} import {model_name}")
+    for table in tables:
+        class_name = table["meta"]["class_name"]
 
-        factory_name = create_factory_name(model_name)
+        model_filename = create_class_filename(class_name)
+        all.append(class_name)
+        imports.append(f"from .{model_filename} import {class_name}")
+
+        factory_name = create_factory_name(class_name)
         factory_filename = create_class_filename(factory_name)
         all.append(factory_name)
         imports.append(f"from .{factory_filename} import {factory_name}")
