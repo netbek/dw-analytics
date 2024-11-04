@@ -1,5 +1,6 @@
 from clickhouse_sqlalchemy import types
 from package.database import get_clickhouse_client
+from package.utils.python_utils import is_python_keyword
 from sqlmodel import create_engine, MetaData, Table
 
 # import pydantic
@@ -200,7 +201,21 @@ def serialize_dict(data: dict) -> str:
     return ", ".join(f"{key}={value}" for key, value in data.items())
 
 
-def create_model_code(dsn: str, database: str, table: str, class_: str) -> str:
+def create_class_filename(class_name: str) -> str:
+    filename = pydash.snake_case(class_name)
+
+    # Fix keywords
+    if is_python_keyword(filename):
+        filename = filename + "_"
+
+    return filename
+
+
+def create_factory_name(model_name: str) -> str:
+    return f"{model_name}Factory"
+
+
+def create_model_code(dsn: str, database: str, table: str, model_name: str) -> str:
     """Create a SQLModel class from a table schema."""
     schema = get_table_schema(dsn, database, table)
 
@@ -288,7 +303,7 @@ def create_model_code(dsn: str, database: str, table: str, class_: str) -> str:
     # Add table class
     lines.append("")
     lines.append("")
-    lines.append(f"class {class_}(SQLModel, table=True):")
+    lines.append(f"class {model_name}(SQLModel, table=True):")
     lines.append(INDENT + f"__tablename__ = '{table}'")
     lines.append(
         INDENT
@@ -303,10 +318,13 @@ def create_model_code(dsn: str, database: str, table: str, class_: str) -> str:
     return "\n".join(lines) + "\n"
 
 
-def create_factory_code(model_class: str, random_seed: int = 0) -> str:
+def create_factory_code(model_name: str, random_seed: int = 0) -> str:
     """Create a Pydantic model factory."""
+    model_filename = create_class_filename(model_name)
+    factory_name = create_factory_name(model_name)
+
     imports = [
-        f"from ..models import {model_class}",
+        f"from .{model_filename} import {model_name}",
         "from polyfactory.factories.pydantic_factory import ModelFactory",
     ]
 
@@ -320,7 +338,7 @@ def create_factory_code(model_class: str, random_seed: int = 0) -> str:
     # Add factory class
     lines.append("")
     lines.append("")
-    lines.append(f"class {model_class}Factory(ModelFactory[{model_class}]):")
+    lines.append(f"class {factory_name}(ModelFactory[{model_name}]):")
     lines.append(INDENT + f"__random_seed__ = {random_seed}")
 
     return "\n".join(lines) + "\n"
