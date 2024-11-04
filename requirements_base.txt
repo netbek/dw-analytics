@@ -10,6 +10,8 @@ prefect-dbt==0.6.3
 prefect-jupyter==0.3.1
 prefect-shell==0.3.0
 psycopg2-binary==2.9.10
+pydantic==2.9.2
+pydantic-settings==2.6.1
 pydash==8.0.3
 PyYAML==6.0.2
 rich==13.9.3
