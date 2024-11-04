@@ -221,8 +221,8 @@ def create_factory_name(model_name: str) -> str:
 
 def create_model_code(dsn: str, database: str, table: DbtSourceTable) -> str:
     """Create the code of a SQLModel class from a table schema."""
-    table_name = table["name"]
-    model_name = table["meta"]["class_name"]
+    table_name = table.name
+    model_name = table.meta.class_name
     schema = get_table_schema(dsn, database, table_name)
     ddl = get_table_ddl(dsn, database, table_name)
     parsed_ddl = parse_ddl(ddl)
@@ -324,7 +324,7 @@ def create_model_code(dsn: str, database: str, table: DbtSourceTable) -> str:
 
 
 def create_model_file(dsn: str, database: str, table: DbtSourceTable, directory: str) -> None:
-    model_name = table["meta"]["class_name"]
+    model_name = table.meta.class_name
     filename = create_class_filename(model_name)
     file_path = os.path.join(directory, f"{filename}.py")
     code = create_model_code(dsn, database, table)
@@ -335,7 +335,7 @@ def create_model_file(dsn: str, database: str, table: DbtSourceTable, directory:
 
 def create_factory_code(table: DbtSourceTable, random_seed: int = 0) -> str:
     """Create the code of a Pydantic model factory."""
-    model_name = table["meta"]["class_name"]
+    model_name = table.meta.class_name
     model_filename = create_class_filename(model_name)
     factory_name = create_factory_name(model_name)
 
@@ -361,7 +361,7 @@ def create_factory_code(table: DbtSourceTable, random_seed: int = 0) -> str:
 
 
 def create_factory_file(table: DbtSourceTable, directory: str) -> None:
-    model_name = table["meta"]["class_name"]
+    model_name = table.meta.class_name
     factory_name = create_factory_name(model_name)
     filename = create_class_filename(factory_name)
     file_path = os.path.join(directory, f"{filename}.py")
@@ -377,7 +377,7 @@ def create_init_file(tables: list[DbtSourceTable], directory: str) -> None:
     imports = []
 
     for table in tables:
-        class_name = table["meta"]["class_name"]
+        class_name = table.meta.class_name
 
         model_filename = create_class_filename(class_name)
         all.append(class_name)

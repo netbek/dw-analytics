@@ -1,4 +1,5 @@
 from package.project import Project
+from package.types import DbtSourcesConfig
 from package.utils.filesystem import rmtree
 from package.utils.pydantic_utils import dump_csv
 from package.utils.yaml_utils import PrettySafeDumper
@@ -127,6 +128,13 @@ def update_model_unit_tests(project: Project, fixtures: list[dict]):
 def export_fixtures(project: Project, fixtures: list[dict]):
     dump_fixtures_csv(project, fixtures)
     update_model_unit_tests(project, fixtures)
+
+
+def load_sources_config(config_path: str) -> DbtSourcesConfig:
+    with open(config_path, "rt") as fp:
+        data = yaml.safe_load(fp)
+
+    return DbtSourcesConfig(**data)
 
 
 def dbt_run_command_args(
