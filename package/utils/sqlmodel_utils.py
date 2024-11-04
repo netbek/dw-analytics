@@ -3,10 +3,13 @@ from package.database import get_clickhouse_client
 from package.utils.python_utils import is_python_keyword
 from sqlmodel import create_engine, MetaData, Table
 
-# import pydantic
+import os
 import pydash
 import re
 import uuid
+
+# import pydantic
+
 
 CLICKHOUSE_TYPES = [
     "AggregateFunction",
@@ -216,7 +219,7 @@ def create_factory_name(model_name: str) -> str:
 
 
 def create_model_code(dsn: str, database: str, table: str, model_name: str) -> str:
-    """Create a SQLModel class from a table schema."""
+    """Create the code of a SQLModel class from a table schema."""
     schema = get_table_schema(dsn, database, table)
 
     ddl = get_table_ddl(dsn, database, table)
@@ -318,8 +321,17 @@ def create_model_code(dsn: str, database: str, table: str, model_name: str) -> s
     return "\n".join(lines) + "\n"
 
 
+def create_model_file(dsn: str, database: str, table: str, model_name: str, directory: str) -> None:
+    filename = create_class_filename(model_name)
+    file_path = os.path.join(directory, f"{filename}.py")
+    code = create_model_code(dsn, database, table, model_name)
+
+    with open(file_path, "wt") as fp:
+        fp.write(code)
+
+
 def create_factory_code(model_name: str, random_seed: int = 0) -> str:
-    """Create a Pydantic model factory."""
+    """Create the code of a Pydantic model factory."""
     model_filename = create_class_filename(model_name)
     factory_name = create_factory_name(model_name)
 
@@ -342,3 +354,35 @@ def create_factory_code(model_name: str, random_seed: int = 0) -> str:
     lines.append(INDENT + f"__random_seed__ = {random_seed}")
 
     return "\n".join(lines) + "\n"
+
+
+def create_factory_file(model_name: str, directory: str) -> None:
+    factory_name = create_factory_name(model_name)
+    filename = create_class_filename(factory_name)
+    file_path = os.path.join(directory, f"{filename}.py")
+    code = create_factory_code(model_name)
+
+    with open(file_path, "wt") as fp:
+        fp.write(code)
+
+
+def create_init_file(models: list, directory: str) -> None:
+    file_path = os.path.join(directory, "__init__.py")
+    all = []
+    imports = []
+
+    for model_table, model_name in models:
+        model_filename = create_class_filename(model_name)
+        all.append(model_name)
+        imports.append(f"from .{model_filename} import {model_name}")
+
+        factory_name = create_factory_name(model_name)
+        factory_filename = create_class_filename(factory_name)
+        all.append(factory_name)
+        imports.append(f"from .{factory_filename} import {factory_name}")
+
+    lines = [f"__all__ = {all}", "", "\n".join(imports), ""]
+    code = "\n".join(lines)
+
+    with open(file_path, "wt") as fp:
+        fp.write(code)
