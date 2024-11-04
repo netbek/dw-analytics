@@ -9,12 +9,24 @@ T = TypeVar("T")
 class SyncPersistenceHandler(SyncPersistenceProtocol[SQLModel]):
     def save(self, session: Session, data: SQLModel) -> SQLModel:
         session.add(data)
-        session.flush()
+
+        try:
+            session.flush()
+        except Exception:
+            session.rollback()
+            raise
+
         return data
 
     def save_many(self, session: Session, data: List[SQLModel]) -> List[SQLModel]:
         session.add_all(data)
-        session.flush()
+
+        try:
+            session.flush()
+        except Exception:
+            session.rollback()
+            raise
+
         return data
 
 
