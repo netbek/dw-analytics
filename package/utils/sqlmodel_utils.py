@@ -219,11 +219,12 @@ def create_factory_name(model_name: str) -> str:
     return f"{model_name}Factory"
 
 
-def create_model_code(dsn: str, database: str, table: str, model_name: str) -> str:
+def create_model_code(dsn: str, database: str, table: DbtSourceTable) -> str:
     """Create the code of a SQLModel class from a table schema."""
-    schema = get_table_schema(dsn, database, table)
-
-    ddl = get_table_ddl(dsn, database, table)
+    table_name = table["name"]
+    model_name = table["meta"]["class_name"]
+    schema = get_table_schema(dsn, database, table_name)
+    ddl = get_table_ddl(dsn, database, table_name)
     parsed_ddl = parse_ddl(ddl)
     table_kwargs = {"schema": database}
     engine = parsed_ddl["engine"]
@@ -308,7 +309,7 @@ def create_model_code(dsn: str, database: str, table: str, model_name: str) -> s
     lines.append("")
     lines.append("")
     lines.append(f"class {model_name}(SQLModel, table=True):")
-    lines.append(INDENT + f"__tablename__ = '{table}'")
+    lines.append(INDENT + f"__tablename__ = '{table_name}'")
     lines.append(
         INDENT
         + f"__table_args__ = (engines.{engine}({serialize_dict(engine_kwargs)}), {table_kwargs},)"
@@ -322,17 +323,19 @@ def create_model_code(dsn: str, database: str, table: str, model_name: str) -> s
     return "\n".join(lines) + "\n"
 
 
-def create_model_file(dsn: str, database: str, table: str, model_name: str, directory: str) -> None:
+def create_model_file(dsn: str, database: str, table: DbtSourceTable, directory: str) -> None:
+    model_name = table["meta"]["class_name"]
     filename = create_class_filename(model_name)
     file_path = os.path.join(directory, f"{filename}.py")
-    code = create_model_code(dsn, database, table, model_name)
+    code = create_model_code(dsn, database, table)
 
     with open(file_path, "wt") as fp:
         fp.write(code)
 
 
-def create_factory_code(model_name: str, random_seed: int = 0) -> str:
+def create_factory_code(table: DbtSourceTable, random_seed: int = 0) -> str:
     """Create the code of a Pydantic model factory."""
+    model_name = table["meta"]["class_name"]
     model_filename = create_class_filename(model_name)
     factory_name = create_factory_name(model_name)
 
@@ -357,11 +360,12 @@ def create_factory_code(model_name: str, random_seed: int = 0) -> str:
     return "\n".join(lines) + "\n"
 
 
-def create_factory_file(model_name: str, directory: str) -> None:
+def create_factory_file(table: DbtSourceTable, directory: str) -> None:
+    model_name = table["meta"]["class_name"]
     factory_name = create_factory_name(model_name)
     filename = create_class_filename(factory_name)
     file_path = os.path.join(directory, f"{filename}.py")
-    code = create_factory_code(model_name)
+    code = create_factory_code(table)
 
     with open(file_path, "wt") as fp:
         fp.write(code)

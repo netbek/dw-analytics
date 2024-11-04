@@ -1,4 +1,4 @@
-from typing import TypedDict
+from typing import Optional, TypedDict
 
 
 class DbtSourceTableMeta(TypedDict):
@@ -7,4 +7,4 @@ class DbtSourceTableMeta(TypedDict):
 
 class DbtSourceTable(TypedDict):
     name: str
-    meta: DbtSourceTableMeta
+    meta: Optional[DbtSourceTableMeta]
