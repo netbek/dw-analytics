@@ -267,8 +267,8 @@ def create_model_code(dsn: str, database: str, table: DbtSourceTable) -> str:
         if column.primary_key:
             sqlalchemy_column_kwargs["primary_key"] = True
 
-        if column.nullable:
-            sqlalchemy_column_kwargs["nullable"] = True
+        if not column.primary_key:
+            sqlalchemy_column_kwargs["nullable"] = column.nullable
 
         field_kwargs = {
             "sa_column": f"Column({serialize_dict(sqlalchemy_column_kwargs)})",
