@@ -1,16 +1,14 @@
 from clickhouse_sqlalchemy import types
-from package.database import get_clickhouse_client
+from package.database import get_table_ddl, get_table_schema
 from package.types import DbtSourceTable
 from package.utils.python_utils import is_python_keyword
-from sqlmodel import create_engine, MetaData, Table
+from sqlalchemy import Column
+from typing import Any
 
 import os
 import pydash
 import re
 import uuid
-
-# import pydantic
-
 
 CLICKHOUSE_TYPES = [
     "AggregateFunction",
@@ -58,36 +56,10 @@ SQLALCHEMY_TO_CLICKHOUSE_TYPES = {
 
 INDENT = pydash.repeat(" ", 4)
 
-PYTHON_TYPE = {
-    # "_peerdb_synced_at": pydantic.PastDatetime,
-}
-
 FIELD_KWARGS = {
     "_peerdb_is_deleted": {"ge": 0, "le": 1},
     "_peerdb_version": {"ge": 0},
 }
-
-
-def get_table_ddl(dsn: str, database: str, table: str) -> str:
-    with get_clickhouse_client(dsn) as client:
-        result = client.command(
-            "show create table {database:Identifier}.{table:Identifier};",
-            parameters={
-                "database": database,
-                "table": table,
-            },
-        )
-        result = result.replace("\\n", "\n")
-
-    return result
-
-
-def get_table_schema(dsn: str, database: str, table: str) -> Table:
-    engine = create_engine(dsn, echo=False)
-    metadata = MetaData(schema=database)
-    metadata.reflect(bind=engine)
-
-    return metadata.tables.get(f"{database}.{table}")
 
 
 def parse_ddl(ddl: str) -> dict:
@@ -134,13 +106,42 @@ def to_field_name(column_name: str) -> str:
     return column_name.lstrip("_")
 
 
-def to_field_type(python_type) -> str:
+def get_pydantic_type(column: Column) -> str:
+    python_type = get_python_type(column)
+
     if python_type is None:
-        return "None"
+        pydantic_type = "None"
     elif python_type.__module__ in ["datetime"]:
-        return f"{python_type.__module__}.{python_type.__qualname__}"
+        pydantic_type = f"{python_type.__module__}.{python_type.__qualname__}"
     else:
-        return python_type.__qualname__
+        pydantic_type = python_type.__qualname__
+
+    if column.nullable:
+        pydantic_type = f"{pydantic_type} | None"
+
+    return pydantic_type
+
+
+def get_python_type(column: Column) -> Any:
+    try:
+        nested_type = getattr(column.type, "nested_type")
+    except AttributeError:
+        nested_type = None
+
+    if nested_type:
+        type_ = nested_type
+    else:
+        type_ = column.type
+
+    if isinstance(column.type, types.UUID):
+        python_type = uuid.UUID
+    else:
+        try:
+            python_type = getattr(type_, "python_type")
+        except NotImplementedError:
+            python_type = None
+
+    return python_type
 
 
 def get_class_import_string(class_) -> str | None:
@@ -181,7 +182,7 @@ class NestedTypeNode(ASTNode):
         return f"types.{self.modifier}({self.inner})"
 
 
-def get_sqlalchemy_type(type_str: str) -> ASTNode:
+def get_sqlalchemy_type(column: Column) -> str:
     def parse_inner(string: str) -> ASTNode | None:
         if "(" in string and ")" in string:
             modifier, inner = string.split("(", 1)
@@ -198,7 +199,7 @@ def get_sqlalchemy_type(type_str: str) -> ASTNode:
             else:
                 return ArgumentNode(string)
 
-    return parse_inner(type_str)
+    return str(parse_inner(str(column.type)))
 
 
 def serialize_dict(data: dict) -> str:
@@ -240,53 +241,43 @@ def create_model_code(dsn: str, database: str, table: DbtSourceTable) -> str:
         engine_kwargs["primary_key"] = tuple(parsed_ddl["primary_key"])
 
     imports = [
-        "from clickhouse_sqlalchemy import types, engines",
+        "from clickhouse_sqlalchemy import engines",
+        "from package.sqlalchemy.clickhouse import types",
         "from sqlmodel import Column, Field, SQLModel",
     ]
 
     columns = []
 
     for column in schema.columns:
-        try:
-            nested_type = getattr(column.type, "nested_type")
-        except AttributeError:
-            nested_type = None
-
-        type_ = nested_type if nested_type else column.type
-
-        try:
-            python_type = getattr(type_, "python_type")
-        except NotImplementedError:
-            python_type = None
-
-        if column.name in PYTHON_TYPE:
-            python_type = PYTHON_TYPE[column.name]
-        elif isinstance(column.type, types.UUID):
-            python_type = uuid.UUID
-
+        dbt_column = pydash.find(table.columns, lambda x: x.name == column.name)
         field_name = to_field_name(column.name)
-        field_type = to_field_type(python_type)
+        python_type = get_python_type(column)
+        pydantic_type = get_pydantic_type(column)
 
-        sa_column_kwargs = {
+        if dbt_column and dbt_column.meta and dbt_column.meta.sqlalchemy_type:
+            sqlalchemy_type = dbt_column.meta.sqlalchemy_type
+        else:
+            sqlalchemy_type = get_sqlalchemy_type(column)
+
+        sqlalchemy_column_kwargs = {
             "name": f"'{column.name}'",
-            "type_": get_sqlalchemy_type(str(column.type)),
+            "type_": sqlalchemy_type,
         }
 
         if column.primary_key:
-            sa_column_kwargs["primary_key"] = True
+            sqlalchemy_column_kwargs["primary_key"] = True
 
         if column.nullable:
-            sa_column_kwargs["nullable"] = True
-            field_type = f"{field_type} | None"
+            sqlalchemy_column_kwargs["nullable"] = True
 
         field_kwargs = {
-            "sa_column": f"Column({serialize_dict(sa_column_kwargs)})",
+            "sa_column": f"Column({serialize_dict(sqlalchemy_column_kwargs)})",
         }
 
         if column.name in FIELD_KWARGS:
             field_kwargs.update(FIELD_KWARGS[column.name])
 
-        column_def = f"{field_name}: {field_type} = Field({serialize_dict(field_kwargs)})"
+        column_def = f"{field_name}: {pydantic_type} = Field({serialize_dict(field_kwargs)})"
         columns.append(column_def)
 
         class_import = get_class_import_string(python_type)
