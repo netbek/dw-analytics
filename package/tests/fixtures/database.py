@@ -13,10 +13,9 @@ import pytest
 def clickhouse_client(clickhouse_url: str) -> Generator[Client, Any, None]:
     client = clickhouse_connect.get_client(dsn=clickhouse_url)
 
-    try:
-        yield client
-    finally:
-        client.close()
+    yield client
+
+    client.close()
 
 
 @pytest.fixture(scope="session")
