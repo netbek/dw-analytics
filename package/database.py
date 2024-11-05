@@ -2,10 +2,12 @@ from clickhouse_connect.driver.client import Client
 from collections.abc import Generator
 from contextlib import contextmanager
 from jinja2 import Environment
-from typing import Any, Optional
+from sqlmodel import create_engine, MetaData, Table
+from typing import Any, List, Optional
 
 import clickhouse_connect
 import psycopg2
+import pydash
 import re
 import sqlparse
 
@@ -65,3 +67,33 @@ def render_statement(
         )
 
     return statement
+
+
+def get_table_ddl(dsn: str, database: str, table: str) -> str:
+    with get_clickhouse_client(dsn) as client:
+        result = client.command(
+            "show create table {database:Identifier}.{table:Identifier};",
+            parameters={
+                "database": database,
+                "table": table,
+            },
+        )
+        result = result.replace("\\n", "\n")
+
+    return result
+
+
+def get_table_schema(dsn: str, database: str, table: str) -> Table:
+    engine = create_engine(dsn, echo=False)
+    metadata = MetaData(schema=database)
+    metadata.reflect(bind=engine)
+
+    return metadata.tables.get(f"{database}.{table}")
+
+
+def list_tables(dsn: str, database: str) -> List[Table]:
+    engine = create_engine(dsn, echo=False)
+    metadata = MetaData(schema=database)
+    metadata.reflect(bind=engine)
+
+    return pydash.sort_by(list(metadata.tables.values()), lambda table: table.name)
