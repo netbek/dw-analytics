@@ -1,5 +1,5 @@
 from clickhouse_sqlalchemy import types
-from package.database import get_table_ddl, get_table_schema
+from package.database import get_create_table_statement, get_table_schema
 from package.types import DbtSourceTable
 from package.utils.python_utils import is_python_keyword
 from sqlalchemy import Column
@@ -62,7 +62,7 @@ FIELD_KWARGS = {
 }
 
 
-def parse_ddl(ddl: str) -> dict:
+def parse_create_table_statement(statement: str) -> dict:
     pattern = (
         r"(PRIMARY\s+KEY|ORDER\s+BY)\s*\(([\w\s,]+)\)|(PRIMARY\s+KEY|ORDER\s+BY)\s+(\w+)|"
         r"ENGINE\s*=\s*([\w]+)\s*\(?([\w\s,]*)\)?"
@@ -76,7 +76,7 @@ def parse_ddl(ddl: str) -> dict:
     }
 
     # Find all matches for PRIMARY KEY, ORDER BY, and ENGINE
-    matches = re.finditer(pattern, ddl, re.IGNORECASE)
+    matches = re.finditer(pattern, statement, re.IGNORECASE)
 
     for match in matches:
         # Check for PRIMARY KEY or ORDER BY
@@ -225,20 +225,20 @@ def create_model_code(dsn: str, database: str, table: DbtSourceTable) -> str:
     table_name = table.name
     model_name = table.meta.class_name
     schema = get_table_schema(dsn, database, table_name)
-    ddl = get_table_ddl(dsn, database, table_name)
-    parsed_ddl = parse_ddl(ddl)
+    statement = get_create_table_statement(dsn, database, table_name)
+    parsed_statement = parse_create_table_statement(statement)
     table_kwargs = {"schema": database}
-    engine = parsed_ddl["engine"]
+    engine = parsed_statement["engine"]
     engine_kwargs = {}
 
-    if parsed_ddl["version"]:
-        engine_kwargs["version"] = f"'{parsed_ddl["version"]}'"
+    if parsed_statement["version"]:
+        engine_kwargs["version"] = f"'{parsed_statement["version"]}'"
 
-    if parsed_ddl["order_by"]:
-        engine_kwargs["order_by"] = tuple(parsed_ddl["order_by"])
+    if parsed_statement["order_by"]:
+        engine_kwargs["order_by"] = tuple(parsed_statement["order_by"])
 
-    if parsed_ddl["primary_key"]:
-        engine_kwargs["primary_key"] = tuple(parsed_ddl["primary_key"])
+    if parsed_statement["primary_key"]:
+        engine_kwargs["primary_key"] = tuple(parsed_statement["primary_key"])
 
     imports = [
         "from clickhouse_sqlalchemy import engines",
@@ -287,8 +287,8 @@ def create_model_code(dsn: str, database: str, table: DbtSourceTable) -> str:
     # Create model code
     lines = []
 
-    # Add DDL for reference
-    lines.append('"""\nCreated from:\n\n' + ddl + '\n"""')
+    # Add statement for reference
+    lines.append('"""\nCreated from:\n\n' + statement + '\n"""')
     lines.append("")
 
     # Add imports

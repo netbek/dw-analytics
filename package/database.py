@@ -71,7 +71,7 @@ def render_statement(
     return statement
 
 
-def get_table_ddl(dsn: str, database: str, table: str) -> str:
+def get_create_table_statement(dsn: str, database: str, table: str) -> str:
     with get_clickhouse_client(dsn) as client:
         result = client.command(
             "show create table {database:Identifier}.{table:Identifier};",
