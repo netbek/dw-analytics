@@ -28,14 +28,16 @@ def get_clickhouse_client(dsn: str) -> Generator[CHClient | None]:
 
 
 @contextmanager
-def get_postgres_client(dsn: str, autocommit: bool = True):
-    conn = psycopg2.connect(dsn=dsn)
+def get_postgres_client(
+    dsn: str, autocommit: bool = True
+) -> Generator[tuple[psycopg2.extensions.connection, psycopg2.extensions.cursor], Any, None]:
+    connection = psycopg2.connect(dsn=dsn)
     try:
-        conn.autocommit = autocommit
-        with conn.cursor() as cur:
-            yield conn, cur
+        connection.autocommit = autocommit
+        with connection.cursor() as cursor:
+            yield connection, cursor
     finally:
-        conn.close()
+        connection.close()
 
 
 def create_connection_url(
