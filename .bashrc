@@ -14,7 +14,8 @@ tput_reset=`tput sgr0`
 
 PS1="${ansi_green}\u${ansi_reset}:${ansi_cyan}\w${ansi_reset}\$ "
 
-# Prevent less history file from being stored.
+# Prevent bash and less history files from being stored.
+export HISTFILE=/dev/null
 export LESSHISTFILE=/dev/null
 
 # Check whether the 2nd directory is a descendant of the 1st directory.

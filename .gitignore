@@ -9,6 +9,7 @@
 .gitconfig
 .gk
 .ipynb_checkpoints
+.lesshst
 .local
 .prefect/flows.json
 .prefect/memo_store.toml
