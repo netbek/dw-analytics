@@ -1,5 +1,5 @@
 from package.database import create_connection_url
-from package.tests.fixtures.database import *  # noqa
+from package.tests.fixtures.database import *  # noqa: F403
 from typing import Any, Generator
 
 import os
