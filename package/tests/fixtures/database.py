@@ -10,8 +10,8 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def clickhouse_client(clickhouse_url: str) -> Generator[CHClient, Any, None]:
-    client = clickhouse_connect.get_client(dsn=clickhouse_url)
+def ch_client(ch_url: str) -> Generator[CHClient, Any, None]:
+    client = clickhouse_connect.get_client(dsn=ch_url)
 
     yield client
 
@@ -19,14 +19,12 @@ def clickhouse_client(clickhouse_url: str) -> Generator[CHClient, Any, None]:
 
 
 @pytest.fixture(scope="session")
-def clickhouse_engine(clickhouse_url: str) -> Generator[Engine, Any, None]:
-    yield create_engine(clickhouse_url, echo=False)
+def ch_engine(ch_url: str) -> Generator[Engine, Any, None]:
+    yield create_engine(ch_url, echo=False)
 
 
 @pytest.fixture(scope="session")
-def clickhouse_database(
-    clickhouse_engine: Engine, clickhouse_client: CHClient
-) -> Generator[None, Any, None]:
+def ch_database(ch_engine: Engine, ch_client: CHClient) -> Generator[None, Any, None]:
     # Get database names
     schemas = [table.schema for table in SQLModel.metadata.tables.values() if table.schema]
     schemas = pydash.uniq(schemas)
@@ -34,47 +32,43 @@ def clickhouse_database(
 
     # Create databases
     for schema in schemas:
-        clickhouse_client.command(
+        ch_client.command(
             "DROP DATABASE IF EXISTS {schema:Identifier};", parameters={"schema": schema}
         )
-        clickhouse_client.command(
-            "CREATE DATABASE {schema:Identifier};", parameters={"schema": schema}
-        )
+        ch_client.command("CREATE DATABASE {schema:Identifier};", parameters={"schema": schema})
 
     # Create tables
-    SQLModel.metadata.create_all(clickhouse_engine)
+    SQLModel.metadata.create_all(ch_engine)
 
     yield
 
     # Drop databases
     for schema in schemas:
-        clickhouse_client.command(
+        ch_client.command(
             "DROP DATABASE IF EXISTS {schema:Identifier};", parameters={"schema": schema}
         )
 
 
 @pytest.fixture(scope="function")
-def clickhouse_session(
-    clickhouse_engine: Engine, clickhouse_client: CHClient, clickhouse_database: None
+def ch_session(
+    ch_engine: Engine, ch_client: CHClient, ch_database: None
 ) -> Generator[DBSession, Any, None]:
-    session = DBSession(clickhouse_engine)
+    session = DBSession(ch_engine)
 
     yield session
 
     session.close()
 
     for table in SQLModel.metadata.tables.values():
-        clickhouse_client.command(
+        ch_client.command(
             "TRUNCATE TABLE {schema:Identifier}.{name:Identifier};",
             parameters={"schema": table.schema, "name": table.name},
         )
 
 
 @pytest.fixture(scope="session")
-def postgres_connection(
-    postgres_url: str,
-) -> Generator[psycopg2.extensions.connection, Any, None]:
-    connection = psycopg2.connect(dsn=postgres_url)
+def pg_connection(pg_url: str) -> Generator[psycopg2.extensions.connection, Any, None]:
+    connection = psycopg2.connect(dsn=pg_url)
 
     yield connection
 
@@ -82,21 +76,21 @@ def postgres_connection(
 
 
 @pytest.fixture(scope="session")
-def postgres_cursor(
-    postgres_connection: psycopg2.extensions.connection,
+def pg_cursor(
+    pg_connection: psycopg2.extensions.connection,
 ) -> Generator[psycopg2.extensions.cursor, Any, None]:
-    with postgres_connection.cursor() as cursor:
+    with pg_connection.cursor() as cursor:
         yield cursor
 
 
 @pytest.fixture(scope="session")
-def postgres_engine(postgres_url: str) -> Generator[Engine, Any, None]:
-    yield create_engine(postgres_url, echo=False)
+def pg_engine(pg_url: str) -> Generator[Engine, Any, None]:
+    yield create_engine(pg_url, echo=False)
 
 
 @pytest.fixture(scope="function")
-def postgres_session(postgres_engine: Engine) -> Generator[DBSession, Any, None]:
-    session = DBSession(postgres_engine)
+def pg_session(pg_engine: Engine) -> Generator[DBSession, Any, None]:
+    session = DBSession(pg_engine)
 
     yield session
 

@@ -7,7 +7,7 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def clickhouse_url() -> Generator[str, Any, None]:
+def ch_url() -> Generator[str, Any, None]:
     yield create_connection_url(
         type="clickhouse",
         driver=os.getenv("DEFAULT_TEST_CLICKHOUSE_DRIVER"),
