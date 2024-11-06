@@ -1,6 +1,6 @@
-from clickhouse_connect.driver.client import Client
+from package.database import CHClient, DBSession
 from sqlalchemy import Engine
-from sqlmodel import create_engine, Session, SQLModel, text
+from sqlmodel import create_engine, SQLModel
 from typing import Any, Generator
 
 import clickhouse_connect
@@ -10,7 +10,7 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def clickhouse_client(clickhouse_url: str) -> Generator[Client, Any, None]:
+def clickhouse_client(clickhouse_url: str) -> Generator[CHClient, Any, None]:
     client = clickhouse_connect.get_client(dsn=clickhouse_url)
 
     yield client
@@ -24,9 +24,9 @@ def clickhouse_engine(clickhouse_url: str) -> Generator[Engine, Any, None]:
 
 
 @pytest.fixture(scope="session")
-def clickhouse_database(clickhouse_engine: Engine) -> Generator[None, Any, None]:
-    session = Session(clickhouse_engine)
-
+def clickhouse_database(
+    clickhouse_engine: Engine, clickhouse_client: CHClient
+) -> Generator[None, Any, None]:
     # Get database names
     schemas = [table.schema for table in SQLModel.metadata.tables.values() if table.schema]
     schemas = pydash.uniq(schemas)
@@ -34,37 +34,31 @@ def clickhouse_database(clickhouse_engine: Engine) -> Generator[None, Any, None]
 
     # Create databases
     for schema in schemas:
-        session.exec(text(f"DROP DATABASE IF EXISTS `{schema}`;"))
-        session.exec(text(f"CREATE DATABASE `{schema}`;"))
+        clickhouse_client.command(f"DROP DATABASE IF EXISTS `{schema}`;")
+        clickhouse_client.command(f"CREATE DATABASE `{schema}`;")
 
     # Create tables
     SQLModel.metadata.create_all(clickhouse_engine)
 
-    session.close()
-
     yield
-
-    session = Session(clickhouse_engine)
 
     # Drop databases
     for schema in schemas:
-        session.exec(text(f"DROP DATABASE IF EXISTS `{schema}`;"))
-
-    session.close()
+        clickhouse_client.command(f"DROP DATABASE IF EXISTS `{schema}`;")
 
 
 @pytest.fixture(scope="function")
 def clickhouse_session(
-    clickhouse_engine: Engine, clickhouse_database: None
-) -> Generator[Session, Any, None]:
-    session = Session(clickhouse_engine)
+    clickhouse_engine: Engine, clickhouse_client: CHClient, clickhouse_database: None
+) -> Generator[DBSession, Any, None]:
+    session = DBSession(clickhouse_engine)
 
     yield session
 
-    for table in SQLModel.metadata.tables.values():
-        session.exec(text(f"TRUNCATE TABLE `{table.schema}`.`{table.name}`;"))
-
     session.close()
+
+    for table in SQLModel.metadata.tables.values():
+        clickhouse_client.command(f"TRUNCATE TABLE `{table.schema}`.`{table.name}`;")
 
 
 @pytest.fixture(scope="session")
@@ -91,11 +85,10 @@ def postgres_engine(postgres_url: str) -> Generator[Engine, Any, None]:
     yield create_engine(postgres_url, echo=False)
 
 
-@pytest.fixture(scope="session")
-def postgres_session(postgres_engine: Engine) -> Generator[Session, Any, None]:
-    session = Session(postgres_engine)
+@pytest.fixture(scope="function")
+def postgres_session(postgres_engine: Engine) -> Generator[DBSession, Any, None]:
+    session = DBSession(postgres_engine)
 
-    try:
-        yield session
-    finally:
-        session.close()
+    yield session
+
+    session.close()

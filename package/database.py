@@ -1,8 +1,10 @@
-from clickhouse_connect.driver.client import Client
+from clickhouse_connect.driver.client import Client as CHClient
 from collections.abc import Generator
 from contextlib import contextmanager
 from jinja2 import Environment
-from sqlmodel import create_engine, MetaData, Table
+from sqlmodel import create_engine, MetaData
+from sqlmodel import Session as DBSession  # noqa: F401
+from sqlmodel import Table
 from typing import Any, List, Optional
 
 import clickhouse_connect
@@ -17,7 +19,7 @@ jinja_env = Environment(extensions=["jinja2.ext.do", "jinja2.ext.loopcontrols"])
 
 
 @contextmanager
-def get_clickhouse_client(dsn: str) -> Generator[Client | None]:
+def get_clickhouse_client(dsn: str) -> Generator[CHClient | None]:
     client = clickhouse_connect.get_client(dsn=dsn)
     try:
         yield client
@@ -26,10 +28,10 @@ def get_clickhouse_client(dsn: str) -> Generator[Client | None]:
 
 
 @contextmanager
-def get_postgres_client(dsn: str):
+def get_postgres_client(dsn: str, autocommit: bool = True):
     conn = psycopg2.connect(dsn=dsn)
     try:
-        conn.autocommit = True
+        conn.autocommit = autocommit
         with conn.cursor() as cur:
             yield conn, cur
     finally:
