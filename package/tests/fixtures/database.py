@@ -34,8 +34,12 @@ def clickhouse_database(
 
     # Create databases
     for schema in schemas:
-        clickhouse_client.command(f"DROP DATABASE IF EXISTS `{schema}`;")
-        clickhouse_client.command(f"CREATE DATABASE `{schema}`;")
+        clickhouse_client.command(
+            "DROP DATABASE IF EXISTS {schema:Identifier};", parameters={"schema": schema}
+        )
+        clickhouse_client.command(
+            "CREATE DATABASE {schema:Identifier};", parameters={"schema": schema}
+        )
 
     # Create tables
     SQLModel.metadata.create_all(clickhouse_engine)
@@ -44,7 +48,9 @@ def clickhouse_database(
 
     # Drop databases
     for schema in schemas:
-        clickhouse_client.command(f"DROP DATABASE IF EXISTS `{schema}`;")
+        clickhouse_client.command(
+            "DROP DATABASE IF EXISTS {schema:Identifier};", parameters={"schema": schema}
+        )
 
 
 @pytest.fixture(scope="function")
@@ -58,7 +64,10 @@ def clickhouse_session(
     session.close()
 
     for table in SQLModel.metadata.tables.values():
-        clickhouse_client.command(f"TRUNCATE TABLE `{table.schema}`.`{table.name}`;")
+        clickhouse_client.command(
+            "TRUNCATE TABLE {schema:Identifier}.{name:Identifier};",
+            parameters={"schema": table.schema, "name": table.name},
+        )
 
 
 @pytest.fixture(scope="session")
