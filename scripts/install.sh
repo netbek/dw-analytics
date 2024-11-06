@@ -55,7 +55,6 @@ else
     cat <<EOF > .gitconfig
 [core]
 autocrlf = input
-editor = nano
 
 [pull]
 rebase = false
