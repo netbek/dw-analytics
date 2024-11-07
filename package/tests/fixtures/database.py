@@ -10,7 +10,7 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def ch_adapter(ch_settings: DBSettings):
+def ch_adapter(ch_settings: DBSettings) -> Generator[CHAdapter, Any, None]:
     yield CHAdapter(ch_settings)
 
 
