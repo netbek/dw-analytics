@@ -179,6 +179,22 @@ class Adapter(ABC):
 
     @overload
     @abstractmethod
+    def set_table_replica_identity(
+        self, table: str, replica_identity: str, database: Optional[str] = None
+    ) -> None: ...
+
+    @overload
+    @abstractmethod
+    def set_table_replica_identity(
+        self, table: str, replica_identity: str, schema: Optional[str] = None
+    ) -> None: ...
+
+    @abstractmethod
+    def set_table_replica_identity(self, *args, **kwargs) -> None:
+        pass
+
+    @overload
+    @abstractmethod
     def create_table(self, table: str, statement: str, database: Optional[str] = None) -> None: ...
 
     @overload
@@ -223,6 +239,30 @@ class Adapter(ABC):
 
     @abstractmethod
     def drop_user(self, username: str) -> None:
+        pass
+
+    @overload
+    @abstractmethod
+    def grant_user_privileges(self, username: str, database: Optional[str] = None) -> None: ...
+
+    @overload
+    @abstractmethod
+    def grant_user_privileges(self, username: str, schema: Optional[str] = None) -> None: ...
+
+    @abstractmethod
+    def grant_user_privileges(self, *args, **kwargs) -> None:
+        pass
+
+    @overload
+    @abstractmethod
+    def revoke_user_privileges(self, username: str, database: Optional[str] = None) -> None: ...
+
+    @overload
+    @abstractmethod
+    def revoke_user_privileges(self, username: str, schema: Optional[str] = None) -> None: ...
+
+    @abstractmethod
+    def revoke_user_privileges(self, *args, **kwargs) -> None:
         pass
 
     @abstractmethod
@@ -302,6 +342,11 @@ class ClickHouseAdapter(Adapter):
 
         return metadata.tables.get(f"{database}.{table}")
 
+    def set_table_replica_identity(
+        self, table: str, replica_identity: str, database: Optional[str] = None
+    ) -> None:
+        raise NotImplementedError()
+
     def create_table(self, table: str, statement: str, database: Optional[str] = None) -> None:
         if database is None:
             database = self.settings.database
@@ -358,6 +403,12 @@ class ClickHouseAdapter(Adapter):
                 parameters={"username": username},
             )
 
+    def grant_user_privileges(self, username: str, database: Optional[str] = None) -> None:
+        raise NotImplementedError()
+
+    def revoke_user_privileges(self, username: str, database: Optional[str] = None) -> None:
+        raise NotImplementedError()
+
     def has_publication(self, publication: str) -> bool:
         raise NotImplementedError()
 
@@ -369,6 +420,14 @@ class ClickHouseAdapter(Adapter):
 
 
 class PostgresAdapter(Adapter):
+    @classmethod
+    def to_escaped_identifier(cls, identifier: str) -> str:
+        raise NotImplementedError()
+
+    @classmethod
+    def to_qualified_table(self, table: str, schema: Optional[str] = None) -> bool:
+        raise NotImplementedError()
+
     def get_client():
         raise NotImplementedError()
 
@@ -384,29 +443,114 @@ class PostgresAdapter(Adapter):
     def has_schema():
         raise NotImplementedError()
 
-    def has_table(self, table: str, database: Optional[str] = None) -> bool:
+    def has_table(self, table: str, schema: Optional[str] = None) -> bool:
+        if not schema:
+            schema = "public"
+
+        with get_postgres_client(self.dsn) as (conn, cur):
+            cur.execute(
+                "select 1 from pg_catalog.pg_tables where schemaname = %s and tablename = %s;",
+                [schema, table],
+            )
+            return bool(cur.fetchall())
+
+    def get_table_schema(self, table: str, schema: Optional[str] = None) -> Table:
         raise NotImplementedError()
 
-    def get_table_schema(self, table: str, database: Optional[str] = None) -> Table:
+    def set_table_replica_identity(
+        self, table: str, replica_identity: str, schema: Optional[str] = None
+    ) -> None:
+        if not schema:
+            schema = "public"
+
+        if not self.has_table(table, schema=schema):
+            return
+
+        with get_postgres_client(self.dsn) as (conn, cur):
+            # TODO Escape identifiers
+            cur.execute(f"alter table {table} replica identity {replica_identity};")
+
+    def create_table(self, table: str, statement: str, schema: Optional[str] = None) -> None:
         raise NotImplementedError()
 
-    def create_table(self, table: str, statement: str, database: Optional[str] = None) -> None:
+    def drop_table(self, table: str, schema: Optional[str] = None) -> None:
         raise NotImplementedError()
 
-    def drop_table(self, table: str, database: Optional[str] = None) -> None:
-        raise NotImplementedError()
-
-    def list_tables(self, database: Optional[str] = None) -> List[Table]:
+    def list_tables(self, schema: Optional[str] = None) -> List[Table]:
         raise NotImplementedError()
 
     def has_user(self, username: str) -> bool:
-        raise NotImplementedError()
+        with get_postgres_client(self.dsn) as (conn, cur):
+            cur.execute("select 1 from pg_catalog.pg_user where usename = %s;", [username])
+            return bool(cur.fetchall())
 
-    def create_user(self, username: str, password: str) -> None:
-        raise NotImplementedError()
+    def create_user(self, username: str, password: str, options: Optional[dict] = None) -> None:
+        if self.has_user(username):
+            return
+
+        computed_options = []
+        if options:
+            if options.get("login"):
+                computed_options.append("login")
+
+            if options.get("replication"):
+                computed_options.append("replication")
+
+        with get_postgres_client(self.dsn) as (conn, cur):
+            cur.execute(
+                f"""
+                create user {username} with {' '.join(computed_options)} password %(password)s;
+                """,
+                {"password": password},
+            )
 
     def drop_user(self, username: str) -> None:
-        raise NotImplementedError()
+        if not self.has_user(username):
+            return
+
+        with get_postgres_client(self.dsn) as (conn, cur):
+            # TODO Escape identifier
+            cur.execute(
+                f"""
+                drop owned by {username} cascade;
+                drop user {username};
+                """
+            )
+
+    def grant_user_privileges(self, username: str, schema: Optional[str] = None) -> None:
+        if not self.has_user(username):
+            return
+
+        if not schema:
+            schema = "public"
+
+        with get_postgres_client(self.dsn) as (conn, cur):
+            # TODO Escape identifiers
+            cur.execute(
+                f"""
+                grant usage on schema {schema} to {username};
+                grant select on all tables in schema {schema} to {username};
+                alter default privileges in schema {schema} grant select on tables to {username};
+                """
+            )
+
+    def revoke_user_privileges(self, username: str, schema: Optional[str] = None) -> None:
+        if not self.has_user(username):
+            return
+
+        if not schema:
+            schema = "public"
+
+        with get_postgres_client(self.dsn) as (conn, cur):
+            # TODO Escape identifiers
+            cur.execute(
+                f"""
+                alter default privileges for user {username} in schema {schema} revoke select on tables from {username};
+                revoke select on all tables in schema {schema} from {username};
+                revoke usage on schema {schema} from {username};
+                -- reassign owned by {username} to postgres;
+                """
+            )
 
     def has_publication(self, publication: str) -> bool:
         with get_postgres_client(self.dsn) as (conn, cur):

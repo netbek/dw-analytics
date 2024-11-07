@@ -1,10 +1,5 @@
 from functools import lru_cache
-from package.database import (
-    ClickHouseAdapter,
-    create_connection_url,
-    get_postgres_client,
-    PostgresAdapter,
-)
+from package.database import ClickHouseAdapter, create_connection_url, PostgresAdapter
 from package.types import DBSettings
 from pathlib import Path
 from typing import List
@@ -176,67 +171,35 @@ class PeerDBClient:
 class SourcePeer:
     def __init__(self, db_settings: DBSettings) -> None:
         self._adapter = PostgresAdapter(db_settings)
-        self._db_url = create_connection_url(**db_settings.model_dump())
 
-    def set_table_replica_identity(self, table_identifier: str, replica_identity: str):
-        with get_postgres_client(self._db_url) as (conn, cur):
-            cur.execute(f"alter table {table_identifier} replica identity {replica_identity};")
+    def set_table_replica_identity(self, table: str, replica_identity: str):
+        return self._adapter.set_table_replica_identity(table, replica_identity)
 
-    def has_publication(self, publication_name: str) -> bool:
-        return self._adapter.has_publication(publication_name)
+    def has_publication(self, publication: str) -> bool:
+        return self._adapter.has_publication(publication)
 
-    def create_publication(self, publication_name: str, table_identifiers: List[str]) -> None:
-        return self._adapter.create_publication(publication_name, table_identifiers)
+    def create_publication(self, publication: str, tables: List[str]) -> None:
+        return self._adapter.create_publication(publication, tables)
 
-    def drop_publication(self, publication_name: str) -> None:
-        return self._adapter.drop_publication(publication_name)
+    def drop_publication(self, publication: str) -> None:
+        return self._adapter.drop_publication(publication)
 
     def has_user(self, username: str) -> bool:
-        with get_postgres_client(self._db_url) as (conn, cur):
-            cur.execute("select 1 from pg_roles where rolname = %s;", [username])
-            return bool(cur.fetchall())
+        return self._adapter.has_user(username)
 
     def create_user(self, username: str, password: str) -> None:
-        if not self.has_user(username):
-            with get_postgres_client(self._db_url) as (conn, cur):
-                cur.execute(
-                    f"""
-                    create role {username} with replication login password %(password)s;
-                    """,
-                    {"password": password},
-                )
+        return self._adapter.create_user(
+            username, password, options={"login": True, "replication": True}
+        )
 
     def drop_user(self, username: str) -> None:
-        if self.has_user(username):
-            with get_postgres_client(self._db_url) as (conn, cur):
-                cur.execute(
-                    f"""
-                    drop owned by {username} cascade;
-                    drop role {username};
-                    """
-                )
+        return self._adapter.drop_user(username)
 
     def grant_privileges(self, username: str, schema: str) -> None:
-        with get_postgres_client(self._db_url) as (conn, cur):
-            cur.execute(
-                f"""
-                grant usage on schema {schema} to {username};
-                grant select on all tables in schema {schema} to {username};
-                alter default privileges in schema {schema} grant select on tables to {username};
-                """,
-            )
+        return self._adapter.grant_user_privileges(username, schema)
 
     def revoke_privileges(self, username: str, schema: str) -> None:
-        if self.has_user(username):
-            with get_postgres_client(self._db_url) as (conn, cur):
-                cur.execute(
-                    f"""
-                    alter default privileges for role {username} in schema {schema} revoke select on tables from {username};
-                    revoke select on all tables in schema {schema} from {username};
-                    revoke usage on schema {schema} from {username};
-                    -- reassign owned by {username} to postgres;
-                    """
-                )
+        return self._adapter.revoke_user_privileges(username, schema)
 
 
 class DestinationPeer:
