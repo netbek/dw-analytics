@@ -12,7 +12,7 @@ class PeerDBConfig:
     def __init__(self, path: Path) -> None:
         self._path = path
 
-    def load(self):
+    def load(self) -> dict:
         with open(self._path, "rt") as fp:
             config = yaml.safe_load(fp) or {}
             config = self.process(config)
