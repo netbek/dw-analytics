@@ -1,8 +1,7 @@
 from functools import lru_cache
-from package.database import ClickHouseAdapter, create_connection_url, PostgresAdapter
+from package.database import ClickHouseAdapter, PostgresAdapter
 from package.types import DBSettings
 from pathlib import Path
-from typing import List
 
 import copy
 import httpx
@@ -168,57 +167,16 @@ class PeerDBClient:
                 )
 
 
-class SourcePeer:
-    def __init__(self, db_settings: DBSettings) -> None:
-        self._adapter = PostgresAdapter(db_settings)
-
-    def set_table_replica_identity(self, table: str, replica_identity: str):
-        return self._adapter.set_table_replica_identity(table, replica_identity)
-
-    def has_publication(self, publication: str) -> bool:
-        return self._adapter.has_publication(publication)
-
-    def create_publication(self, publication: str, tables: List[str]) -> None:
-        return self._adapter.create_publication(publication, tables)
-
-    def drop_publication(self, publication: str) -> None:
-        return self._adapter.drop_publication(publication)
-
-    def has_user(self, username: str) -> bool:
-        return self._adapter.has_user(username)
-
+class SourcePeer(PostgresAdapter):
     def create_user(self, username: str, password: str) -> None:
-        return self._adapter.create_user(
-            username, password, options={"login": True, "replication": True}
-        )
-
-    def drop_user(self, username: str) -> None:
-        return self._adapter.drop_user(username)
-
-    def grant_privileges(self, username: str, schema: str) -> None:
-        return self._adapter.grant_user_privileges(username, schema)
-
-    def revoke_privileges(self, username: str, schema: str) -> None:
-        return self._adapter.revoke_user_privileges(username, schema)
+        return super().create_user(username, password, options={"login": True, "replication": True})
 
 
-class DestinationPeer:
+class DestinationPeer(ClickHouseAdapter):
     def __init__(self, db_settings: DBSettings, database: str) -> None:
-        self._adapter = ClickHouseAdapter(db_settings)
         self._database = database
+        super().__init__(db_settings)
 
     @property
     def database(self) -> str:
         return self._database
-
-    def create_database(self, database: str) -> None:
-        return self._adapter.create_database(database)
-
-    def drop_database(self, database: str) -> None:
-        return self._adapter.drop_database(database)
-
-    def create_user(self, username: str, password: str) -> None:
-        return self._adapter.create_user(username, password)
-
-    def drop_user(self, username: str) -> None:
-        return self._adapter.drop_user(username)

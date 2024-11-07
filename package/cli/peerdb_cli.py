@@ -29,7 +29,7 @@ async def install(project_name: str):
         )
 
         for schema in peerdb_config["publication_schemas"]:
-            source_peer.grant_privileges(peerdb_config["users"]["source"]["username"], schema)
+            source_peer.grant_user_privileges(peerdb_config["users"]["source"]["username"], schema)
             app.console.print(
                 f"Granted privileges to user '{peerdb_config["users"]["source"]["username"]}' on source schema '{schema}'",
                 style="green",
@@ -123,7 +123,7 @@ async def uninstall(project_name: str):
 
     if "source" in peerdb_config["users"]:
         for schema in peerdb_config["publication_schemas"]:
-            source_peer.revoke_privileges(peerdb_config["users"]["source"]["username"], schema)
+            source_peer.revoke_user_privileges(peerdb_config["users"]["source"]["username"], schema)
             app.console.print(
                 f"Revoked privileges from user '{peerdb_config["users"]["source"]["username"]}' on source schema '{schema}'",
                 style="green",
