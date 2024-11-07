@@ -92,12 +92,14 @@ class DbtSourceTableMeta(BaseModel):
 
 class DbtSourceTable(BaseModel):
     name: str
-    columns: Optional[List[DbtColumn]] = None
     meta: Optional[DbtSourceTableMeta] = None
+    loaded_at_field: Optional[str] = None
+    columns: Optional[List[DbtColumn]] = None
 
 
 class DbtSource(BaseModel):
     name: str
+    loader: Optional[str] = None
     tables: List[DbtSourceTable]
 
 
