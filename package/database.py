@@ -115,22 +115,22 @@ class Adapter(ABC):
 
     @classmethod
     @abstractmethod
-    def escaped_identifier(cls, identifier: str) -> str:
+    def to_escaped_identifier(cls, identifier: str) -> str:
         pass
 
     @overload
     @classmethod
     @abstractmethod
-    def qualified_table(self, table: str, database: Optional[str] = None) -> str: ...
+    def to_qualified_table(self, table: str, database: Optional[str] = None) -> str: ...
 
     @overload
     @classmethod
     @abstractmethod
-    def qualified_table(self, table: str, schema: Optional[str] = None) -> str: ...
+    def to_qualified_table(self, table: str, schema: Optional[str] = None) -> str: ...
 
     @classmethod
     @abstractmethod
-    def qualified_table(self, *args, **kwargs) -> str:
+    def to_qualified_table(self, *args, **kwargs) -> str:
         pass
 
     @abstractmethod
@@ -228,15 +228,15 @@ class Adapter(ABC):
 
 class ClickHouseAdapter(Adapter):
     @classmethod
-    def escaped_identifier(cls, identifier: str) -> str:
+    def to_escaped_identifier(cls, identifier: str) -> str:
         return f"`{identifier}`"
 
     @classmethod
-    def qualified_table(self, table: str, database: Optional[str] = None) -> bool:
+    def to_qualified_table(self, table: str, database: Optional[str] = None) -> bool:
         if database is None:
             database = self.settings.database
 
-        return f"{self.escaped_identifier(database)}.{self.escaped_identifier(table)}"
+        return f"{self.to_escaped_identifier(database)}.{self.to_escaped_identifier(table)}"
 
     def get_client():
         raise NotImplementedError()
@@ -305,8 +305,8 @@ class ClickHouseAdapter(Adapter):
             database = self.settings.database
 
         with get_clickhouse_client(self.dsn) as client:
-            escaped_database = self.escaped_identifier(database)
-            escaped_table = self.escaped_identifier(table)
+            escaped_database = self.to_escaped_identifier(database)
+            escaped_table = self.to_escaped_identifier(table)
             client.command(f"drop table if exists {escaped_database}.{escaped_table};")
 
     def list_tables(self, database: Optional[str] = None) -> List[Table]:
@@ -332,7 +332,7 @@ class ClickHouseAdapter(Adapter):
             return
 
         with get_clickhouse_client(self.dsn) as client:
-            escaped_username = self.escaped_identifier(username)
+            escaped_username = self.to_escaped_identifier(username)
             client.command(
                 f"create user {escaped_username} identified by %(password)s;",
                 parameters={"password": password},
@@ -340,7 +340,7 @@ class ClickHouseAdapter(Adapter):
 
     def drop_user(self, username: str) -> None:
         with get_clickhouse_client(self.dsn) as client:
-            escaped_username = self.escaped_identifier(username)
+            escaped_username = self.to_escaped_identifier(username)
             client.command(
                 f"drop user if exists {escaped_username};",
                 parameters={"username": username},

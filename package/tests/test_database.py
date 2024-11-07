@@ -53,7 +53,7 @@ class TestClickHouseAdapter:
         assert table is None
 
         table = "test_table"
-        qualified_table = ClickHouseAdapter.qualified_table(
+        qualified_table = ClickHouseAdapter.to_qualified_table(
             database=ch_settings.database, table=table
         )
         statement = f"""
@@ -76,7 +76,7 @@ class TestClickHouseAdapter:
         adapter = ClickHouseAdapter(ch_settings)
 
         table = "test_table"
-        qualified_table = ClickHouseAdapter.qualified_table(
+        qualified_table = ClickHouseAdapter.to_qualified_table(
             database=ch_settings.database, table=table
         )
         statement = f"""
@@ -104,7 +104,7 @@ class TestClickHouseAdapter:
         assert adapter.list_tables(ch_settings.database) == []
 
         table = "test_table"
-        qualified_table = ClickHouseAdapter.qualified_table(
+        qualified_table = ClickHouseAdapter.to_qualified_table(
             database=ch_settings.database, table=table
         )
         statement = f"""
