@@ -259,7 +259,7 @@ class ClickHouseAdapter(Adapter):
     def drop_database(self, database: str) -> None:
         with get_clickhouse_client(self.dsn) as client:
             client.command(
-                "drop database {database:Identifier};",
+                "drop database if exists {database:Identifier};",
                 parameters={"database": database},
             )
 
@@ -336,13 +336,10 @@ class ClickHouseAdapter(Adapter):
             )
 
     def drop_user(self, username: str) -> None:
-        if not self.has_user(username):
-            return
-
         with get_clickhouse_client(self.dsn) as client:
             escaped_username = self.escaped_identifier(username)
             client.command(
-                f"drop user {escaped_username};",
+                f"drop user if exists {escaped_username};",
                 parameters={"username": username},
             )
 

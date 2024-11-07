@@ -4,7 +4,7 @@ from typing import List, Literal, Optional
 
 class DBSettings(BaseModel):
     type: Literal["clickhouse", "postgresql"]
-    driver: str
+    driver: Optional[str] = None
     host: str
     port: str
     username: str
