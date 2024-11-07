@@ -28,7 +28,7 @@ class CHTableIdentifier(CHIdentifier):
 
     @classmethod
     def from_string(cls, identifier: str) -> "CHTableIdentifier":
-        parts = [CHIdentifier.unquote(identifier) for part in identifier.split(".")]
+        parts = [cls.unquote(part) for part in identifier.split(".")]
 
         if len(parts) == 2:
             return cls(database=parts[0], table=parts[1])
@@ -39,9 +39,9 @@ class CHTableIdentifier(CHIdentifier):
 
     def to_string(self) -> str:
         if self.database is None:
-            return CHIdentifier.quote(self.table)
+            return self.quote(self.table)
         else:
-            return f"{CHIdentifier.quote(self.database)}.{CHIdentifier.quote(self.table)}"
+            return f"{self.quote(self.database)}.{self.quote(self.table)}"
 
 
 class PGIdentifier(BaseModel):
@@ -60,7 +60,7 @@ class PGTableIdentifier(PGIdentifier):
 
     @classmethod
     def from_string(cls, identifier: str) -> "PGTableIdentifier":
-        parts = [PGIdentifier.unquote(identifier) for part in identifier.split(".")]
+        parts = [cls.unquote(part) for part in identifier.split(".")]
 
         if len(parts) == 2:
             return cls(schema_=parts[0], table=parts[1])
@@ -71,9 +71,9 @@ class PGTableIdentifier(PGIdentifier):
 
     def to_string(self) -> str:
         if self.schema_ is None:
-            return PGIdentifier.quote(self.table)
+            return self.quote(self.table)
         else:
-            return f"{PGIdentifier.quote(self.schema_)}.{PGIdentifier.quote(self.table)}"
+            return f"{self.quote(self.schema_)}.{self.quote(self.table)}"
 
 
 class DbtColumnMeta(BaseModel):
