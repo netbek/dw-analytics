@@ -48,7 +48,7 @@ def test_clickhouse_session(ch_session: Session):
     assert actual == [(1,)]
 
 
-class TestClickHouseAdapter:
+class TestCHAdapter:
     def test_has_database(self, ch_adapter: CHAdapter):
         assert ch_adapter.has_database("non_existent_db") is False
         assert ch_adapter.has_database(ch_adapter.settings.database) is True
@@ -98,7 +98,7 @@ class TestClickHouseAdapter:
 
     def test_get_create_table_statement(self, ch_adapter: CHAdapter, ch_table: str):
         with pytest.raises(DatabaseError):
-            ch_adapter.get_create_table_statement(table="non_existent_table")
+            ch_adapter.get_create_table_statement("non_existent_table")
 
         expected = """
         CREATE TABLE default.test_table
@@ -110,9 +110,7 @@ class TestClickHouseAdapter:
         ORDER BY id
         SETTINGS index_granularity = 8192
         """
-        assert_equal_ignoring_whitespace(
-            ch_adapter.get_create_table_statement(table=ch_table), expected
-        )
+        assert_equal_ignoring_whitespace(ch_adapter.get_create_table_statement(ch_table), expected)
 
     def test_list_tables(self, ch_adapter: CHAdapter):
         assert ch_adapter.list_tables() == []
