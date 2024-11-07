@@ -1,4 +1,3 @@
-from functools import lru_cache
 from package.database import CHAdapter, PGAdapter
 from package.types import DBSettings
 from pathlib import Path
@@ -13,7 +12,6 @@ class PeerDBConfig:
     def __init__(self, path: Path) -> None:
         self._path = path
 
-    @lru_cache
     def load(self):
         with open(self._path, "rt") as fp:
             config = yaml.safe_load(fp) or {}
