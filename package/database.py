@@ -82,6 +82,7 @@ def render_statement(
     return statement
 
 
+@deprecated("Use Adapter.get_create_table_statement()")
 def get_create_table_statement(dsn: str, database: str, table: str) -> str:
     with get_clickhouse_client(dsn) as client:
         result = client.command(
@@ -189,6 +190,18 @@ class Adapter(ABC):
 
     @abstractmethod
     def create_table(self, *args, **kwargs) -> None:
+        pass
+
+    @overload
+    @abstractmethod
+    def get_create_table_statement(self, table: str, database: Optional[str] = None) -> None: ...
+
+    @overload
+    @abstractmethod
+    def get_create_table_statement(self, table: str, schema: Optional[str] = None) -> None: ...
+
+    @abstractmethod
+    def get_create_table_statement(self, *args, **kwargs) -> None:
         pass
 
     @overload
@@ -332,6 +345,22 @@ class CHAdapter(Adapter):
         with get_clickhouse_client(self.dsn) as client:
             client.command(statement)
 
+    def get_create_table_statement(self, table: str, database: Optional[str] = None) -> None:
+        if database is None:
+            database = self.settings.database
+
+        with get_clickhouse_client(self.dsn) as client:
+            statement = client.command(
+                "show create table {database:Identifier}.{table:Identifier};",
+                parameters={
+                    "database": database,
+                    "table": table,
+                },
+            )
+            statement = statement.replace("\\n", "\n")
+
+        return statement
+
     def drop_table(self, table: str, database: Optional[str] = None) -> None:
         if database is None:
             database = self.settings.database
@@ -445,6 +474,9 @@ class PGAdapter(Adapter):
             cur.execute(f"alter table {quoted_table} replica identity {replica_identity};")
 
     def create_table(self, table: str, statement: str, schema: Optional[str] = None) -> None:
+        raise NotImplementedError()
+
+    def get_create_table_statement(self, table: str, schema: Optional[str] = None) -> None:
         raise NotImplementedError()
 
     def drop_table(self, table: str, schema: Optional[str] = None) -> None:

@@ -1,4 +1,4 @@
-from package.database import CHClient, DBSession
+from package.database import CHAdapter, CHClient, DBSession, DBSettings
 from sqlalchemy import Engine
 from sqlmodel import create_engine, SQLModel
 from typing import Any, Generator
@@ -7,6 +7,11 @@ import clickhouse_connect
 import psycopg2
 import pydash
 import pytest
+
+
+@pytest.fixture(scope="session")
+def ch_adapter(ch_settings: DBSettings):
+    yield CHAdapter(ch_settings)
 
 
 @pytest.fixture(scope="session")
