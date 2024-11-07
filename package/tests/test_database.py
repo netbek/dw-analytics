@@ -1,5 +1,6 @@
 from clickhouse_connect.driver.client import Client
 from package.database import CHClient, ClickHouseAdapter, DBSettings
+from package.types import CHTableIdentifier
 from sqlmodel import Session, text
 
 import os
@@ -53,11 +54,9 @@ class TestClickHouseAdapter:
         assert table is None
 
         table = "test_table"
-        qualified_table = ClickHouseAdapter.to_qualified_table(
-            database=ch_settings.database, table=table
-        )
+        table_identifier = CHTableIdentifier(database=ch_settings.database, table=table).to_string()
         statement = f"""
-        CREATE OR REPLACE TABLE {qualified_table}
+        CREATE OR REPLACE TABLE {table_identifier}
         (
             id UInt64,
             updated_at DateTime DEFAULT now()
@@ -76,11 +75,9 @@ class TestClickHouseAdapter:
         adapter = ClickHouseAdapter(ch_settings)
 
         table = "test_table"
-        qualified_table = ClickHouseAdapter.to_qualified_table(
-            database=ch_settings.database, table=table
-        )
+        table_identifier = CHTableIdentifier(database=ch_settings.database, table=table).to_string()
         statement = f"""
-        CREATE OR REPLACE TABLE {qualified_table}
+        CREATE OR REPLACE TABLE {table_identifier}
         (
             id UInt64,
             updated_at DateTime DEFAULT now()
@@ -104,11 +101,9 @@ class TestClickHouseAdapter:
         assert adapter.list_tables(ch_settings.database) == []
 
         table = "test_table"
-        qualified_table = ClickHouseAdapter.to_qualified_table(
-            database=ch_settings.database, table=table
-        )
+        table_identifier = CHTableIdentifier(database=ch_settings.database, table=table).to_string()
         statement = f"""
-        CREATE OR REPLACE TABLE {qualified_table}
+        CREATE OR REPLACE TABLE {table_identifier}
         (
             id UInt64,
             updated_at DateTime DEFAULT now()

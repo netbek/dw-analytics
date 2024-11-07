@@ -22,3 +22,15 @@ def ch_settings() -> Generator[DBSettings, Any, None]:
 @pytest.fixture(scope="session")
 def ch_url(ch_settings: DBSettings) -> Generator[str, Any, None]:
     yield create_connection_url(**ch_settings.model_dump())
+
+
+# @pytest.fixture(scope="session")
+# def pg_settings() -> Generator[DBSettings, Any, None]:
+#     yield DBSettings(
+#         type="postgresql",
+#         host="localhost",
+#         port="5432",
+#         username="postgres",
+#         password="postgres",
+#         database="postgres",
+#     )

@@ -12,6 +12,62 @@ class DBSettings(BaseModel):
     database: str
 
 
+class CHIdentifier(BaseModel):
+    @classmethod
+    def quote(cls, identifier: str) -> str:
+        return f"`{identifier}`"
+
+
+class CHTableIdentifier(CHIdentifier):
+    database: Optional[str] = None
+    table: str
+
+    @classmethod
+    def from_string(cls, identifier: str) -> "CHTableIdentifier":
+        parts = [part.strip("`") for part in identifier.split(".")]
+
+        if len(parts) == 2:
+            return cls(database=parts[0], table=parts[1])
+        elif len(parts) == 1:
+            return cls(table=parts[0])
+        else:
+            raise ValueError()
+
+    def to_string(self) -> str:
+        if self.database is None:
+            return f"`{self.table}`"
+        else:
+            return f"`{self.database}`.`{self.table}`"
+
+
+class PGIdentifier(BaseModel):
+    @classmethod
+    def quote(cls, identifier: str) -> str:
+        return f'"{identifier}"'
+
+
+class PGTableIdentifier(PGIdentifier):
+    schema_: Optional[str] = None
+    table: str
+
+    @classmethod
+    def from_string(cls, identifier: str) -> "PGTableIdentifier":
+        parts = [part.strip('"') for part in identifier.split(".")]
+
+        if len(parts) == 2:
+            return cls(schema_=parts[0], table=parts[1])
+        elif len(parts) == 1:
+            return cls(table=parts[0])
+        else:
+            raise ValueError()
+
+    def to_string(self) -> str:
+        if self.schema_ is None:
+            return f'"{self.table}"'
+        else:
+            return f'"{self.schema_}"."{self.table}"'
+
+
 class DbtColumnMeta(BaseModel):
     sqlalchemy_type: str
 

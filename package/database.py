@@ -3,7 +3,13 @@ from clickhouse_connect.driver.client import Client as CHClient
 from collections.abc import Generator
 from contextlib import contextmanager
 from jinja2 import Environment
-from package.types import DBSettings
+from package.types import (
+    CHIdentifier,
+    CHTableIdentifier,
+    DBSettings,
+    PGIdentifier,
+    PGTableIdentifier,
+)
 from sqlmodel import create_engine, MetaData
 from sqlmodel import Session as DBSession  # noqa: F401
 from sqlmodel import Table
@@ -112,26 +118,6 @@ class Adapter(ABC):
     def __init__(self, settings: DBSettings):
         self.settings = settings
         self.dsn = create_connection_url(**settings.model_dump())
-
-    @classmethod
-    @abstractmethod
-    def to_escaped_identifier(cls, identifier: str) -> str:
-        pass
-
-    @overload
-    @classmethod
-    @abstractmethod
-    def to_qualified_table(self, table: str, database: Optional[str] = None) -> str: ...
-
-    @overload
-    @classmethod
-    @abstractmethod
-    def to_qualified_table(self, table: str, schema: Optional[str] = None) -> str: ...
-
-    @classmethod
-    @abstractmethod
-    def to_qualified_table(self, *args, **kwargs) -> str:
-        pass
 
     @abstractmethod
     def get_client():
@@ -279,17 +265,6 @@ class Adapter(ABC):
 
 
 class ClickHouseAdapter(Adapter):
-    @classmethod
-    def to_escaped_identifier(cls, identifier: str) -> str:
-        return f"`{identifier}`"
-
-    @classmethod
-    def to_qualified_table(self, table: str, database: Optional[str] = None) -> bool:
-        if database is None:
-            database = self.settings.database
-
-        return f"{self.to_escaped_identifier(database)}.{self.to_escaped_identifier(table)}"
-
     def get_client():
         raise NotImplementedError()
 
@@ -361,10 +336,10 @@ class ClickHouseAdapter(Adapter):
         if database is None:
             database = self.settings.database
 
+        quoted_table = CHTableIdentifier(database=database, table=table).to_string()
+
         with get_clickhouse_client(self.dsn) as client:
-            escaped_database = self.to_escaped_identifier(database)
-            escaped_table = self.to_escaped_identifier(table)
-            client.command(f"drop table if exists {escaped_database}.{escaped_table};")
+            client.command(f"drop table if exists {quoted_table};")
 
     def list_tables(self, database: Optional[str] = None) -> List[Table]:
         if database is None:
@@ -388,18 +363,20 @@ class ClickHouseAdapter(Adapter):
         if self.has_user(username):
             return
 
+        quoted_username = CHIdentifier.quote(username)
+
         with get_clickhouse_client(self.dsn) as client:
-            escaped_username = self.to_escaped_identifier(username)
             client.command(
-                f"create user {escaped_username} identified by %(password)s;",
+                f"create user {quoted_username} identified by %(password)s;",
                 parameters={"password": password},
             )
 
     def drop_user(self, username: str) -> None:
+        quoted_username = CHIdentifier.quote(username)
+
         with get_clickhouse_client(self.dsn) as client:
-            escaped_username = self.to_escaped_identifier(username)
             client.command(
-                f"drop user if exists {escaped_username};",
+                f"drop user if exists {quoted_username};",
                 parameters={"username": username},
             )
 
@@ -420,14 +397,6 @@ class ClickHouseAdapter(Adapter):
 
 
 class PostgresAdapter(Adapter):
-    @classmethod
-    def to_escaped_identifier(cls, identifier: str) -> str:
-        raise NotImplementedError()
-
-    @classmethod
-    def to_qualified_table(self, table: str, schema: Optional[str] = None) -> bool:
-        raise NotImplementedError()
-
     def get_client():
         raise NotImplementedError()
 
@@ -466,9 +435,14 @@ class PostgresAdapter(Adapter):
         if not self.has_table(table, schema=schema):
             return
 
+        identifier = PGTableIdentifier.from_string(table)
+        if schema is not None:
+            identifier.schema_ = schema
+
+        quoted_table = identifier.to_string()
+
         with get_postgres_client(self.dsn) as (conn, cur):
-            # TODO Escape identifiers
-            cur.execute(f"alter table {table} replica identity {replica_identity};")
+            cur.execute(f"alter table {quoted_table} replica identity {replica_identity};")
 
     def create_table(self, table: str, statement: str, schema: Optional[str] = None) -> None:
         raise NotImplementedError()
@@ -488,19 +462,18 @@ class PostgresAdapter(Adapter):
         if self.has_user(username):
             return
 
+        quoted_username = PGIdentifier.quote(username)
+
         computed_options = []
         if options:
             if options.get("login"):
                 computed_options.append("login")
-
             if options.get("replication"):
                 computed_options.append("replication")
 
         with get_postgres_client(self.dsn) as (conn, cur):
             cur.execute(
-                f"""
-                create user {username} with {' '.join(computed_options)} password %(password)s;
-                """,
+                f"create user {quoted_username} with {' '.join(computed_options)} password %(password)s;",
                 {"password": password},
             )
 
@@ -508,12 +481,13 @@ class PostgresAdapter(Adapter):
         if not self.has_user(username):
             return
 
+        quoted_username = PGIdentifier.quote(username)
+
         with get_postgres_client(self.dsn) as (conn, cur):
-            # TODO Escape identifier
             cur.execute(
                 f"""
-                drop owned by {username} cascade;
-                drop user {username};
+                drop owned by {quoted_username} cascade;
+                drop user {quoted_username};
                 """
             )
 
@@ -524,13 +498,15 @@ class PostgresAdapter(Adapter):
         if not schema:
             schema = "public"
 
+        quoted_username = PGIdentifier.quote(username)
+        quoted_schema = PGIdentifier.quote(schema)
+
         with get_postgres_client(self.dsn) as (conn, cur):
-            # TODO Escape identifiers
             cur.execute(
                 f"""
-                grant usage on schema {schema} to {username};
-                grant select on all tables in schema {schema} to {username};
-                alter default privileges in schema {schema} grant select on tables to {username};
+                grant usage on schema {quoted_schema} to {quoted_username};
+                grant select on all tables in schema {quoted_schema} to {quoted_username};
+                alter default privileges in schema {quoted_schema} grant select on tables to {quoted_username};
                 """
             )
 
@@ -541,14 +517,16 @@ class PostgresAdapter(Adapter):
         if not schema:
             schema = "public"
 
+        quoted_username = PGIdentifier.quote(username)
+        quoted_schema = PGIdentifier.quote(schema)
+
         with get_postgres_client(self.dsn) as (conn, cur):
-            # TODO Escape identifiers
             cur.execute(
                 f"""
-                alter default privileges for user {username} in schema {schema} revoke select on tables from {username};
-                revoke select on all tables in schema {schema} from {username};
-                revoke usage on schema {schema} from {username};
-                -- reassign owned by {username} to postgres;
+                alter default privileges for user {quoted_username} in schema {quoted_schema} revoke select on tables from {quoted_username};
+                revoke select on all tables in schema {quoted_schema} from {quoted_username};
+                revoke usage on schema {quoted_schema} from {quoted_username};
+                -- reassign owned by {quoted_username} to postgres;
                 """
             )
 
@@ -561,12 +539,19 @@ class PostgresAdapter(Adapter):
         if self.has_publication(publication):
             self.drop_publication(publication)
 
+        quoted_publication = PGIdentifier.quote(publication)
+        quoted_tables = [PGTableIdentifier.from_string(table).to_string() for table in tables]
+
         with get_postgres_client(self.dsn) as (conn, cur):
-            # TODO Escape identifiers
-            cur.execute(f"create publication {publication} for table {", ".join(tables)};")
+            cur.execute(
+                f"create publication {quoted_publication} for table {", ".join(quoted_tables)};"
+            )
 
     def drop_publication(self, publication: str) -> None:
-        if self.has_publication(publication):
-            with get_postgres_client(self.dsn) as (conn, cur):
-                # TODO Escape identifier
-                cur.execute(f"drop publication if exists {publication};")
+        if not self.has_publication(publication):
+            return
+
+        quoted_publication = PGIdentifier.quote(publication)
+
+        with get_postgres_client(self.dsn) as (conn, cur):
+            cur.execute(f"drop publication if exists {quoted_publication};")
