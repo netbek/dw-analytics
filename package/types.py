@@ -12,7 +12,7 @@ class DBSettings(BaseModel):
     database: str
 
 
-class CHIdentifier(BaseModel):
+class CHIdentifier:
     @classmethod
     def quote(cls, identifier: str) -> str:
         return f"`{identifier}`"
@@ -22,7 +22,7 @@ class CHIdentifier(BaseModel):
         return identifier.strip("`")
 
 
-class CHTableIdentifier(CHIdentifier):
+class CHTableIdentifier(CHIdentifier, BaseModel):
     database: Optional[str] = None
     table: str
 
@@ -44,7 +44,7 @@ class CHTableIdentifier(CHIdentifier):
             return f"{self.quote(self.database)}.{self.quote(self.table)}"
 
 
-class PGIdentifier(BaseModel):
+class PGIdentifier:
     @classmethod
     def quote(cls, identifier: str) -> str:
         return f'"{identifier}"'
@@ -54,7 +54,7 @@ class PGIdentifier(BaseModel):
         return identifier.strip('"')
 
 
-class PGTableIdentifier(PGIdentifier):
+class PGTableIdentifier(PGIdentifier, BaseModel):
     schema_: Optional[str] = None
     table: str
 
