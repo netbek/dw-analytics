@@ -17,6 +17,10 @@ class CHIdentifier(BaseModel):
     def quote(cls, identifier: str) -> str:
         return f"`{identifier}`"
 
+    @classmethod
+    def unquote(cls, identifier: str) -> str:
+        return identifier.strip("`")
+
 
 class CHTableIdentifier(CHIdentifier):
     database: Optional[str] = None
@@ -24,7 +28,7 @@ class CHTableIdentifier(CHIdentifier):
 
     @classmethod
     def from_string(cls, identifier: str) -> "CHTableIdentifier":
-        parts = [part.strip("`") for part in identifier.split(".")]
+        parts = [CHIdentifier.unquote(identifier) for part in identifier.split(".")]
 
         if len(parts) == 2:
             return cls(database=parts[0], table=parts[1])
@@ -35,15 +39,19 @@ class CHTableIdentifier(CHIdentifier):
 
     def to_string(self) -> str:
         if self.database is None:
-            return f"`{self.table}`"
+            return CHIdentifier.quote(self.table)
         else:
-            return f"`{self.database}`.`{self.table}`"
+            return f"{CHIdentifier.quote(self.database)}.{CHIdentifier.quote(self.table)}"
 
 
 class PGIdentifier(BaseModel):
     @classmethod
     def quote(cls, identifier: str) -> str:
         return f'"{identifier}"'
+
+    @classmethod
+    def unquote(cls, identifier: str) -> str:
+        return identifier.strip('"')
 
 
 class PGTableIdentifier(PGIdentifier):
@@ -52,7 +60,7 @@ class PGTableIdentifier(PGIdentifier):
 
     @classmethod
     def from_string(cls, identifier: str) -> "PGTableIdentifier":
-        parts = [part.strip('"') for part in identifier.split(".")]
+        parts = [PGIdentifier.unquote(identifier) for part in identifier.split(".")]
 
         if len(parts) == 2:
             return cls(schema_=parts[0], table=parts[1])
@@ -63,9 +71,9 @@ class PGTableIdentifier(PGIdentifier):
 
     def to_string(self) -> str:
         if self.schema_ is None:
-            return f'"{self.table}"'
+            return PGIdentifier.quote(self.table)
         else:
-            return f'"{self.schema_}"."{self.table}"'
+            return f"{PGIdentifier.quote(self.schema_)}.{PGIdentifier.quote(self.table)}"
 
 
 class DbtColumnMeta(BaseModel):
