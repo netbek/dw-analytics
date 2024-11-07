@@ -1,5 +1,15 @@
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List, Literal, Optional
+
+
+class DBSettings(BaseModel):
+    type: Literal["clickhouse", "postgres"]
+    driver: str
+    host: str
+    port: str
+    username: str
+    password: str
+    database: str
 
 
 class DbtColumnMeta(BaseModel):

@@ -3,11 +3,11 @@ from clickhouse_connect.driver.client import Client as CHClient
 from collections.abc import Generator
 from contextlib import contextmanager
 from jinja2 import Environment
-from pydantic import BaseModel
+from package.types import DBSettings
 from sqlmodel import create_engine, MetaData
 from sqlmodel import Session as DBSession  # noqa: F401
 from sqlmodel import Table
-from typing import Any, List, Literal, Optional, overload
+from typing import Any, List, Optional, overload
 
 import clickhouse_connect
 import psycopg2
@@ -18,16 +18,6 @@ import sqlparse
 RE_HAS_JINJA = re.compile(r"({[{%#]|[#}%]})")
 
 jinja_env = Environment(extensions=["jinja2.ext.do", "jinja2.ext.loopcontrols"])
-
-
-class DBSettings(BaseModel):
-    type: Literal["clickhouse", "postgres"]
-    driver: str
-    host: str
-    port: str
-    username: str
-    password: str
-    database: str
 
 
 @contextmanager

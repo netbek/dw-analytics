@@ -10,4 +10,4 @@ project = Project.from_path(__file__)
 
 @pytest.fixture(scope="session")
 def ch_url() -> Generator[str, Any, None]:
-    yield create_connection_url(**project.test_db_settings)
+    yield create_connection_url(**project.test_db_settings.model_dump())

@@ -1,5 +1,6 @@
 from functools import lru_cache
 from package.config.constants import HOME_DIR, PROJECTS_DIR, TEMPLATE_PROJECT_DIR
+from package.types import DBSettings
 from package.utils.environ_utils import get_env_var
 from package.utils.filesystem import rmtree, symlink
 from package.utils.template import render_template
@@ -172,24 +173,18 @@ class Project:
 
     @property
     @lru_cache
-    def test_db_settings(self) -> dict:
+    def test_db_settings(self) -> DBSettings:
         namespace = self.name.upper()
-        driver = get_env_var(f"{namespace}_TEST_CLICKHOUSE_DRIVER")
-        host = get_env_var(f"{namespace}_TEST_CLICKHOUSE_HOST")
-        port = get_env_var(f"{namespace}_TEST_CLICKHOUSE_PORT")
-        username = get_env_var(f"{namespace}_TEST_CLICKHOUSE_USERNAME")
-        password = get_env_var(f"{namespace}_TEST_CLICKHOUSE_PASSWORD")
-        database = get_env_var(f"{namespace}_TEST_CLICKHOUSE_DATABASE")
 
-        return {
-            "type": "clickhouse",
-            "driver": driver,
-            "host": host,
-            "port": port,
-            "username": username,
-            "password": password,
-            "database": database,
-        }
+        return DBSettings(
+            type="clickhouse",
+            driver=get_env_var(f"{namespace}_TEST_CLICKHOUSE_DRIVER"),
+            host=get_env_var(f"{namespace}_TEST_CLICKHOUSE_HOST"),
+            port=get_env_var(f"{namespace}_TEST_CLICKHOUSE_PORT"),
+            username=get_env_var(f"{namespace}_TEST_CLICKHOUSE_USERNAME"),
+            password=get_env_var(f"{namespace}_TEST_CLICKHOUSE_PASSWORD"),
+            database=get_env_var(f"{namespace}_TEST_CLICKHOUSE_DATABASE"),
+        )
 
     def init_directory(self):
         """Copy template project files to the project directory."""
