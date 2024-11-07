@@ -49,8 +49,10 @@ def test_clickhouse_session(ch_session: Session):
 
 
 class TestCHAdapter:
-    def test_has_database(self, ch_adapter: CHAdapter):
-        assert ch_adapter.has_database("non_existent_db") is False
+    def test_has_database_non_existent_table(self, ch_adapter: CHAdapter):
+        assert ch_adapter.has_database("non_existent_database") is False
+
+    def test_has_database_existent_table(self, ch_adapter: CHAdapter):
         assert ch_adapter.has_database(ch_adapter.settings.database) is True
 
     def test_create_and_drop_database(self, ch_adapter: CHAdapter):
@@ -64,14 +66,17 @@ class TestCHAdapter:
         ch_adapter.drop_database(database)
         assert ch_adapter.has_database(database) is False
 
-    def test_has_table(self, ch_adapter: CHAdapter, ch_table: str):
+    def test_has_table_non_existent_table(self, ch_adapter: CHAdapter):
         assert ch_adapter.has_table("non_existent_table") is False
+
+    def test_has_table_existent_table(self, ch_adapter: CHAdapter, ch_table: str):
         assert ch_adapter.has_table(ch_table) is True
 
-    def test_get_table_schema(self, ch_adapter: CHAdapter, ch_table: str):
+    def test_get_table_schema_non_existent_table(self, ch_adapter: CHAdapter):
         table = ch_adapter.get_table_schema("non_existent_table")
         assert table is None
 
+    def test_get_table_schema_existent_table(self, ch_adapter: CHAdapter, ch_table: str):
         table = ch_adapter.get_table_schema(ch_table)
         assert set(["id", "updated_at"]) == set([column.name for column in table.columns])
 
@@ -112,14 +117,16 @@ class TestCHAdapter:
         """
         assert_equal_ignoring_whitespace(ch_adapter.get_create_table_statement(ch_table), expected)
 
-    def test_list_tables(self, ch_adapter: CHAdapter):
+    def test_list_tables_empty_database(self, ch_adapter: CHAdapter):
         assert ch_adapter.list_tables() == []
 
-    def test_list_tables2(self, ch_adapter: CHAdapter, ch_table: str):
+    def test_list_tables_populated_database(self, ch_adapter: CHAdapter, ch_table: str):
         assert set([ch_table]) == set([table.name for table in ch_adapter.list_tables()])
 
-    def test_has_user(self, ch_adapter: CHAdapter):
+    def test_has_user_non_existent_user(self, ch_adapter: CHAdapter):
         assert ch_adapter.has_user("non_existent_user") is False
+
+    def test_has_user_existent_user(self, ch_adapter: CHAdapter):
         assert ch_adapter.has_user(ch_adapter.settings.username) is True
 
     def test_create_and_drop_user(self, ch_adapter: CHAdapter):
