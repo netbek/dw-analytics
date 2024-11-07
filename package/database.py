@@ -264,7 +264,7 @@ class Adapter(ABC):
         pass
 
 
-class ClickHouseAdapter(Adapter):
+class CHAdapter(Adapter):
     def get_client():
         raise NotImplementedError()
 
@@ -396,7 +396,7 @@ class ClickHouseAdapter(Adapter):
         raise NotImplementedError()
 
 
-class PostgresAdapter(Adapter):
+class PGAdapter(Adapter):
     def get_client():
         raise NotImplementedError()
 

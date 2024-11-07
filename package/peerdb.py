@@ -1,5 +1,5 @@
 from functools import lru_cache
-from package.database import ClickHouseAdapter, PostgresAdapter
+from package.database import CHAdapter, PGAdapter
 from package.types import DBSettings
 from pathlib import Path
 
@@ -167,12 +167,12 @@ class PeerDBClient:
                 )
 
 
-class SourcePeer(PostgresAdapter):
+class SourcePeer(PGAdapter):
     def create_user(self, username: str, password: str) -> None:
         return super().create_user(username, password, options={"login": True, "replication": True})
 
 
-class DestinationPeer(ClickHouseAdapter):
+class DestinationPeer(CHAdapter):
     def __init__(self, db_settings: DBSettings, database: str) -> None:
         self._database = database
         super().__init__(db_settings)
