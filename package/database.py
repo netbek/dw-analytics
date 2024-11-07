@@ -229,11 +229,11 @@ class Adapter(ABC):
 
     @overload
     @abstractmethod
-    def grant_user_privileges(self, username: str, database: Optional[str] = None) -> None: ...
+    def grant_user_privileges(self, username: str, database: str) -> None: ...
 
     @overload
     @abstractmethod
-    def grant_user_privileges(self, username: str, schema: Optional[str] = None) -> None: ...
+    def grant_user_privileges(self, username: str, schema: str) -> None: ...
 
     @abstractmethod
     def grant_user_privileges(self, *args, **kwargs) -> None:
@@ -241,11 +241,11 @@ class Adapter(ABC):
 
     @overload
     @abstractmethod
-    def revoke_user_privileges(self, username: str, database: Optional[str] = None) -> None: ...
+    def revoke_user_privileges(self, username: str, database: str) -> None: ...
 
     @overload
     @abstractmethod
-    def revoke_user_privileges(self, username: str, schema: Optional[str] = None) -> None: ...
+    def revoke_user_privileges(self, username: str, schema: str) -> None: ...
 
     @abstractmethod
     def revoke_user_privileges(self, *args, **kwargs) -> None:
@@ -380,10 +380,10 @@ class CHAdapter(Adapter):
                 parameters={"username": username},
             )
 
-    def grant_user_privileges(self, username: str, database: Optional[str] = None) -> None:
+    def grant_user_privileges(self, username: str, database: str) -> None:
         raise NotImplementedError()
 
-    def revoke_user_privileges(self, username: str, database: Optional[str] = None) -> None:
+    def revoke_user_privileges(self, username: str, database: str) -> None:
         raise NotImplementedError()
 
     def has_publication(self, publication: str) -> bool:
@@ -491,12 +491,9 @@ class PGAdapter(Adapter):
                 """
             )
 
-    def grant_user_privileges(self, username: str, schema: Optional[str] = None) -> None:
+    def grant_user_privileges(self, username: str, schema: str) -> None:
         if not self.has_user(username):
             return
-
-        if not schema:
-            schema = "public"
 
         quoted_username = PGIdentifier.quote(username)
         quoted_schema = PGIdentifier.quote(schema)
@@ -510,12 +507,9 @@ class PGAdapter(Adapter):
                 """
             )
 
-    def revoke_user_privileges(self, username: str, schema: Optional[str] = None) -> None:
+    def revoke_user_privileges(self, username: str, schema: str) -> None:
         if not self.has_user(username):
             return
-
-        if not schema:
-            schema = "public"
 
         quoted_username = PGIdentifier.quote(username)
         quoted_schema = PGIdentifier.quote(schema)
