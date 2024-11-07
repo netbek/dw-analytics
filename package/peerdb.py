@@ -1,5 +1,6 @@
 from functools import lru_cache
 from package.database import create_connection_url, get_clickhouse_client, get_postgres_client
+from package.types import DBSettings
 from pathlib import Path
 from typing import List
 
@@ -243,8 +244,8 @@ class SourcePeer:
 
 
 class DestinationPeer:
-    def __init__(self, db_settings: dict, database: str) -> None:
-        self._db_url = create_connection_url(**db_settings)
+    def __init__(self, db_settings: DBSettings, database: str) -> None:
+        self._db_url = create_connection_url(**db_settings.model_dump())
         self._database = database
 
     @property

@@ -14,7 +14,9 @@ class ProjectSettings:
 @dataclass
 class DatabaseSettings:
     URL: str = field(
-        default_factory=lambda: create_connection_url(**project.destination_db_settings)
+        default_factory=lambda: create_connection_url(
+            **project.destination_db_settings.model_dump()
+        )
     )
 
 
