@@ -8,6 +8,7 @@ from sqlmodel import create_engine, MetaData
 from sqlmodel import Session as DBSession  # noqa: F401
 from sqlmodel import Table
 from typing import Any, List, Optional, overload
+from typing_extensions import deprecated
 
 import clickhouse_connect
 import psycopg2
@@ -89,6 +90,7 @@ def get_create_table_statement(dsn: str, database: str, table: str) -> str:
     return result
 
 
+@deprecated("Use Adapter.get_table_schema()")
 def get_table_schema(dsn: str, database: str, table: str) -> Table:
     engine = create_engine(dsn, echo=False)
     metadata = MetaData(schema=database)
@@ -97,6 +99,7 @@ def get_table_schema(dsn: str, database: str, table: str) -> Table:
     return metadata.tables.get(f"{database}.{table}")
 
 
+@deprecated("Use Adapter.list_tables()")
 def list_tables(dsn: str, database: str) -> List[Table]:
     engine = create_engine(dsn, echo=False)
     metadata = MetaData(schema=database)
