@@ -54,9 +54,9 @@ class TestClickHouseAdapter:
         assert table is None
 
         table = "test_table"
-        table_identifier = CHTableIdentifier(database=ch_settings.database, table=table).to_string()
+        quoted_table = CHTableIdentifier(database=ch_settings.database, table=table).to_string()
         statement = f"""
-        CREATE OR REPLACE TABLE {table_identifier}
+        CREATE OR REPLACE TABLE {quoted_table}
         (
             id UInt64,
             updated_at DateTime DEFAULT now()
@@ -75,9 +75,9 @@ class TestClickHouseAdapter:
         adapter = CHAdapter(ch_settings)
 
         table = "test_table"
-        table_identifier = CHTableIdentifier(database=ch_settings.database, table=table).to_string()
+        quoted_table = CHTableIdentifier(database=ch_settings.database, table=table).to_string()
         statement = f"""
-        CREATE OR REPLACE TABLE {table_identifier}
+        CREATE OR REPLACE TABLE {quoted_table}
         (
             id UInt64,
             updated_at DateTime DEFAULT now()
@@ -101,9 +101,9 @@ class TestClickHouseAdapter:
         assert adapter.list_tables(ch_settings.database) == []
 
         table = "test_table"
-        table_identifier = CHTableIdentifier(database=ch_settings.database, table=table).to_string()
+        quoted_table = CHTableIdentifier(database=ch_settings.database, table=table).to_string()
         statement = f"""
-        CREATE OR REPLACE TABLE {table_identifier}
+        CREATE OR REPLACE TABLE {quoted_table}
         (
             id UInt64,
             updated_at DateTime DEFAULT now()
