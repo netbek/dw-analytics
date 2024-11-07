@@ -134,21 +134,15 @@ class Project:
 
     @property
     @lru_cache
-    def source_db_settings(self) -> dict:
-        host = get_env_var("SOURCE_POSTGRES_HOST")
-        port = get_env_var("SOURCE_POSTGRES_PORT")
-        username = get_env_var("SOURCE_POSTGRES_USERNAME")
-        password = get_env_var("SOURCE_POSTGRES_PASSWORD")
-        database = get_env_var("SOURCE_POSTGRES_DATABASE")
-
-        return {
-            "type": "postgresql",
-            "host": host,
-            "port": port,
-            "username": username,
-            "password": password,
-            "database": database,
-        }
+    def source_db_settings(self) -> DBSettings:
+        return DBSettings(
+            type="postgresql",
+            host=get_env_var("SOURCE_POSTGRES_HOST"),
+            port=get_env_var("SOURCE_POSTGRES_PORT"),
+            username=get_env_var("SOURCE_POSTGRES_USERNAME"),
+            password=get_env_var("SOURCE_POSTGRES_PASSWORD"),
+            database=get_env_var("SOURCE_POSTGRES_DATABASE"),
+        )
 
     @property
     @lru_cache

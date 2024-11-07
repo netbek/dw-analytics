@@ -3,7 +3,7 @@ from typing import List, Literal, Optional
 
 
 class DBSettings(BaseModel):
-    type: Literal["clickhouse", "postgres"]
+    type: Literal["clickhouse", "postgresql"]
     driver: str
     host: str
     port: str
