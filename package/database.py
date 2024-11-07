@@ -369,6 +369,45 @@ class ClickHouseAdapter(Adapter):
 
 
 class PostgresAdapter(Adapter):
+    def get_client():
+        raise NotImplementedError()
+
+    def has_database(self, database: str) -> bool:
+        raise NotImplementedError()
+
+    def create_database(self, database: str) -> None:
+        raise NotImplementedError()
+
+    def drop_database(self, database: str) -> None:
+        raise NotImplementedError()
+
+    def has_schema():
+        raise NotImplementedError()
+
+    def has_table(self, table: str, database: Optional[str] = None) -> bool:
+        raise NotImplementedError()
+
+    def get_table_schema(self, table: str, database: Optional[str] = None) -> Table:
+        raise NotImplementedError()
+
+    def create_table(self, table: str, statement: str, database: Optional[str] = None) -> None:
+        raise NotImplementedError()
+
+    def drop_table(self, table: str, database: Optional[str] = None) -> None:
+        raise NotImplementedError()
+
+    def list_tables(self, database: Optional[str] = None) -> List[Table]:
+        raise NotImplementedError()
+
+    def has_user(self, username: str) -> bool:
+        raise NotImplementedError()
+
+    def create_user(self, username: str, password: str) -> None:
+        raise NotImplementedError()
+
+    def drop_user(self, username: str) -> None:
+        raise NotImplementedError()
+
     def has_publication(self, publication: str) -> bool:
         with get_postgres_client(self.dsn) as (conn, cur):
             cur.execute("select 1 from pg_publication where pubname = %s;", [publication])
