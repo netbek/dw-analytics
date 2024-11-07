@@ -99,7 +99,6 @@ class Project:
     @property
     @lru_cache
     def dbt_tests_directory(self) -> Path:
-        # TODO Consider loading from project's dbt config
         return Path(os.path.join(self.directory, "dbt", "tests"))
 
     @property
