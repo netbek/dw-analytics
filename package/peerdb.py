@@ -1,5 +1,5 @@
 from functools import lru_cache
-from package.database import create_connection_url, get_clickhouse_client, get_postgres_client
+from package.database import ClickHouseAdapter, create_connection_url, get_postgres_client
 from package.types import DBSettings
 from pathlib import Path
 from typing import List
@@ -245,47 +245,21 @@ class SourcePeer:
 
 class DestinationPeer:
     def __init__(self, db_settings: DBSettings, database: str) -> None:
-        self._db_url = create_connection_url(**db_settings.model_dump())
+        self._adapter = ClickHouseAdapter(db_settings)
         self._database = database
 
     @property
     def database(self) -> str:
         return self._database
 
-    def has_database(self, db_name: str) -> bool:
-        with get_clickhouse_client(self._db_url) as client:
-            result = client.query(
-                "select 1 from system.databases where name = {db_name:String};",
-                parameters={"db_name": db_name},
-            )
-            return bool(result.result_rows)
+    def create_database(self, database: str) -> None:
+        return self._adapter.create_database(database)
 
-    def create_database(self, db_name: str) -> None:
-        if not self.has_database(db_name):
-            with get_clickhouse_client(self._db_url) as client:
-                client.command(
-                    "create database {db_name:Identifier};",
-                    parameters={"db_name": db_name},
-                )
+    def drop_database(self, database: str) -> None:
+        return self._adapter.drop_database(database)
 
-    def drop_database(self, db_name: str) -> None:
-        if self.has_database(db_name):
-            with get_clickhouse_client(self._db_url) as client:
-                client.command(
-                    "drop database {db_name:Identifier};",
-                    parameters={"db_name": db_name},
-                )
+    def create_user(self, username: str, password: str) -> None:
+        return self._adapter.create_user(username, password)
 
-    def create_user(self, username: str, password: str):
-        with get_clickhouse_client(self._db_url) as client:
-            client.command(
-                "create user {username:Identifier} identified by {password:String};",
-                parameters={"username": username, "password": password},
-            )
-
-    def drop_user(self, username: str):
-        with get_clickhouse_client(self._db_url) as client:
-            client.command(
-                "drop user {username:Identifier};",
-                parameters={"username": username},
-            )
+    def drop_user(self, username: str) -> None:
+        return self._adapter.drop_user(username)
