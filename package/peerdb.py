@@ -1,5 +1,10 @@
 from functools import lru_cache
-from package.database import ClickHouseAdapter, create_connection_url, get_postgres_client
+from package.database import (
+    ClickHouseAdapter,
+    create_connection_url,
+    get_postgres_client,
+    PostgresAdapter,
+)
 from package.types import DBSettings
 from pathlib import Path
 from typing import List
@@ -170,32 +175,23 @@ class PeerDBClient:
 
 class SourcePeer:
     def __init__(self, db_settings: DBSettings) -> None:
+        self._adapter = PostgresAdapter(db_settings)
         self._db_url = create_connection_url(**db_settings.model_dump())
 
     def set_table_replica_identity(self, table_identifier: str, replica_identity: str):
         with get_postgres_client(self._db_url) as (conn, cur):
             cur.execute(f"alter table {table_identifier} replica identity {replica_identity};")
 
-    def has_publication(self, publication_name: str) -> None:
-        with get_postgres_client(self._db_url) as (conn, cur):
-            cur.execute("select 1 from pg_publication where pubname = %s;", [publication_name])
-            return bool(cur.fetchall())
+    def has_publication(self, publication_name: str) -> bool:
+        return self._adapter.has_publication(publication_name)
 
     def create_publication(self, publication_name: str, table_identifiers: List[str]) -> None:
-        if self.has_publication(publication_name):
-            self.drop_publication(publication_name)
-
-        with get_postgres_client(self._db_url) as (conn, cur):
-            cur.execute(
-                f"create publication {publication_name} for table {", ".join(table_identifiers)};"
-            )
+        return self._adapter.create_publication(publication_name, table_identifiers)
 
     def drop_publication(self, publication_name: str) -> None:
-        if self.has_publication(publication_name):
-            with get_postgres_client(self._db_url) as (conn, cur):
-                cur.execute(f"drop publication {publication_name};")
+        return self._adapter.drop_publication(publication_name)
 
-    def has_user(self, username: str) -> None:
+    def has_user(self, username: str) -> bool:
         with get_postgres_client(self._db_url) as (conn, cur):
             cur.execute("select 1 from pg_roles where rolname = %s;", [username])
             return bool(cur.fetchall())

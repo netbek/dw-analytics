@@ -225,6 +225,18 @@ class Adapter(ABC):
     def drop_user(self, username: str) -> None:
         pass
 
+    @abstractmethod
+    def has_publication(self, publication: str) -> bool:
+        pass
+
+    @abstractmethod
+    def create_publication(self, publication: str, tables: List[str]) -> None:
+        pass
+
+    @abstractmethod
+    def drop_publication(self, publication: str) -> None:
+        pass
+
 
 class ClickHouseAdapter(Adapter):
     @classmethod
@@ -346,6 +358,32 @@ class ClickHouseAdapter(Adapter):
                 parameters={"username": username},
             )
 
+    def has_publication(self, publication: str) -> bool:
+        raise NotImplementedError()
+
+    def create_publication(self, publication: str, tables: List[str]) -> None:
+        raise NotImplementedError()
+
+    def drop_publication(self, publication: str) -> None:
+        raise NotImplementedError()
+
 
 class PostgresAdapter(Adapter):
-    pass
+    def has_publication(self, publication: str) -> bool:
+        with get_postgres_client(self.dsn) as (conn, cur):
+            cur.execute("select 1 from pg_publication where pubname = %s;", [publication])
+            return bool(cur.fetchall())
+
+    def create_publication(self, publication: str, tables: List[str]) -> None:
+        if self.has_publication(publication):
+            self.drop_publication(publication)
+
+        with get_postgres_client(self.dsn) as (conn, cur):
+            # TODO Escape identifiers
+            cur.execute(f"create publication {publication} for table {", ".join(tables)};")
+
+    def drop_publication(self, publication: str) -> None:
+        if self.has_publication(publication):
+            with get_postgres_client(self.dsn) as (conn, cur):
+                # TODO Escape identifier
+                cur.execute(f"drop publication if exists {publication};")
