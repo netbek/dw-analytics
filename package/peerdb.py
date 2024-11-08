@@ -1,5 +1,5 @@
 from package.database import CHAdapter, PGAdapter
-from package.types import DBSettings
+from package.database.types import CHSettings
 from pathlib import Path
 
 import copy
@@ -171,7 +171,7 @@ class SourcePeer(PGAdapter):
 
 
 class DestinationPeer(CHAdapter):
-    def __init__(self, db_settings: DBSettings, database: str) -> None:
+    def __init__(self, db_settings: CHSettings, database: str) -> None:
         self._database = database
         super().__init__(db_settings)
 

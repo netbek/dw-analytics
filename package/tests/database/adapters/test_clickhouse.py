@@ -32,18 +32,18 @@ def ch_table(ch_adapter: CHAdapter) -> Generator[str, Any, None]:
 
 
 def test_clickhouse_client(ch_client: Client):
-    db_name = os.environ["DEFAULT_TEST_CLICKHOUSE_DATABASE"]
+    database = os.environ["TEST_CLICKHOUSE_DATABASE"]
     actual = ch_client.query(
-        "select 1 from system.databases where name = {db_name:String};",
-        parameters={"db_name": db_name},
+        "select 1 from system.databases where name = {database:String};",
+        parameters={"database": database},
     ).result_rows
     assert actual == [(1,)]
 
 
 def test_clickhouse_session(ch_session: Session):
-    db_name = os.environ["DEFAULT_TEST_CLICKHOUSE_DATABASE"]
+    database = os.environ["TEST_CLICKHOUSE_DATABASE"]
     actual = ch_session.exec(
-        text("select 1 from system.databases where name = :db_name;").bindparams(db_name=db_name)
+        text("select 1 from system.databases where name = :database;").bindparams(database=database)
     ).all()
     assert actual == [(1,)]
 
@@ -105,8 +105,8 @@ class TestCHAdapter:
         with pytest.raises(DatabaseError):
             ch_adapter.get_create_table_statement("non_existent_table")
 
-        expected = """
-        CREATE TABLE default.test_table
+        expected = f"""
+        CREATE TABLE {ch_adapter.settings.database}.{ch_table}
         (
             `id` UInt64,
             `updated_at` DateTime DEFAULT now()

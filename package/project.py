@@ -1,6 +1,6 @@
 from functools import lru_cache
 from package.config.constants import HOME_DIR, PROJECTS_DIR, TEMPLATE_PROJECT_DIR
-from package.types import DBSettings
+from package.database.types import CHSettings, PGSettings
 from package.utils.environ_utils import get_env_var
 from package.utils.filesystem import rmtree, symlink
 from package.utils.template import render_template
@@ -133,9 +133,8 @@ class Project:
 
     @property
     @lru_cache
-    def source_db_settings(self) -> DBSettings:
-        return DBSettings(
-            type="postgresql",
+    def source_db_settings(self) -> PGSettings:
+        return PGSettings(
             host=get_env_var("SOURCE_POSTGRES_HOST"),
             port=get_env_var("SOURCE_POSTGRES_PORT"),
             username=get_env_var("SOURCE_POSTGRES_USERNAME"),
@@ -145,11 +144,10 @@ class Project:
 
     @property
     @lru_cache
-    def destination_db_settings(self) -> DBSettings:
+    def destination_db_settings(self) -> CHSettings:
         namespace = self.name.upper()
 
-        return DBSettings(
-            type="clickhouse",
+        return CHSettings(
             driver=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_DRIVER"),
             host=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_HOST"),
             port=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_PORT"),
@@ -160,17 +158,14 @@ class Project:
 
     @property
     @lru_cache
-    def test_db_settings(self) -> DBSettings:
-        namespace = self.name.upper()
-
-        return DBSettings(
-            type="clickhouse",
-            driver=get_env_var(f"{namespace}_TEST_CLICKHOUSE_DRIVER"),
-            host=get_env_var(f"{namespace}_TEST_CLICKHOUSE_HOST"),
-            port=get_env_var(f"{namespace}_TEST_CLICKHOUSE_PORT"),
-            username=get_env_var(f"{namespace}_TEST_CLICKHOUSE_USERNAME"),
-            password=get_env_var(f"{namespace}_TEST_CLICKHOUSE_PASSWORD"),
-            database=get_env_var(f"{namespace}_TEST_CLICKHOUSE_DATABASE"),
+    def test_ch_settings(self) -> CHSettings:
+        return CHSettings(
+            driver=get_env_var("TEST_CLICKHOUSE_DRIVER"),
+            host=get_env_var("TEST_CLICKHOUSE_HOST"),
+            port=get_env_var("TEST_CLICKHOUSE_PORT"),
+            username=get_env_var("TEST_CLICKHOUSE_USERNAME"),
+            password=get_env_var("TEST_CLICKHOUSE_PASSWORD"),
+            database=get_env_var("TEST_CLICKHOUSE_DATABASE"),
         )
 
     def init_directory(self):

@@ -1,4 +1,5 @@
-from package.database import CHAdapter, CHClient, DBSession, DBSettings
+from package.database import CHAdapter, CHClient, DBSession, PGAdapter
+from package.database.types import CHSettings, PGSettings
 from sqlalchemy import Engine
 from sqlmodel import create_engine, SQLModel
 from typing import Any, Generator
@@ -10,7 +11,7 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def ch_adapter(ch_settings: DBSettings) -> Generator[CHAdapter, Any, None]:
+def ch_adapter(ch_settings: CHSettings) -> Generator[CHAdapter, Any, None]:
     yield CHAdapter(ch_settings)
 
 
@@ -69,6 +70,11 @@ def ch_session(
             "TRUNCATE TABLE {schema:Identifier}.{name:Identifier};",
             parameters={"schema": table.schema, "name": table.name},
         )
+
+
+@pytest.fixture(scope="session")
+def pg_adapter(pg_settings: PGSettings) -> Generator[PGAdapter, Any, None]:
+    yield PGAdapter(pg_settings)
 
 
 @pytest.fixture(scope="session")
