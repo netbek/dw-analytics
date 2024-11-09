@@ -1,7 +1,7 @@
 from package.config.settings import TestCHSettings, TestPGSettings
 from package.database import CHAdapter, DBSession, PGAdapter
 from sqlmodel import SQLModel
-from typing import Any, Generator
+from typing import Any, Generator, List
 
 import pydash
 import pytest
@@ -13,33 +13,38 @@ def ch_adapter(ch_settings: TestCHSettings) -> Generator[CHAdapter, Any, None]:
 
 
 @pytest.fixture(scope="session")
-def ch_database(ch_adapter: CHAdapter) -> Generator[None, Any, None]:
+def ch_database(ch_adapter: CHAdapter) -> Generator[List[str], Any, None]:
     # Get database names
-    schemas = [table.schema for table in SQLModel.metadata.tables.values() if table.schema]
-    schemas = pydash.uniq(schemas)
-    schemas = pydash.without(schemas, "default")
+    databases = [table.schema for table in SQLModel.metadata.tables.values() if table.schema]
+    databases = pydash.uniq(databases)
+    databases = pydash.without(databases, "default")
 
     with ch_adapter.get_client() as client:
-        for schema in schemas:
+        for database in databases:
             client.command(
-                "DROP DATABASE IF EXISTS {schema:Identifier};", parameters={"schema": schema}
+                "DROP DATABASE IF EXISTS {database:Identifier};",
+                parameters={"database": database},
             )
-            client.command("CREATE DATABASE {schema:Identifier};", parameters={"schema": schema})
+            client.command(
+                "CREATE DATABASE {database:Identifier};",
+                parameters={"database": database},
+            )
 
     with ch_adapter.get_engine() as engine:
         SQLModel.metadata.create_all(engine)
 
-    yield
+    yield databases
 
     with ch_adapter.get_client() as client:
-        for schema in schemas:
+        for database in databases:
             client.command(
-                "DROP DATABASE IF EXISTS {schema:Identifier};", parameters={"schema": schema}
+                "DROP DATABASE IF EXISTS {database:Identifier};",
+                parameters={"database": database},
             )
 
 
 @pytest.fixture(scope="function")
-def ch_session(ch_adapter: CHAdapter, ch_database: None) -> Generator[DBSession, Any, None]:
+def ch_session(ch_adapter: CHAdapter, ch_database: List[str]) -> Generator[DBSession, Any, None]:
     with ch_adapter.get_engine() as engine:
         session = DBSession(engine)
 
