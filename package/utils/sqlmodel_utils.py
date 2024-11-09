@@ -1,6 +1,6 @@
 from clickhouse_sqlalchemy import types
-from package.database import get_create_table_statement, get_table_schema
-from package.types import DbtSourceTable
+from package.database import CHAdapter
+from package.types import CHSettings, DbtSourceTable
 from package.utils.python_utils import is_python_keyword
 from sqlalchemy import Column
 from typing import Any
@@ -220,12 +220,13 @@ def create_factory_name(model_name: str) -> str:
     return f"{model_name}Factory"
 
 
-def create_model_code(dsn: str, database: str, table: DbtSourceTable) -> str:
+def create_model_code(db_settings: CHSettings, database: str, table: DbtSourceTable) -> str:
     """Create the code of a SQLModel class from a table schema."""
+    ch_adapter = CHAdapter(db_settings)
     table_name = table.name
     model_name = table.meta.class_name
-    schema = get_table_schema(dsn, database, table_name)
-    statement = get_create_table_statement(dsn, database, table_name)
+    sa_table = ch_adapter.get_table(table_name, database=database)
+    statement = ch_adapter.get_create_table_statement(table_name, database=database)
     parsed_statement = parse_create_table_statement(statement)
     table_kwargs = {"schema": database}
     engine = parsed_statement["engine"]
@@ -248,7 +249,7 @@ def create_model_code(dsn: str, database: str, table: DbtSourceTable) -> str:
 
     columns = []
 
-    for column in schema.columns:
+    for column in sa_table.columns:
         dbt_column = pydash.find(table.columns, lambda x: x.name == column.name)
         field_name = to_field_name(column.name)
         python_type = get_python_type(column)
@@ -314,11 +315,13 @@ def create_model_code(dsn: str, database: str, table: DbtSourceTable) -> str:
     return "\n".join(lines) + "\n"
 
 
-def create_model_file(dsn: str, database: str, table: DbtSourceTable, directory: str) -> None:
+def create_model_file(
+    db_settings: CHSettings, database: str, table: DbtSourceTable, directory: str
+) -> None:
     model_name = table.meta.class_name
     filename = create_class_filename(model_name)
     file_path = os.path.join(directory, f"{filename}.py")
-    code = create_model_code(dsn, database, table)
+    code = create_model_code(db_settings, database, table)
 
     with open(file_path, "wt") as fp:
         fp.write(code)

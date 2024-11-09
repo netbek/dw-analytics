@@ -129,7 +129,7 @@ class PGAdapter(BaseAdapter):
         with get_postgres_client(self.settings.to_url()) as (conn, cur):
             cur.execute(statement)
 
-    def get_table_schema(
+    def get_table(
         self, table: str, database: Optional[str] = None, schema: Optional[str] = None
     ) -> Table:
         if database is None:

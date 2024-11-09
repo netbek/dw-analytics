@@ -94,12 +94,12 @@ class TestPGAdapter:
     def test_has_table_existent(self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier):
         assert pg_adapter.has_table(pg_table.table) is True
 
-    def test_get_table_schema_non_existent(self, pg_adapter: PGAdapter):
-        table = pg_adapter.get_table_schema("non_existent")
+    def test_get_table_non_existent(self, pg_adapter: PGAdapter):
+        table = pg_adapter.get_table("non_existent")
         assert table is None
 
-    def test_get_table_schema_existent(self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier):
-        table = pg_adapter.get_table_schema(pg_table.table)
+    def test_get_table_existent(self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier):
+        table = pg_adapter.get_table(pg_table.table)
         assert set(["id", "updated_at"]) == set([column.name for column in table.columns])
 
     def test_create_and_drop_table(self, pg_adapter: PGAdapter):

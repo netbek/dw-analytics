@@ -73,12 +73,12 @@ class TestCHAdapter:
     def test_has_table_existent(self, ch_adapter: CHAdapter, ch_table: CHTableIdentifier):
         assert ch_adapter.has_table(ch_table.table) is True
 
-    def test_get_table_schema_non_existent(self, ch_adapter: CHAdapter):
-        table = ch_adapter.get_table_schema("non_existent")
+    def test_get_table_non_existent(self, ch_adapter: CHAdapter):
+        table = ch_adapter.get_table("non_existent")
         assert table is None
 
-    def test_get_table_schema_existent(self, ch_adapter: CHAdapter, ch_table: CHTableIdentifier):
-        table = ch_adapter.get_table_schema(ch_table.table)
+    def test_get_table_existent(self, ch_adapter: CHAdapter, ch_table: CHTableIdentifier):
+        table = ch_adapter.get_table(ch_table.table)
         assert set(["id", "updated_at"]) == set([column.name for column in table.columns])
 
     def test_create_and_drop_table(self, ch_adapter: CHAdapter):

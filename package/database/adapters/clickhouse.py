@@ -105,7 +105,7 @@ class CHAdapter(BaseAdapter):
         with get_clickhouse_client(self.settings.to_url()) as client:
             client.command(statement)
 
-    def get_table_schema(self, table: str, database: Optional[str] = None) -> Table:
+    def get_table(self, table: str, database: Optional[str] = None) -> Table:
         if database is None:
             database = self.settings.database
 

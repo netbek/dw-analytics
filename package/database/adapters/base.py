@@ -98,16 +98,16 @@ class BaseAdapter(ABC):
 
     @overload
     @abstractmethod
-    def get_table_schema(self, table: str, database: Optional[str] = None) -> Table: ...
+    def get_table(self, table: str, database: Optional[str] = None) -> Table: ...
 
     @overload
     @abstractmethod
-    def get_table_schema(
+    def get_table(
         self, table: str, database: Optional[str] = None, schema: Optional[str] = None
     ) -> Table: ...
 
     @abstractmethod
-    def get_table_schema(self, *args, **kwargs) -> Table:
+    def get_table(self, *args, **kwargs) -> Table:
         pass
 
     @overload
