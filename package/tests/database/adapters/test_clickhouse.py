@@ -1,6 +1,7 @@
 from clickhouse_connect.driver.exceptions import DatabaseError
 from package.database import CHAdapter, DBSession
 from package.tests.asserts import assert_equal_ignoring_whitespace
+from package.tests.fixtures import DBTest
 from package.types import CHTableIdentifier
 from sqlmodel import Table, text
 from typing import Any, Generator
@@ -8,7 +9,7 @@ from typing import Any, Generator
 import pytest
 
 
-class TestCHAdapter:
+class TestCHAdapter(DBTest):
     @pytest.fixture(scope="function")
     def ch_table(self, ch_adapter: CHAdapter) -> Generator[CHTableIdentifier, Any, None]:
         table = "test_table"

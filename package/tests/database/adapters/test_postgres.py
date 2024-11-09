@@ -1,4 +1,5 @@
 from package.database import PGAdapter
+from package.tests.fixtures import DBTest
 from package.types import PGTableIdentifier
 from sqlmodel import Table, text
 from typing import Any, Generator
@@ -6,7 +7,7 @@ from typing import Any, Generator
 import pytest
 
 
-class TestPGAdapter:
+class TestPGAdapter(DBTest):
     @pytest.fixture(scope="function")
     def pg_user(self, pg_adapter: PGAdapter) -> Generator[str, Any, None]:
         username = "test_user"

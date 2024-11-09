@@ -7,59 +7,59 @@ import pydash
 import pytest
 
 
-@pytest.fixture(scope="session")
-def ch_adapter() -> Generator[CHAdapter, Any, None]:
-    yield CHAdapter(TestCHSettings())
+class DBTest:
+    @pytest.fixture(scope="session")
+    def ch_adapter(self) -> Generator[CHAdapter, Any, None]:
+        yield CHAdapter(TestCHSettings())
 
+    @pytest.fixture(scope="session")
+    def ch_database(self, ch_adapter: CHAdapter) -> Generator[List[str], Any, None]:
+        # Get database names
+        databases = [table.schema for table in SQLModel.metadata.tables.values() if table.schema]
+        databases = pydash.uniq(databases)
+        databases = pydash.without(databases, "default")
 
-@pytest.fixture(scope="session")
-def ch_database(ch_adapter: CHAdapter) -> Generator[List[str], Any, None]:
-    # Get database names
-    databases = [table.schema for table in SQLModel.metadata.tables.values() if table.schema]
-    databases = pydash.uniq(databases)
-    databases = pydash.without(databases, "default")
+        with ch_adapter.create_client() as client:
+            for database in databases:
+                client.command(
+                    "DROP DATABASE IF EXISTS {database:Identifier};",
+                    parameters={"database": database},
+                )
+                client.command(
+                    "CREATE DATABASE {database:Identifier};",
+                    parameters={"database": database},
+                )
 
-    with ch_adapter.create_client() as client:
-        for database in databases:
-            client.command(
-                "DROP DATABASE IF EXISTS {database:Identifier};",
-                parameters={"database": database},
-            )
-            client.command(
-                "CREATE DATABASE {database:Identifier};",
-                parameters={"database": database},
-            )
+        with ch_adapter.create_engine() as engine:
+            SQLModel.metadata.create_all(engine)
 
-    with ch_adapter.create_engine() as engine:
-        SQLModel.metadata.create_all(engine)
+        yield databases
 
-    yield databases
+        with ch_adapter.create_client() as client:
+            for database in databases:
+                client.command(
+                    "DROP DATABASE IF EXISTS {database:Identifier};",
+                    parameters={"database": database},
+                )
 
-    with ch_adapter.create_client() as client:
-        for database in databases:
-            client.command(
-                "DROP DATABASE IF EXISTS {database:Identifier};",
-                parameters={"database": database},
-            )
+    @pytest.fixture(scope="function")
+    def ch_session(
+        self, ch_adapter: CHAdapter, ch_database: List[str]
+    ) -> Generator[DBSession, Any, None]:
+        with ch_adapter.create_engine() as engine:
+            session = DBSession(engine)
 
+        yield session
 
-@pytest.fixture(scope="function")
-def ch_session(ch_adapter: CHAdapter, ch_database: List[str]) -> Generator[DBSession, Any, None]:
-    with ch_adapter.create_engine() as engine:
-        session = DBSession(engine)
+        session.close()
 
-    yield session
+        with ch_adapter.create_client() as client:
+            for table in SQLModel.metadata.tables.values():
+                client.command(
+                    "TRUNCATE TABLE {schema:Identifier}.{name:Identifier};",
+                    parameters={"schema": table.schema, "name": table.name},
+                )
 
-    session.close()
-
-    with ch_adapter.create_client() as client:
-        for table in SQLModel.metadata.tables.values():
-            client.command(
-                "TRUNCATE TABLE {schema:Identifier}.{name:Identifier};",
-                parameters={"schema": table.schema, "name": table.name},
-            )
-
-
-@pytest.fixture(scope="session")
-def pg_adapter() -> Generator[PGAdapter, Any, None]:
-    yield PGAdapter(TestPGSettings())
+    @pytest.fixture(scope="session")
+    def pg_adapter(self) -> Generator[PGAdapter, Any, None]:
+        yield PGAdapter(TestPGSettings())
