@@ -1,9 +1,9 @@
 from clickhouse_connect.driver.exceptions import DatabaseError
-from package.database import CHAdapter, DBSession
+from package.database import CHAdapter
 from package.tests.asserts import assert_equal_ignoring_whitespace
 from package.tests.fixtures import DBTest
 from package.types import CHTableIdentifier
-from sqlmodel import Table, text
+from sqlmodel import Session, Table, text
 from typing import Any, Generator
 
 import pytest
@@ -38,7 +38,7 @@ class TestCHAdapter(DBTest):
             ).result_rows
         assert actual == [(1,)]
 
-    def test_clickhouse_session(self, ch_adapter: CHAdapter, ch_session: DBSession):
+    def test_clickhouse_session(self, ch_adapter: CHAdapter, ch_session: Session):
         actual = ch_session.exec(
             text("select 1 from system.databases where name = :database;").bindparams(
                 database=ch_adapter.settings.database

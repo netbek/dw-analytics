@@ -1,6 +1,6 @@
 from package.config.settings import TestCHSettings, TestPGSettings
-from package.database import CHAdapter, DBSession, PGAdapter
-from sqlmodel import SQLModel
+from package.database import CHAdapter, PGAdapter
+from sqlmodel import Session, SQLModel
 from typing import Any, Generator, List
 
 import pydash
@@ -45,9 +45,9 @@ class DBTest:
     @pytest.fixture(scope="function")
     def ch_session(
         self, ch_adapter: CHAdapter, ch_database: List[str]
-    ) -> Generator[DBSession, Any, None]:
+    ) -> Generator[Session, Any, None]:
         with ch_adapter.create_engine() as engine:
-            session = DBSession(engine)
+            session = Session(engine)
 
         yield session
 
