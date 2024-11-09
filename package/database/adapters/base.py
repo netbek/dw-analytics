@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
+from contextlib import contextmanager
 from package.types import CHSettings, PGSettings
-from sqlmodel import Table
+from sqlmodel import create_engine, Table
 from typing import List, Optional, overload
 
 
@@ -43,6 +44,14 @@ class BaseAdapter(ABC):
     @abstractmethod
     def get_client():
         pass
+
+    @contextmanager
+    def get_engine(self):
+        engine = create_engine(self.url, echo=False)
+
+        yield engine
+
+        engine.dispose()
 
     @abstractmethod
     def has_database(self, database: str) -> bool:

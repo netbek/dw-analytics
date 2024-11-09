@@ -11,11 +11,6 @@ class CHSettings(BaseModel):
     secure: Optional[bool] = False
     driver: Optional[str] = None
 
-    def to_url(self) -> str:
-        from package.database import CHAdapter
-
-        return CHAdapter.create_url(**self.model_dump())
-
 
 class CHIdentifier:
     @classmethod
@@ -57,11 +52,6 @@ class PGSettings(BaseModel):
     password: str
     database: str
     schema_: str = Field(serialization_alias="schema")
-
-    def to_url(self) -> str:
-        from package.database import PGAdapter
-
-        return PGAdapter.create_url(**self.model_dump(by_alias=True))
 
 
 class PGIdentifier:

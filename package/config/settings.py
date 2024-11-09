@@ -25,11 +25,6 @@ class TestCHSettings(BaseSettings):
     secure: bool = Field(validation_alias="test_clickhouse_secure", serialization_alias="secure")
     driver: str = Field(validation_alias="test_clickhouse_driver", serialization_alias="driver")
 
-    def to_url(self) -> str:
-        from package.database import CHAdapter
-
-        return CHAdapter.create_url(**self.model_dump(by_alias=True))
-
 
 class TestPGSettings(BaseSettings):
     __test__ = False  # Exclude from Pytest collection
@@ -43,8 +38,3 @@ class TestPGSettings(BaseSettings):
     password: str = Field(validation_alias="test_postgres_password", serialization_alias="password")
     database: str = Field(validation_alias="test_postgres_database", serialization_alias="database")
     schema_: str = Field(validation_alias="test_postgres_schema", serialization_alias="schema")
-
-    def to_url(self) -> str:
-        from package.database import PGAdapter
-
-        return PGAdapter.create_url(**self.model_dump(by_alias=True))

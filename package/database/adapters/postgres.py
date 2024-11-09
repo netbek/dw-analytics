@@ -9,19 +9,6 @@ import psycopg2
 import pydash
 
 
-@contextmanager
-def get_postgres_client(
-    dsn: str, autocommit: bool = True
-) -> Generator[tuple[psycopg2.extensions.connection, psycopg2.extensions.cursor], Any, None]:
-    connection = psycopg2.connect(dsn=dsn)
-    try:
-        connection.autocommit = autocommit
-        with connection.cursor() as cursor:
-            yield connection, cursor
-    finally:
-        connection.close()
-
-
 class PGAdapter(BaseAdapter):
     def __init__(self, settings: PGSettings) -> None:
         super().__init__(settings)
@@ -40,8 +27,28 @@ class PGAdapter(BaseAdapter):
 
         return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
 
-    def get_client():
-        raise NotImplementedError()
+    @property
+    def url(self) -> str:
+        return self.create_url(
+            self.settings.host,
+            self.settings.port,
+            self.settings.username,
+            self.settings.password,
+            self.settings.database,
+            self.settings.schema_,
+        )
+
+    @contextmanager
+    def get_client(
+        self, autocommit: bool = True
+    ) -> Generator[tuple[psycopg2.extensions.connection, psycopg2.extensions.cursor], Any, None]:
+        connection = psycopg2.connect(dsn=self.url)
+        connection.autocommit = autocommit
+
+        with connection.cursor() as cursor:
+            yield (connection, cursor)
+
+        connection.close()
 
     def has_database(self, database: str) -> bool:
         statement = """
@@ -50,7 +57,7 @@ class PGAdapter(BaseAdapter):
         limit 1;
         """
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement, {"database": database})
             return bool(cur.fetchall())
 
@@ -71,7 +78,7 @@ class PGAdapter(BaseAdapter):
         limit 1;
         """
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement, {"database": database, "schema": schema})
             return bool(cur.fetchall())
 
@@ -97,7 +104,7 @@ class PGAdapter(BaseAdapter):
         and table_name = %(table)s;
         """
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement, {"database": database, "schema": schema, "table": table})
             return bool(cur.fetchall())
 
@@ -117,7 +124,7 @@ class PGAdapter(BaseAdapter):
         if self.has_table(table=table, database=database, schema=schema):
             return
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement)
 
     def get_create_table_statement(
@@ -140,7 +147,7 @@ class PGAdapter(BaseAdapter):
         quoted_table = PGTableIdentifier(database=database, schema_=schema, table=table).to_string()
         statement = f"drop table {quoted_table};"
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement)
 
     def get_table(
@@ -152,7 +159,9 @@ class PGAdapter(BaseAdapter):
         if schema is None:
             schema = self.settings.schema_
 
-        url = self.settings.model_copy(update={"database": database}).to_url()
+        url = self.create_url(
+            **self.settings.model_copy(update={"database": database}).model_dump(by_alias=True)
+        )
         engine = create_engine(url, echo=False)
         metadata = MetaData(schema=schema)
         metadata.reflect(bind=engine)
@@ -190,7 +199,7 @@ class PGAdapter(BaseAdapter):
             and t.table_name = %(table)s;
         """
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement, {"database": database, "schema": schema, "table": table})
             return cur.fetchone()[0]
 
@@ -213,7 +222,7 @@ class PGAdapter(BaseAdapter):
         quoted_table = PGTableIdentifier(database=database, schema_=schema, table=table).to_string()
         statement = f"alter table {quoted_table} replica identity {replica_identity};"
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement)
 
     def list_tables(
@@ -225,7 +234,9 @@ class PGAdapter(BaseAdapter):
         if schema is None:
             schema = self.settings.schema_
 
-        url = self.settings.model_copy(update={"database": database}).to_url()
+        url = self.create_url(
+            **self.settings.model_copy(update={"database": database}).model_dump(by_alias=True)
+        )
         engine = create_engine(url, echo=False)
         metadata = MetaData(schema=schema)
         metadata.reflect(bind=engine)
@@ -239,7 +250,7 @@ class PGAdapter(BaseAdapter):
         where usename = %(username)s;
         """
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement, {"username": username})
             return bool(cur.fetchall())
 
@@ -261,7 +272,7 @@ class PGAdapter(BaseAdapter):
         with {' '.join(computed_options)} password %(password)s;
         """
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement, {"password": password})
 
     def drop_user(self, username: str) -> None:
@@ -274,7 +285,7 @@ class PGAdapter(BaseAdapter):
         drop user {quoted_username};
         """
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement)
 
     def grant_user_privileges(self, username: str, schema: str) -> None:
@@ -289,7 +300,7 @@ class PGAdapter(BaseAdapter):
         alter default privileges in schema {quoted_schema} grant select on tables to {quoted_username};
         """
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement)
 
     def revoke_user_privileges(self, username: str, schema: str) -> None:
@@ -305,7 +316,7 @@ class PGAdapter(BaseAdapter):
         -- reassign owned by {quoted_username} to postgres;
         """
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement)
 
     def list_user_privileges(self, username: str) -> List[tuple] | None:
@@ -323,14 +334,14 @@ class PGAdapter(BaseAdapter):
         order by 1, 2, 3, 4;
         """
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement, {"username": username})
             return cur.fetchall()
 
     def has_publication(self, publication: str) -> bool:
         statement = "select 1 from pg_publication where pubname = %(publication)s;"
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement, {"publication": publication})
             return bool(cur.fetchall())
 
@@ -345,7 +356,7 @@ class PGAdapter(BaseAdapter):
         quoted_tables = [PGTableIdentifier.from_string(table).to_string() for table in tables]
         statement = f"create publication {quoted_publication} for table {", ".join(quoted_tables)};"
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement)
 
     def drop_publication(self, publication: str) -> None:
@@ -355,7 +366,7 @@ class PGAdapter(BaseAdapter):
         quoted_publication = PGIdentifier.quote(publication)
         statement = f"drop publication {quoted_publication};"
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement)
 
     def list_publications(self) -> List[str]:
@@ -364,6 +375,6 @@ class PGAdapter(BaseAdapter):
         from pg_catalog.pg_publication;
         """
 
-        with get_postgres_client(self.settings.to_url()) as (conn, cur):
+        with self.get_client() as (conn, cur):
             cur.execute(statement)
             return [row[0] for row in cur.fetchall()]

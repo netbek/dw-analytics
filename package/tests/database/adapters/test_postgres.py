@@ -4,7 +4,6 @@ from package.types import PGTableIdentifier
 from sqlmodel import text
 from typing import Any, Generator
 
-import psycopg2
 import pytest
 
 
@@ -50,12 +49,13 @@ def pg_publication(pg_adapter: PGAdapter, pg_table: PGTableIdentifier) -> Genera
     pg_adapter.drop_publication(publication)
 
 
-def test_postgres_client(pg_settings: TestPGSettings, pg_cursor: psycopg2.extensions.cursor):
-    pg_cursor.execute(
-        "select 1 from information_schema.schemata where catalog_name = %s limit 1;",
-        [pg_settings.database],
-    )
-    actual = pg_cursor.fetchall()
+def test_postgres_client(pg_adapter: PGAdapter):
+    with pg_adapter.get_client() as (conn, cur):
+        cur.execute(
+            "select 1 from information_schema.schemata where catalog_name = %s limit 1;",
+            [pg_adapter.settings.database],
+        )
+        actual = cur.fetchall()
     assert actual == [(1,)]
 
 

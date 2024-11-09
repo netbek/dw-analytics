@@ -1,4 +1,3 @@
-from clickhouse_connect.driver.client import Client
 from clickhouse_connect.driver.exceptions import DatabaseError
 from package.config.settings import TestCHSettings
 from package.database import CHAdapter
@@ -32,11 +31,12 @@ def ch_table(ch_adapter: CHAdapter) -> Generator[CHTableIdentifier, Any, None]:
     ch_adapter.drop_table(table)
 
 
-def test_clickhouse_client(ch_settings: TestCHSettings, ch_client: Client):
-    actual = ch_client.query(
-        "select 1 from system.databases where name = {database:String};",
-        parameters={"database": ch_settings.database},
-    ).result_rows
+def test_clickhouse_client(ch_adapter: CHAdapter):
+    with ch_adapter.get_client() as client:
+        actual = client.query(
+            "select 1 from system.databases where name = {database:String};",
+            parameters={"database": ch_adapter.settings.database},
+        ).result_rows
     assert actual == [(1,)]
 
 

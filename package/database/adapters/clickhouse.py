@@ -10,15 +10,6 @@ import clickhouse_connect
 import pydash
 
 
-@contextmanager
-def get_clickhouse_client(dsn: str) -> Generator[Client | None]:
-    client = clickhouse_connect.get_client(dsn=dsn)
-    try:
-        yield client
-    finally:
-        client.close()
-
-
 class CHAdapter(BaseAdapter):
     def __init__(self, settings: CHSettings) -> None:
         super().__init__(settings)
@@ -41,13 +32,30 @@ class CHAdapter(BaseAdapter):
 
         return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
 
-    def get_client():
-        raise NotImplementedError()
+    @property
+    def url(self) -> str:
+        return self.create_url(
+            self.settings.host,
+            self.settings.port,
+            self.settings.username,
+            self.settings.password,
+            self.settings.database,
+            self.settings.driver,
+            self.settings.secure,
+        )
+
+    @contextmanager
+    def get_client(self) -> Generator[Client | None]:
+        client = clickhouse_connect.get_client(dsn=self.url)
+
+        yield client
+
+        client.close()
 
     def has_database(self, database: str) -> bool:
         statement = "select 1 from system.databases where name = {database:String};"
 
-        with get_clickhouse_client(self.settings.to_url()) as client:
+        with self.get_client() as client:
             result = client.query(statement, parameters={"database": database})
             return bool(result.result_rows)
 
@@ -57,7 +65,7 @@ class CHAdapter(BaseAdapter):
 
         statement = "create database {database:Identifier};"
 
-        with get_clickhouse_client(self.settings.to_url()) as client:
+        with self.get_client() as client:
             client.command(statement, parameters={"database": database})
 
     def drop_database(self, database: str) -> None:
@@ -66,7 +74,7 @@ class CHAdapter(BaseAdapter):
 
         statement = "drop database {database:Identifier};"
 
-        with get_clickhouse_client(self.settings.to_url()) as client:
+        with self.get_client() as client:
             client.command(statement, parameters={"database": database})
 
     def has_schema(self, schema: str, database: Optional[str] = None) -> bool:
@@ -84,7 +92,7 @@ class CHAdapter(BaseAdapter):
 
         statement = "select 1 from system.tables where database = {database:String} and name = {table:String};"
 
-        with get_clickhouse_client(self.settings.to_url()) as client:
+        with self.get_client() as client:
             result = client.query(statement, parameters={"database": database, "table": table})
             return bool(result.result_rows)
 
@@ -95,7 +103,7 @@ class CHAdapter(BaseAdapter):
         if self.has_table(table=table, database=database):
             return
 
-        with get_clickhouse_client(self.settings.to_url()) as client:
+        with self.get_client() as client:
             client.command(statement)
 
     def get_create_table_statement(self, table: str, database: Optional[str] = None) -> None:
@@ -104,7 +112,7 @@ class CHAdapter(BaseAdapter):
 
         statement = "show create table {database:Identifier}.{table:Identifier};"
 
-        with get_clickhouse_client(self.settings.to_url()) as client:
+        with self.get_client() as client:
             statement = client.command(statement, parameters={"database": database, "table": table})
             statement = statement.replace("\\n", "\n")
 
@@ -120,14 +128,15 @@ class CHAdapter(BaseAdapter):
         quoted_table = CHTableIdentifier(database=database, table=table).to_string()
         statement = f"drop table {quoted_table};"
 
-        with get_clickhouse_client(self.settings.to_url()) as client:
+        with self.get_client() as client:
             client.command(statement)
 
     def get_table(self, table: str, database: Optional[str] = None) -> Table:
         if database is None:
             database = self.settings.database
 
-        engine = create_engine(self.settings.to_url(), echo=False)
+        url = self.create_url(**self.settings.model_dump())
+        engine = create_engine(url, echo=False)
         metadata = MetaData(schema=database)
         metadata.reflect(bind=engine)
 
@@ -145,7 +154,8 @@ class CHAdapter(BaseAdapter):
         if database is None:
             database = self.settings.database
 
-        engine = create_engine(self.settings.to_url(), echo=False)
+        url = self.create_url(**self.settings.model_dump())
+        engine = create_engine(url, echo=False)
         metadata = MetaData(schema=database)
         metadata.reflect(bind=engine)
 
@@ -154,7 +164,7 @@ class CHAdapter(BaseAdapter):
     def has_user(self, username: str) -> bool:
         statement = "select 1 from system.users where name = {username:String};"
 
-        with get_clickhouse_client(self.settings.to_url()) as client:
+        with self.get_client() as client:
             result = client.query(statement, parameters={"username": username})
             return bool(result.result_rows)
 
@@ -165,7 +175,7 @@ class CHAdapter(BaseAdapter):
         quoted_username = CHIdentifier.quote(username)
         statement = f"create user {quoted_username} identified by %(password)s;"
 
-        with get_clickhouse_client(self.settings.to_url()) as client:
+        with self.get_client() as client:
             client.command(statement, parameters={"password": password})
 
     def drop_user(self, username: str) -> None:
@@ -175,7 +185,7 @@ class CHAdapter(BaseAdapter):
         quoted_username = CHIdentifier.quote(username)
         statement = f"drop user {quoted_username};"
 
-        with get_clickhouse_client(self.settings.to_url()) as client:
+        with self.get_client() as client:
             client.command(statement, parameters={"username": username})
 
     def grant_user_privileges(self, username: str, database: str) -> None:
