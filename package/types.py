@@ -1,4 +1,3 @@
-from package.database.utils import create_clickhouse_url, create_postgres_url
 from pydantic import BaseModel, Field
 from typing import List, Optional
 
@@ -13,7 +12,9 @@ class CHSettings(BaseModel):
     driver: Optional[str] = None
 
     def to_url(self) -> str:
-        return create_clickhouse_url(**self.model_dump())
+        from package.database import CHAdapter
+
+        return CHAdapter.create_url(**self.model_dump())
 
 
 class CHIdentifier:
@@ -58,7 +59,9 @@ class PGSettings(BaseModel):
     schema_: str = Field(serialization_alias="schema")
 
     def to_url(self) -> str:
-        return create_postgres_url(**self.model_dump(by_alias=True))
+        from package.database import PGAdapter
+
+        return PGAdapter.create_url(**self.model_dump(by_alias=True))
 
 
 class PGIdentifier:

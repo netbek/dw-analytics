@@ -23,6 +23,24 @@ class CHAdapter(BaseAdapter):
     def __init__(self, settings: CHSettings) -> None:
         super().__init__(settings)
 
+    @classmethod
+    def create_url(
+        cls,
+        host: str,
+        port: int,
+        username: str,
+        password: str,
+        database: str,
+        driver: Optional[str] = None,
+        secure: Optional[bool] = None,
+    ) -> str:
+        if driver:
+            scheme = f"clickhouse+{driver}"
+        else:
+            scheme = "clickhouse"
+
+        return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
+
     def get_client():
         raise NotImplementedError()
 

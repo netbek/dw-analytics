@@ -3,8 +3,6 @@ __all__ = [
     "CHClient",
     "DBSession",
     "PGAdapter",
-    "create_clickhouse_url",
-    "create_postgres_url",
     "get_clickhouse_client",
     "get_postgres_client",
     "render_statement",
@@ -12,6 +10,6 @@ __all__ = [
 
 from .adapters.clickhouse import CHAdapter, get_clickhouse_client
 from .adapters.postgres import get_postgres_client, PGAdapter
-from .utils import create_clickhouse_url, create_postgres_url, render_statement
+from .utils import render_statement
 from clickhouse_connect.driver.client import Client as CHClient
 from sqlmodel import Session as DBSession

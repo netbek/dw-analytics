@@ -1,5 +1,4 @@
 from package.config.constants import HOME_DIR
-from package.database.utils import create_clickhouse_url, create_postgres_url
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -27,7 +26,9 @@ class TestCHSettings(BaseSettings):
     driver: str = Field(validation_alias="test_clickhouse_driver", serialization_alias="driver")
 
     def to_url(self) -> str:
-        return create_clickhouse_url(**self.model_dump(by_alias=True))
+        from package.database import CHAdapter
+
+        return CHAdapter.create_url(**self.model_dump(by_alias=True))
 
 
 class TestPGSettings(BaseSettings):
@@ -44,4 +45,6 @@ class TestPGSettings(BaseSettings):
     schema_: str = Field(validation_alias="test_postgres_schema", serialization_alias="schema")
 
     def to_url(self) -> str:
-        return create_postgres_url(**self.model_dump(by_alias=True))
+        from package.database import PGAdapter
+
+        return PGAdapter.create_url(**self.model_dump(by_alias=True))

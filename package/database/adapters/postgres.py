@@ -26,6 +26,20 @@ class PGAdapter(BaseAdapter):
     def __init__(self, settings: PGSettings) -> None:
         super().__init__(settings)
 
+    @classmethod
+    def create_url(
+        cls,
+        host: str,
+        port: int,
+        username: str,
+        password: str,
+        database: str,
+        schema: str,
+    ) -> str:
+        scheme = "postgresql"
+
+        return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
+
     def get_client():
         raise NotImplementedError()
 
