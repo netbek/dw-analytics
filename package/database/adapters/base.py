@@ -8,6 +8,38 @@ class BaseAdapter(ABC):
     def __init__(self, settings: CHSettings | PGSettings) -> None:
         self.settings = settings
 
+    @overload
+    @classmethod
+    @abstractmethod
+    def create_url(
+        cls,
+        host: str,
+        port: int,
+        username: str,
+        password: str,
+        database: str,
+        schema: str,
+    ) -> str: ...
+
+    @overload
+    @classmethod
+    @abstractmethod
+    def create_url(
+        cls,
+        host: str,
+        port: int,
+        username: str,
+        password: str,
+        database: str,
+        driver: Optional[str] = None,
+        secure: Optional[bool] = None,
+    ) -> str: ...
+
+    @classmethod
+    @abstractmethod
+    def create_url(cls, *args, **kwargs) -> str:
+        pass
+
     @abstractmethod
     def get_client():
         pass
