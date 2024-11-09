@@ -2,10 +2,12 @@ version: "3.8"
 
 volumes:
   prefect-postgres-data:
+  test-clickhouse-data:
+  test-postgres-data:
 
 services:
   prefect-postgres:
-    image: postgres:16.4-alpine3.20
+    image: postgres:17.0-alpine3.20
     env_file:
       - ./.env_files/prefect-postgres.env
     ports:
@@ -134,3 +136,44 @@ services:
       - ${DW_API_PORT:-8080}:80
     volumes:
       - .:/home/analyst:rw
+
+  test-clickhouse:
+    image: clickhouse/clickhouse-server:24.8.6.70-alpine
+    env_file:
+      - ./.env_files/test-clickhouse.env
+    ports:
+      - ${DW_TEST_CLICKHOUSE_HTTP_PORT:-8123}:8123
+      - ${DW_TEST_CLICKHOUSE_NATIVE_PORT:-9000}:9000
+    volumes:
+      - ./docker/test-clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - ./docker/test-clickhouse/config.d/override.xml:/etc/clickhouse-server/config.d/override.xml:ro
+      - ./docker/test-clickhouse/users.d/override.xml:/etc/clickhouse-server/users.d/override.xml:ro
+      - test-clickhouse-data:/var/lib/clickhouse:rw
+    healthcheck:
+      test: wget --no-verbose --spider http://localhost:8123/ping || exit 1
+      interval: 1s
+      timeout: 1s
+      retries: 10
+    deploy:
+      restart_policy:
+        condition: on-failure
+    cap_add:
+      - CAP_SYS_NICE # https://github.com/ClickHouse/ClickHouse/issues/68747#issuecomment-2306631664
+
+  test-postgres:
+    image: postgres:17.0-alpine3.20
+    env_file:
+      - ./.env_files/test-postgres.env
+    ports:
+      - ${DW_TEST_POSTGRES_PORT:-5432}:5432
+    volumes:
+      - ./docker/test-postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - test-postgres-data:/var/lib/postgresql/data:rw
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 1s
+      timeout: 1s
+      retries: 10
+    deploy:
+      restart_policy:
+        condition: on-failure
