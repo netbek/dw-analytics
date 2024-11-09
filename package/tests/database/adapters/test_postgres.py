@@ -55,11 +55,11 @@ class TestPGAdapter:
             actual = cur.fetchall()
         assert actual == [(1,)]
 
-    def test_postgres_session(self, pg_settings: TestPGSettings, pg_session: DBSession):
+    def test_postgres_session(self, pg_adapter: PGAdapter, pg_session: DBSession):
         actual = pg_session.exec(
             text(
                 "select 1 from information_schema.schemata where catalog_name = :database limit 1;"
-            ).bindparams(database=pg_settings.database)
+            ).bindparams(database=pg_adapter.settings.database)
         ).all()
         assert actual == [(1,)]
 

@@ -8,8 +8,8 @@ import pytest
 
 
 @pytest.fixture(scope="session")
-def ch_adapter(ch_settings: TestCHSettings) -> Generator[CHAdapter, Any, None]:
-    yield CHAdapter(ch_settings)
+def ch_adapter() -> Generator[CHAdapter, Any, None]:
+    yield CHAdapter(TestCHSettings())
 
 
 @pytest.fixture(scope="session")
@@ -61,8 +61,8 @@ def ch_session(ch_adapter: CHAdapter, ch_database: List[str]) -> Generator[DBSes
 
 
 @pytest.fixture(scope="session")
-def pg_adapter(pg_settings: TestPGSettings) -> Generator[PGAdapter, Any, None]:
-    yield PGAdapter(pg_settings)
+def pg_adapter() -> Generator[PGAdapter, Any, None]:
+    yield PGAdapter(TestPGSettings())
 
 
 @pytest.fixture(scope="function")

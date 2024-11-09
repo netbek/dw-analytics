@@ -38,10 +38,10 @@ class TestCHAdapter:
             ).result_rows
         assert actual == [(1,)]
 
-    def test_clickhouse_session(self, ch_settings: TestCHSettings, ch_session: DBSession):
+    def test_clickhouse_session(self, ch_adapter: CHAdapter, ch_session: DBSession):
         actual = ch_session.exec(
             text("select 1 from system.databases where name = :database;").bindparams(
-                database=ch_settings.database
+                database=ch_adapter.settings.database
             )
         ).all()
         assert actual == [(1,)]
