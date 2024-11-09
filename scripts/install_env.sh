@@ -145,6 +145,8 @@ templates=(
     env_files/prefect-postgres.env.jinja2     ${env_dir}/prefect-postgres.env
     env_files/prefect-server.env.jinja2       ${env_dir}/prefect-server.env
     env_files/prefect-worker.env.jinja2       ${env_dir}/prefect-worker.env
+    env_files/test-postgres.env.jinja2        ${env_dir}/test-postgres.env
+    env_files/test-clickhouse.env.jinja2      ${env_dir}/test-clickhouse.env
 )
 context=(
     "profile=${profile}"
