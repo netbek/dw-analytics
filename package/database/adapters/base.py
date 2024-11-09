@@ -1,8 +1,8 @@
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from package.types import CHSettings, PGSettings
-from sqlmodel import create_engine, Table
-from typing import List, Optional, overload
+from sqlmodel import create_engine, Session, Table
+from typing import Any, Generator, List, Optional, overload
 
 
 class BaseAdapter(ABC):
@@ -52,6 +52,15 @@ class BaseAdapter(ABC):
         yield engine
 
         engine.dispose()
+
+    @contextmanager
+    def get_session(self) -> Generator[Session, Any, None]:
+        with self.get_engine() as engine:
+            session = Session(engine)
+
+        yield session
+
+        session.close()
 
     @abstractmethod
     def has_database(self, database: str) -> bool:
