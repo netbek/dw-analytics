@@ -3,7 +3,8 @@ __all__ = [
     "CHClient",
     "DBSession",
     "PGAdapter",
-    "create_connection_url",
+    "create_clickhouse_url",
+    "create_postgres_url",
     "get_clickhouse_client",
     "get_create_table_statement",
     "get_postgres_client",
@@ -15,7 +16,8 @@ __all__ = [
 from .adapters.clickhouse import CHAdapter, get_clickhouse_client
 from .adapters.postgres import get_postgres_client, PGAdapter
 from .utils import (
-    create_connection_url,
+    create_clickhouse_url,
+    create_postgres_url,
     get_create_table_statement,
     get_table_schema,
     list_tables,

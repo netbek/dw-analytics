@@ -1,5 +1,5 @@
 from package.database import CHAdapter, PGAdapter
-from package.database.types import CHSettings
+from package.types import CHSettings
 from pathlib import Path
 
 import copy

@@ -1,6 +1,6 @@
 from functools import lru_cache
 from package.config.constants import HOME_DIR, PROJECTS_DIR, TEMPLATE_PROJECT_DIR
-from package.database.types import CHSettings, PGSettings
+from package.types import CHSettings, PGSettings
 from package.utils.environ_utils import get_env_var
 from package.utils.filesystem import rmtree, symlink
 from package.utils.template import render_template
@@ -154,18 +154,6 @@ class Project:
             username=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_USERNAME"),
             password=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_PASSWORD"),
             database=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_DATABASE"),
-        )
-
-    @property
-    @lru_cache
-    def test_ch_settings(self) -> CHSettings:
-        return CHSettings(
-            driver=get_env_var("TEST_CLICKHOUSE_DRIVER"),
-            host=get_env_var("TEST_CLICKHOUSE_HOST"),
-            port=get_env_var("TEST_CLICKHOUSE_PORT"),
-            username=get_env_var("TEST_CLICKHOUSE_USERNAME"),
-            password=get_env_var("TEST_CLICKHOUSE_PASSWORD"),
-            database=get_env_var("TEST_CLICKHOUSE_DATABASE"),
         )
 
     def init_directory(self):

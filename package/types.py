@@ -1,15 +1,19 @@
-from pydantic import BaseModel
-from typing import List, Literal, Optional
+from package.database.utils import create_clickhouse_url, create_postgres_url
+from pydantic import BaseModel, Field
+from typing import List, Optional
 
 
-class DBSettings(BaseModel):
-    type: Literal["clickhouse", "postgresql"]
-    driver: Optional[str] = None
+class CHSettings(BaseModel):
     host: str
-    port: str
+    port: int
     username: str
     password: str
     database: str
+    secure: Optional[bool] = False
+    driver: Optional[str] = None
+
+    def to_url(self) -> str:
+        return create_clickhouse_url(**self.model_dump())
 
 
 class CHIdentifier:
@@ -38,10 +42,23 @@ class CHTableIdentifier(CHIdentifier, BaseModel):
             raise ValueError()
 
     def to_string(self) -> str:
-        if self.database is None:
-            return self.quote(self.table)
-        else:
+        if self.database is not None:
             return f"{self.quote(self.database)}.{self.quote(self.table)}"
+        else:
+            return self.quote(self.table)
+
+
+class PGSettings(BaseModel):
+    driver: Optional[str] = None
+    host: str
+    port: str
+    username: str
+    password: str
+    database: str
+    schema_: str = Field(serialization_alias="schema")
+
+    def to_url(self) -> str:
+        return create_postgres_url(**self.model_dump(by_alias=True))
 
 
 class PGIdentifier:
@@ -55,6 +72,7 @@ class PGIdentifier:
 
 
 class PGTableIdentifier(PGIdentifier, BaseModel):
+    database: Optional[str] = None
     schema_: Optional[str] = None
     table: str
 
@@ -62,7 +80,9 @@ class PGTableIdentifier(PGIdentifier, BaseModel):
     def from_string(cls, identifier: str) -> "PGTableIdentifier":
         parts = [cls.unquote(part) for part in identifier.split(".")]
 
-        if len(parts) == 2:
+        if len(parts) == 3:
+            return cls(database=parts[0], schema_=parts[1], table=parts[2])
+        elif len(parts) == 2:
             return cls(schema_=parts[0], table=parts[1])
         elif len(parts) == 1:
             return cls(table=parts[0])
@@ -70,10 +90,14 @@ class PGTableIdentifier(PGIdentifier, BaseModel):
             raise ValueError()
 
     def to_string(self) -> str:
-        if self.schema_ is None:
-            return self.quote(self.table)
-        else:
+        if self.database is not None and self.schema_ is not None:
+            return (
+                f"{self.quote(self.database)}.{self.quote(self.schema_)}.{self.quote(self.table)}"
+            )
+        elif self.schema_ is not None:
             return f"{self.quote(self.schema_)}.{self.quote(self.table)}"
+        else:
+            return self.quote(self.table)
 
 
 class DbtColumnMeta(BaseModel):

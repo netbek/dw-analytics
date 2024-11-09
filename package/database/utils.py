@@ -17,6 +17,23 @@ RE_HAS_JINJA = re.compile(r"({[{%#]|[#}%]})")
 jinja_env = Environment(extensions=["jinja2.ext.do", "jinja2.ext.loopcontrols"])
 
 
+def create_clickhouse_url(
+    host: str,
+    port: int,
+    username: str,
+    password: str,
+    database: str,
+    driver: Optional[str] = None,
+    secure: Optional[bool] = None,
+) -> str:
+    if driver:
+        scheme = f"clickhouse+{driver}"
+    else:
+        scheme = "clickhouse"
+
+    return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
+
+
 @contextmanager
 def get_clickhouse_client(dsn: str) -> Generator[CHClient | None]:
     client = clickhouse_connect.get_client(dsn=dsn)
@@ -24,6 +41,19 @@ def get_clickhouse_client(dsn: str) -> Generator[CHClient | None]:
         yield client
     finally:
         client.close()
+
+
+def create_postgres_url(
+    host: str,
+    port: int,
+    username: str,
+    password: str,
+    database: str,
+    schema: str,
+) -> str:
+    scheme = "postgresql"
+
+    return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
 
 
 @contextmanager
@@ -37,23 +67,6 @@ def get_postgres_client(
             yield connection, cursor
     finally:
         connection.close()
-
-
-def create_connection_url(
-    type: str,
-    host: str,
-    port: int,
-    username: str,
-    password: str,
-    database: str,
-    driver: Optional[str] = None,
-):
-    if driver:
-        scheme = f"{type}+{driver}"
-    else:
-        scheme = type
-
-    return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
 
 
 def render_statement(

@@ -1,6 +1,7 @@
 from package.cli.root import app
 from package.peerdb import DestinationPeer, PeerDBClient, PeerDBConfig, SourcePeer
 from package.project import Project
+from package.types import PGTableIdentifier
 from package.utils.typer_utils import typer_async
 
 import typer
@@ -38,8 +39,14 @@ async def install(project_name: str):
     for mirror in peerdb_config["mirrors"].values():
         for table_mapping in mirror["table_mappings"]:
             if "replica_identity" in table_mapping:
+                table_identifier = PGTableIdentifier.from_string(
+                    table_mapping["source_table_identifier"]
+                )
                 source_peer.set_table_replica_identity(
-                    table_mapping["source_table_identifier"], table_mapping["replica_identity"]
+                    table_identifier.table,
+                    table_mapping["replica_identity"],
+                    database=table_identifier.database,
+                    schema=table_identifier.schema_,
                 )
                 app.console.print(
                     f"Set replica identity of '{table_mapping["source_table_identifier"]}' to '{table_mapping["replica_identity"]}'",
@@ -47,7 +54,9 @@ async def install(project_name: str):
                 )
 
     for publication in peerdb_config["publications"].values():
-        source_peer.create_publication(publication["name"], publication["table_identifiers"])
+        source_peer.create_publication(
+            publication["name"], publication["table_identifiers"], replace=True
+        )
         app.console.print(
             f"Created publication '{publication["name"]}' on source",
             style="green",
@@ -113,11 +122,18 @@ async def uninstall(project_name: str):
     for mirror in peerdb_config["mirrors"].values():
         for table_mapping in mirror["table_mappings"]:
             if "replica_identity" in table_mapping:
+                table_identifier = PGTableIdentifier.from_string(
+                    table_mapping["source_table_identifier"]
+                )
+                replica_identity = "default"
                 source_peer.set_table_replica_identity(
-                    table_mapping["source_table_identifier"], "default"
+                    table_identifier.table,
+                    replica_identity,
+                    database=table_identifier.database,
+                    schema=table_identifier.schema_,
                 )
                 app.console.print(
-                    f"Set replica identity of '{table_mapping["source_table_identifier"]}' to 'default'",
+                    f"Set replica identity of '{table_mapping["source_table_identifier"]}' to '{replica_identity}'",
                     style="green",
                 )
 

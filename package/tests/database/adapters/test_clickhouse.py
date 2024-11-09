@@ -1,58 +1,59 @@
 from clickhouse_connect.driver.client import Client
 from clickhouse_connect.driver.exceptions import DatabaseError
+from package.config.settings import TestCHSettings
 from package.database import CHAdapter
 from package.tests.asserts import assert_equal_ignoring_whitespace
 from package.types import CHTableIdentifier
 from sqlmodel import Session, text
 from typing import Any, Generator
 
-import os
 import pytest
 
 
 @pytest.fixture(scope="function")
-def ch_table(ch_adapter: CHAdapter) -> Generator[str, Any, None]:
+def ch_table(ch_adapter: CHAdapter) -> Generator[CHTableIdentifier, Any, None]:
     table = "test_table"
-    quoted_table = CHTableIdentifier(table=table).to_string()
+    table_identifier = CHTableIdentifier(table=table)
+    quoted_table = table_identifier.to_string()
     statement = f"""
-    CREATE OR REPLACE TABLE {quoted_table}
+    create or replace table {quoted_table}
     (
         id UInt64,
-        updated_at DateTime DEFAULT now()
+        updated_at DateTime default now()
     )
-    ENGINE = MergeTree
-    ORDER BY id
+    engine = MergeTree
+    order by id
     """
 
     ch_adapter.create_table(table, statement)
 
-    yield table
+    yield table_identifier
 
     ch_adapter.drop_table(table)
 
 
-def test_clickhouse_client(ch_client: Client):
-    database = os.environ["TEST_CLICKHOUSE_DATABASE"]
+def test_clickhouse_client(ch_settings: TestCHSettings, ch_client: Client):
     actual = ch_client.query(
         "select 1 from system.databases where name = {database:String};",
-        parameters={"database": database},
+        parameters={"database": ch_settings.database},
     ).result_rows
     assert actual == [(1,)]
 
 
-def test_clickhouse_session(ch_session: Session):
-    database = os.environ["TEST_CLICKHOUSE_DATABASE"]
+def test_clickhouse_session(ch_settings: TestCHSettings, ch_session: Session):
     actual = ch_session.exec(
-        text("select 1 from system.databases where name = :database;").bindparams(database=database)
+        text("select 1 from system.databases where name = :database;").bindparams(
+            database=ch_settings.database
+        )
     ).all()
     assert actual == [(1,)]
 
 
 class TestCHAdapter:
-    def test_has_database_non_existent_table(self, ch_adapter: CHAdapter):
-        assert ch_adapter.has_database("non_existent_database") is False
+    def test_has_database_non_existent(self, ch_adapter: CHAdapter):
+        assert ch_adapter.has_database("non_existent") is False
 
-    def test_has_database_existent_table(self, ch_adapter: CHAdapter):
+    def test_has_database_existent(self, ch_adapter: CHAdapter):
         assert ch_adapter.has_database(ch_adapter.settings.database) is True
 
     def test_create_and_drop_database(self, ch_adapter: CHAdapter):
@@ -66,31 +67,31 @@ class TestCHAdapter:
         ch_adapter.drop_database(database)
         assert ch_adapter.has_database(database) is False
 
-    def test_has_table_non_existent_table(self, ch_adapter: CHAdapter):
-        assert ch_adapter.has_table("non_existent_table") is False
+    def test_has_table_non_existent(self, ch_adapter: CHAdapter):
+        assert ch_adapter.has_table("non_existent") is False
 
-    def test_has_table_existent_table(self, ch_adapter: CHAdapter, ch_table: str):
-        assert ch_adapter.has_table(ch_table) is True
+    def test_has_table_existent(self, ch_adapter: CHAdapter, ch_table: CHTableIdentifier):
+        assert ch_adapter.has_table(ch_table.table) is True
 
-    def test_get_table_schema_non_existent_table(self, ch_adapter: CHAdapter):
-        table = ch_adapter.get_table_schema("non_existent_table")
+    def test_get_table_schema_non_existent(self, ch_adapter: CHAdapter):
+        table = ch_adapter.get_table_schema("non_existent")
         assert table is None
 
-    def test_get_table_schema_existent_table(self, ch_adapter: CHAdapter, ch_table: str):
-        table = ch_adapter.get_table_schema(ch_table)
+    def test_get_table_schema_existent(self, ch_adapter: CHAdapter, ch_table: CHTableIdentifier):
+        table = ch_adapter.get_table_schema(ch_table.table)
         assert set(["id", "updated_at"]) == set([column.name for column in table.columns])
 
     def test_create_and_drop_table(self, ch_adapter: CHAdapter):
         table = "test_table"
         quoted_table = CHTableIdentifier(table=table).to_string()
         statement = f"""
-        CREATE OR REPLACE TABLE {quoted_table}
+        create or replace table {quoted_table}
         (
             id UInt64,
-            updated_at DateTime DEFAULT now()
+            updated_at DateTime default now()
         )
-        ENGINE = MergeTree
-        ORDER BY id
+        engine = MergeTree
+        order by id
         """
 
         assert ch_adapter.has_table(table) is False
@@ -101,12 +102,12 @@ class TestCHAdapter:
         ch_adapter.drop_table(table)
         assert ch_adapter.has_table(table) is False
 
-    def test_get_create_table_statement(self, ch_adapter: CHAdapter, ch_table: str):
+    def test_get_create_table_statement(self, ch_adapter: CHAdapter, ch_table: CHTableIdentifier):
         with pytest.raises(DatabaseError):
-            ch_adapter.get_create_table_statement("non_existent_table")
+            ch_adapter.get_create_table_statement("non_existent")
 
         expected = f"""
-        CREATE TABLE {ch_adapter.settings.database}.{ch_table}
+        CREATE TABLE {ch_adapter.settings.database}.{ch_table.table}
         (
             `id` UInt64,
             `updated_at` DateTime DEFAULT now()
@@ -115,13 +116,17 @@ class TestCHAdapter:
         ORDER BY id
         SETTINGS index_granularity = 8192
         """
-        assert_equal_ignoring_whitespace(ch_adapter.get_create_table_statement(ch_table), expected)
+        assert_equal_ignoring_whitespace(
+            ch_adapter.get_create_table_statement(ch_table.table), expected
+        )
 
     def test_list_tables_empty_database(self, ch_adapter: CHAdapter):
         assert ch_adapter.list_tables() == []
 
-    def test_list_tables_populated_database(self, ch_adapter: CHAdapter, ch_table: str):
-        assert set([ch_table]) == set([table.name for table in ch_adapter.list_tables()])
+    def test_list_tables_populated_database(
+        self, ch_adapter: CHAdapter, ch_table: CHTableIdentifier
+    ):
+        assert set([ch_table.table]) == set([table.name for table in ch_adapter.list_tables()])
 
     def test_has_user_non_existent_user(self, ch_adapter: CHAdapter):
         assert ch_adapter.has_user("non_existent_user") is False
