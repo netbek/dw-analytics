@@ -13,7 +13,7 @@ target-version = "py312"
 ignore = ["D100", "D101", "D102", "D103", "D104", "D107", "D205"]
 
 [tool.pytest.ini_options]
-addopts = "-q"
+addopts = "--no-header"
 norecursedirs = [
     "*.egg",
     ".*",
@@ -30,4 +30,4 @@ norecursedirs = [
 python_classes = ["Test*"]
 python_files = ["test_*.py"]
 python_functions = ["test_*"]
-# testpaths = ["tests"]
+testpaths = ["tests"]
