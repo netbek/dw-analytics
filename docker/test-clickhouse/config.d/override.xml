@@ -1,0 +1,22 @@
+<clickhouse>
+  <compression>
+    <case>
+      <method>lz4</method>
+    </case>
+  </compression>
+
+  <logger>
+    <level>notice</level>
+  </logger>
+
+  <send_crash_reports>
+    <enabled>false</enabled>
+  </send_crash_reports>
+
+  <!--
+  <session_log>
+    <database>system</database>
+    <table>session_log</table>
+  </session_log>
+  -->
+</clickhouse>
