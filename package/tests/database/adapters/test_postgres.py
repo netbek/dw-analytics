@@ -1,7 +1,7 @@
 from package.config.settings import TestPGSettings
 from package.database import DBSession, PGAdapter
 from package.types import PGTableIdentifier
-from sqlmodel import text
+from sqlmodel import Table, text
 from typing import Any, Generator
 
 import pytest
@@ -20,7 +20,7 @@ class TestPGAdapter:
         pg_adapter.drop_user(username)
 
     @pytest.fixture(scope="function")
-    def pg_table(self, pg_adapter: PGAdapter) -> Generator[PGTableIdentifier, Any, None]:
+    def pg_table(self, pg_adapter: PGAdapter) -> Generator[Table, Any, None]:
         table = "test_table"
         table_identifier = PGTableIdentifier(table=table)
         quoted_table = table_identifier.to_string()
@@ -33,17 +33,15 @@ class TestPGAdapter:
 
         pg_adapter.create_table(table, statement)
 
-        yield table_identifier
+        yield pg_adapter.get_table(table)
 
         pg_adapter.drop_table(table)
 
     @pytest.fixture(scope="function")
-    def pg_publication(
-        self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier
-    ) -> Generator[str, Any, None]:
+    def pg_publication(self, pg_adapter: PGAdapter, pg_table: Table) -> Generator[str, Any, None]:
         publication = "test_publication"
 
-        pg_adapter.create_publication(publication, tables=[pg_table.table])
+        pg_adapter.create_publication(publication, tables=[pg_table.name])
 
         yield publication
 
@@ -88,15 +86,15 @@ class TestPGAdapter:
     def test_has_table_non_existent(self, pg_adapter: PGAdapter):
         assert pg_adapter.has_table("non_existent") is False
 
-    def test_has_table_existent(self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier):
-        assert pg_adapter.has_table(pg_table.table) is True
+    def test_has_table_existent(self, pg_adapter: PGAdapter, pg_table: Table):
+        assert pg_adapter.has_table(pg_table.name) is True
 
     def test_get_table_non_existent(self, pg_adapter: PGAdapter):
         table = pg_adapter.get_table("non_existent")
         assert table is None
 
-    def test_get_table_existent(self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier):
-        table = pg_adapter.get_table(pg_table.table)
+    def test_get_table_existent(self, pg_adapter: PGAdapter, pg_table: Table):
+        table = pg_adapter.get_table(pg_table.name)
         assert set(["id", "updated_at"]) == set([column.name for column in table.columns])
 
     def test_create_and_drop_table(self, pg_adapter: PGAdapter):
@@ -120,32 +118,22 @@ class TestPGAdapter:
     def test_list_tables_empty_database(self, pg_adapter: PGAdapter):
         assert pg_adapter.list_tables() == []
 
-    def test_list_tables_populated_database(
-        self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier
-    ):
-        assert set([pg_table.table]) == set([table.name for table in pg_adapter.list_tables()])
+    def test_list_tables_populated_database(self, pg_adapter: PGAdapter, pg_table: Table):
+        assert set([pg_table.name]) == set([table.name for table in pg_adapter.list_tables()])
 
-    def test_get_table_replica_identity_non_existent(
-        self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier
-    ):
+    def test_get_table_replica_identity_non_existent(self, pg_adapter: PGAdapter, pg_table: Table):
         assert pg_adapter.get_table_replica_identity("non_existent_table") is None
 
-    def test_get_table_replica_identity_existent(
-        self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier
-    ):
-        assert pg_adapter.get_table_replica_identity(pg_table.table) == "default"
+    def test_get_table_replica_identity_existent(self, pg_adapter: PGAdapter, pg_table: Table):
+        assert pg_adapter.get_table_replica_identity(pg_table.name) == "default"
 
-    def test_set_table_replica_identity_non_existent(
-        self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier
-    ):
+    def test_set_table_replica_identity_non_existent(self, pg_adapter: PGAdapter, pg_table: Table):
         pg_adapter.set_table_replica_identity("non_existent_table", "full")
 
-    def test_set_table_replica_identity_existent(
-        self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier
-    ):
-        assert pg_adapter.get_table_replica_identity(pg_table.table) == "default"
-        pg_adapter.set_table_replica_identity(pg_table.table, "full")
-        assert pg_adapter.get_table_replica_identity(pg_table.table) == "full"
+    def test_set_table_replica_identity_existent(self, pg_adapter: PGAdapter, pg_table: Table):
+        assert pg_adapter.get_table_replica_identity(pg_table.name) == "default"
+        pg_adapter.set_table_replica_identity(pg_table.name, "full")
+        assert pg_adapter.get_table_replica_identity(pg_table.name) == "full"
 
     def test_has_user_non_existent_user(self, pg_adapter: PGAdapter):
         assert pg_adapter.has_user("non_existent_user") is False
@@ -166,22 +154,22 @@ class TestPGAdapter:
         assert pg_adapter.has_user(username) is False
 
     def test_grant_and_revoke_user_privileges(
-        self, pg_adapter: PGAdapter, pg_user: str, pg_table: PGTableIdentifier
+        self, pg_adapter: PGAdapter, pg_user: str, pg_table: Table
     ):
         pg_adapter.grant_user_privileges(pg_user, pg_adapter.settings.schema_)
 
         assert pg_adapter.list_user_privileges(pg_user) == [
-            (pg_adapter.settings.database, pg_adapter.settings.schema_, pg_table.table, "SELECT")
+            (pg_adapter.settings.database, pg_adapter.settings.schema_, pg_table.name, "SELECT")
         ]
 
         pg_adapter.revoke_user_privileges(pg_user, pg_adapter.settings.schema_)
 
         assert pg_adapter.list_user_privileges(pg_user) == []
 
-    def test_create_and_drop_publication(self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier):
+    def test_create_and_drop_publication(self, pg_adapter: PGAdapter, pg_table: Table):
         publication = "test_publication"
 
-        pg_adapter.create_publication(publication, [pg_table.table])
+        pg_adapter.create_publication(publication, [pg_table.name])
         assert pg_adapter.list_publications() == [publication]
 
         pg_adapter.drop_publication(publication)

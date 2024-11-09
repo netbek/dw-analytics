@@ -3,7 +3,7 @@ from package.config.settings import TestCHSettings
 from package.database import CHAdapter, DBSession
 from package.tests.asserts import assert_equal_ignoring_whitespace
 from package.types import CHTableIdentifier
-from sqlmodel import text
+from sqlmodel import Table, text
 from typing import Any, Generator
 
 import pytest
@@ -27,7 +27,7 @@ class TestCHAdapter:
 
         ch_adapter.create_table(table, statement)
 
-        yield table_identifier
+        yield ch_adapter.get_table(table)
 
         ch_adapter.drop_table(table)
 
@@ -67,15 +67,15 @@ class TestCHAdapter:
     def test_has_table_non_existent(self, ch_adapter: CHAdapter):
         assert ch_adapter.has_table("non_existent") is False
 
-    def test_has_table_existent(self, ch_adapter: CHAdapter, ch_table: CHTableIdentifier):
-        assert ch_adapter.has_table(ch_table.table) is True
+    def test_has_table_existent(self, ch_adapter: CHAdapter, ch_table: Table):
+        assert ch_adapter.has_table(ch_table.name) is True
 
     def test_get_table_non_existent(self, ch_adapter: CHAdapter):
         table = ch_adapter.get_table("non_existent")
         assert table is None
 
-    def test_get_table_existent(self, ch_adapter: CHAdapter, ch_table: CHTableIdentifier):
-        table = ch_adapter.get_table(ch_table.table)
+    def test_get_table_existent(self, ch_adapter: CHAdapter, ch_table: Table):
+        table = ch_adapter.get_table(ch_table.name)
         assert set(["id", "updated_at"]) == set([column.name for column in table.columns])
 
     def test_create_and_drop_table(self, ch_adapter: CHAdapter):
@@ -99,12 +99,12 @@ class TestCHAdapter:
         ch_adapter.drop_table(table)
         assert ch_adapter.has_table(table) is False
 
-    def test_get_create_table_statement(self, ch_adapter: CHAdapter, ch_table: CHTableIdentifier):
+    def test_get_create_table_statement(self, ch_adapter: CHAdapter, ch_table: Table):
         with pytest.raises(DatabaseError):
             ch_adapter.get_create_table_statement("non_existent")
 
         expected = f"""
-        CREATE TABLE {ch_adapter.settings.database}.{ch_table.table}
+        CREATE TABLE {ch_adapter.settings.database}.{ch_table.name}
         (
             `id` UInt64,
             `updated_at` DateTime DEFAULT now()
@@ -114,16 +114,14 @@ class TestCHAdapter:
         SETTINGS index_granularity = 8192
         """
         assert_equal_ignoring_whitespace(
-            ch_adapter.get_create_table_statement(ch_table.table), expected
+            ch_adapter.get_create_table_statement(ch_table.name), expected
         )
 
     def test_list_tables_empty_database(self, ch_adapter: CHAdapter):
         assert ch_adapter.list_tables() == []
 
-    def test_list_tables_populated_database(
-        self, ch_adapter: CHAdapter, ch_table: CHTableIdentifier
-    ):
-        assert set([ch_table.table]) == set([table.name for table in ch_adapter.list_tables()])
+    def test_list_tables_populated_database(self, ch_adapter: CHAdapter, ch_table: Table):
+        assert set([ch_table.name]) == set([table.name for table in ch_adapter.list_tables()])
 
     def test_has_user_non_existent_user(self, ch_adapter: CHAdapter):
         assert ch_adapter.has_user("non_existent_user") is False
