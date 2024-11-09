@@ -13,8 +13,7 @@ class TestCHAdapter:
     @pytest.fixture(scope="function")
     def ch_table(self, ch_adapter: CHAdapter) -> Generator[CHTableIdentifier, Any, None]:
         table = "test_table"
-        table_identifier = CHTableIdentifier(table=table)
-        quoted_table = table_identifier.to_string()
+        quoted_table = CHTableIdentifier(table=table).to_string()
         statement = f"""
         create or replace table {quoted_table}
         (

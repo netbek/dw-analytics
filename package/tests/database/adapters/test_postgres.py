@@ -22,8 +22,7 @@ class TestPGAdapter:
     @pytest.fixture(scope="function")
     def pg_table(self, pg_adapter: PGAdapter) -> Generator[Table, Any, None]:
         table = "test_table"
-        table_identifier = PGTableIdentifier(table=table)
-        quoted_table = table_identifier.to_string()
+        quoted_table = PGTableIdentifier(table=table).to_string()
         statement = f"""
         create table if not exists {quoted_table} (
             id bigint,
