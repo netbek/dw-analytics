@@ -31,25 +31,23 @@ def ch_table(ch_adapter: CHAdapter) -> Generator[CHTableIdentifier, Any, None]:
     ch_adapter.drop_table(table)
 
 
-def test_clickhouse_client(ch_adapter: CHAdapter):
-    with ch_adapter.get_client() as client:
-        actual = client.query(
-            "select 1 from system.databases where name = {database:String};",
-            parameters={"database": ch_adapter.settings.database},
-        ).result_rows
-    assert actual == [(1,)]
-
-
-def test_clickhouse_session(ch_settings: TestCHSettings, ch_session: Session):
-    actual = ch_session.exec(
-        text("select 1 from system.databases where name = :database;").bindparams(
-            database=ch_settings.database
-        )
-    ).all()
-    assert actual == [(1,)]
-
-
 class TestCHAdapter:
+    def test_clickhouse_client(self, ch_adapter: CHAdapter):
+        with ch_adapter.get_client() as client:
+            actual = client.query(
+                "select 1 from system.databases where name = {database:String};",
+                parameters={"database": ch_adapter.settings.database},
+            ).result_rows
+        assert actual == [(1,)]
+
+    def test_clickhouse_session(self, ch_settings: TestCHSettings, ch_session: Session):
+        actual = ch_session.exec(
+            text("select 1 from system.databases where name = :database;").bindparams(
+                database=ch_settings.database
+            )
+        ).all()
+        assert actual == [(1,)]
+
     def test_has_database_non_existent(self, ch_adapter: CHAdapter):
         assert ch_adapter.has_database("non_existent") is False
 

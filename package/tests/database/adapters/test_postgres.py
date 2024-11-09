@@ -49,26 +49,24 @@ def pg_publication(pg_adapter: PGAdapter, pg_table: PGTableIdentifier) -> Genera
     pg_adapter.drop_publication(publication)
 
 
-def test_postgres_client(pg_adapter: PGAdapter):
-    with pg_adapter.get_client() as (conn, cur):
-        cur.execute(
-            "select 1 from information_schema.schemata where catalog_name = %s limit 1;",
-            [pg_adapter.settings.database],
-        )
-        actual = cur.fetchall()
-    assert actual == [(1,)]
-
-
-def test_postgres_session(pg_settings: TestPGSettings, pg_session: DBSession):
-    actual = pg_session.exec(
-        text(
-            "select 1 from information_schema.schemata where catalog_name = :database limit 1;"
-        ).bindparams(database=pg_settings.database)
-    ).all()
-    assert actual == [(1,)]
-
-
 class TestPGAdapter:
+    def test_postgres_client(self, pg_adapter: PGAdapter):
+        with pg_adapter.get_client() as (conn, cur):
+            cur.execute(
+                "select 1 from information_schema.schemata where catalog_name = %s limit 1;",
+                [pg_adapter.settings.database],
+            )
+            actual = cur.fetchall()
+        assert actual == [(1,)]
+
+    def test_postgres_session(self, pg_settings: TestPGSettings, pg_session: DBSession):
+        actual = pg_session.exec(
+            text(
+                "select 1 from information_schema.schemata where catalog_name = :database limit 1;"
+            ).bindparams(database=pg_settings.database)
+        ).all()
+        assert actual == [(1,)]
+
     def test_has_database_non_existent(self, pg_adapter: PGAdapter):
         assert pg_adapter.has_database("non_existent") is False
 
