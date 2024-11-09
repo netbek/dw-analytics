@@ -39,7 +39,7 @@ class PGAdapter(BaseAdapter):
         )
 
     @contextmanager
-    def get_client(
+    def create_client(
         self, autocommit: bool = True
     ) -> Generator[tuple[psycopg2.extensions.connection, psycopg2.extensions.cursor], Any, None]:
         connection = psycopg2.connect(dsn=self.url)
@@ -57,9 +57,11 @@ class PGAdapter(BaseAdapter):
         limit 1;
         """
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement, {"database": database})
-            return bool(cur.fetchall())
+            result = bool(cur.fetchall())
+
+        return result
 
     def create_database(self, database: str) -> None:
         raise NotImplementedError()
@@ -78,9 +80,11 @@ class PGAdapter(BaseAdapter):
         limit 1;
         """
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement, {"database": database, "schema": schema})
-            return bool(cur.fetchall())
+            result = bool(cur.fetchall())
+
+        return result
 
     def create_schema(self, schema: str, database: Optional[str] = None) -> None:
         raise NotImplementedError()
@@ -104,9 +108,11 @@ class PGAdapter(BaseAdapter):
         and table_name = %(table)s;
         """
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement, {"database": database, "schema": schema, "table": table})
-            return bool(cur.fetchall())
+            result = bool(cur.fetchall())
+
+        return result
 
     def create_table(
         self,
@@ -124,7 +130,7 @@ class PGAdapter(BaseAdapter):
         if self.has_table(table=table, database=database, schema=schema):
             return
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement)
 
     def get_create_table_statement(
@@ -147,7 +153,7 @@ class PGAdapter(BaseAdapter):
         quoted_table = PGTableIdentifier(database=database, schema_=schema, table=table).to_string()
         statement = f"drop table {quoted_table};"
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement)
 
     def get_table(
@@ -199,9 +205,11 @@ class PGAdapter(BaseAdapter):
             and t.table_name = %(table)s;
         """
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement, {"database": database, "schema": schema, "table": table})
-            return cur.fetchone()[0]
+            result = cur.fetchone()[0]
+
+        return result
 
     def set_table_replica_identity(
         self,
@@ -222,7 +230,7 @@ class PGAdapter(BaseAdapter):
         quoted_table = PGTableIdentifier(database=database, schema_=schema, table=table).to_string()
         statement = f"alter table {quoted_table} replica identity {replica_identity};"
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement)
 
     def list_tables(
@@ -250,9 +258,11 @@ class PGAdapter(BaseAdapter):
         where usename = %(username)s;
         """
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement, {"username": username})
-            return bool(cur.fetchall())
+            result = bool(cur.fetchall())
+
+        return result
 
     def create_user(self, username: str, password: str, options: Optional[dict] = None) -> None:
         if self.has_user(username):
@@ -272,7 +282,7 @@ class PGAdapter(BaseAdapter):
         with {' '.join(computed_options)} password %(password)s;
         """
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement, {"password": password})
 
     def drop_user(self, username: str) -> None:
@@ -285,7 +295,7 @@ class PGAdapter(BaseAdapter):
         drop user {quoted_username};
         """
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement)
 
     def grant_user_privileges(self, username: str, schema: str) -> None:
@@ -300,7 +310,7 @@ class PGAdapter(BaseAdapter):
         alter default privileges in schema {quoted_schema} grant select on tables to {quoted_username};
         """
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement)
 
     def revoke_user_privileges(self, username: str, schema: str) -> None:
@@ -316,7 +326,7 @@ class PGAdapter(BaseAdapter):
         -- reassign owned by {quoted_username} to postgres;
         """
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement)
 
     def list_user_privileges(self, username: str) -> List[tuple] | None:
@@ -334,16 +344,20 @@ class PGAdapter(BaseAdapter):
         order by 1, 2, 3, 4;
         """
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement, {"username": username})
-            return cur.fetchall()
+            result = cur.fetchall()
+
+        return result
 
     def has_publication(self, publication: str) -> bool:
         statement = "select 1 from pg_publication where pubname = %(publication)s;"
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement, {"publication": publication})
-            return bool(cur.fetchall())
+            result = bool(cur.fetchall())
+
+        return result
 
     def create_publication(self, publication: str, tables: List[str], replace=False) -> None:
         if self.has_publication(publication):
@@ -356,7 +370,7 @@ class PGAdapter(BaseAdapter):
         quoted_tables = [PGTableIdentifier.from_string(table).to_string() for table in tables]
         statement = f"create publication {quoted_publication} for table {", ".join(quoted_tables)};"
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement)
 
     def drop_publication(self, publication: str) -> None:
@@ -366,7 +380,7 @@ class PGAdapter(BaseAdapter):
         quoted_publication = PGIdentifier.quote(publication)
         statement = f"drop publication {quoted_publication};"
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement)
 
     def list_publications(self) -> List[str]:
@@ -375,6 +389,8 @@ class PGAdapter(BaseAdapter):
         from pg_catalog.pg_publication;
         """
 
-        with self.get_client() as (conn, cur):
+        with self.create_client() as (conn, cur):
             cur.execute(statement)
-            return [row[0] for row in cur.fetchall()]
+            result = [row[0] for row in cur.fetchall()]
+
+        return result

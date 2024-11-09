@@ -19,7 +19,7 @@ def ch_database(ch_adapter: CHAdapter) -> Generator[List[str], Any, None]:
     databases = pydash.uniq(databases)
     databases = pydash.without(databases, "default")
 
-    with ch_adapter.get_client() as client:
+    with ch_adapter.create_client() as client:
         for database in databases:
             client.command(
                 "DROP DATABASE IF EXISTS {database:Identifier};",
@@ -30,12 +30,12 @@ def ch_database(ch_adapter: CHAdapter) -> Generator[List[str], Any, None]:
                 parameters={"database": database},
             )
 
-    with ch_adapter.get_engine() as engine:
+    with ch_adapter.create_engine() as engine:
         SQLModel.metadata.create_all(engine)
 
     yield databases
 
-    with ch_adapter.get_client() as client:
+    with ch_adapter.create_client() as client:
         for database in databases:
             client.command(
                 "DROP DATABASE IF EXISTS {database:Identifier};",
@@ -45,14 +45,14 @@ def ch_database(ch_adapter: CHAdapter) -> Generator[List[str], Any, None]:
 
 @pytest.fixture(scope="function")
 def ch_session(ch_adapter: CHAdapter, ch_database: List[str]) -> Generator[DBSession, Any, None]:
-    with ch_adapter.get_engine() as engine:
+    with ch_adapter.create_engine() as engine:
         session = DBSession(engine)
 
     yield session
 
     session.close()
 
-    with ch_adapter.get_client() as client:
+    with ch_adapter.create_client() as client:
         for table in SQLModel.metadata.tables.values():
             client.command(
                 "TRUNCATE TABLE {schema:Identifier}.{name:Identifier};",
@@ -63,13 +63,3 @@ def ch_session(ch_adapter: CHAdapter, ch_database: List[str]) -> Generator[DBSes
 @pytest.fixture(scope="session")
 def pg_adapter() -> Generator[PGAdapter, Any, None]:
     yield PGAdapter(TestPGSettings())
-
-
-@pytest.fixture(scope="function")
-def pg_session(pg_adapter: PGAdapter) -> Generator[DBSession, Any, None]:
-    with pg_adapter.get_engine() as engine:
-        session = DBSession(engine)
-
-    yield session
-
-    session.close()

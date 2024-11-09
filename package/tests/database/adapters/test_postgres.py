@@ -1,5 +1,4 @@
-from package.config.settings import TestPGSettings
-from package.database import DBSession, PGAdapter
+from package.database import PGAdapter
 from package.types import PGTableIdentifier
 from sqlmodel import Table, text
 from typing import Any, Generator
@@ -47,7 +46,7 @@ class TestPGAdapter:
         pg_adapter.drop_publication(publication)
 
     def test_postgres_client(self, pg_adapter: PGAdapter):
-        with pg_adapter.get_client() as (conn, cur):
+        with pg_adapter.create_client() as (conn, cur):
             cur.execute(
                 "select 1 from information_schema.schemata where catalog_name = %s limit 1;",
                 [pg_adapter.settings.database],
@@ -55,12 +54,13 @@ class TestPGAdapter:
             actual = cur.fetchall()
         assert actual == [(1,)]
 
-    def test_postgres_session(self, pg_adapter: PGAdapter, pg_session: DBSession):
-        actual = pg_session.exec(
-            text(
-                "select 1 from information_schema.schemata where catalog_name = :database limit 1;"
-            ).bindparams(database=pg_adapter.settings.database)
-        ).all()
+    def test_postgres_session(self, pg_adapter: PGAdapter):
+        with pg_adapter.create_session() as session:
+            actual = session.exec(
+                text(
+                    "select 1 from information_schema.schemata where catalog_name = :database limit 1;"
+                ).bindparams(database=pg_adapter.settings.database)
+            ).all()
         assert actual == [(1,)]
 
     def test_has_database_non_existent(self, pg_adapter: PGAdapter):

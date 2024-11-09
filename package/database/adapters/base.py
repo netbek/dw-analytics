@@ -42,11 +42,11 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def get_client():
+    def create_client():
         pass
 
     @contextmanager
-    def get_engine(self):
+    def create_engine(self):
         engine = create_engine(self.url, echo=False)
 
         yield engine
@@ -54,8 +54,8 @@ class BaseAdapter(ABC):
         engine.dispose()
 
     @contextmanager
-    def get_session(self) -> Generator[Session, Any, None]:
-        with self.get_engine() as engine:
+    def create_session(self) -> Generator[Session, Any, None]:
+        with self.create_engine() as engine:
             session = Session(engine)
 
         yield session

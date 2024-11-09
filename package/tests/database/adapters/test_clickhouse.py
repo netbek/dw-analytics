@@ -1,5 +1,4 @@
 from clickhouse_connect.driver.exceptions import DatabaseError
-from package.config.settings import TestCHSettings
 from package.database import CHAdapter, DBSession
 from package.tests.asserts import assert_equal_ignoring_whitespace
 from package.types import CHTableIdentifier
@@ -31,7 +30,7 @@ class TestCHAdapter:
         ch_adapter.drop_table(table)
 
     def test_clickhouse_client(self, ch_adapter: CHAdapter):
-        with ch_adapter.get_client() as client:
+        with ch_adapter.create_client() as client:
             actual = client.query(
                 "select 1 from system.databases where name = {database:String};",
                 parameters={"database": ch_adapter.settings.database},

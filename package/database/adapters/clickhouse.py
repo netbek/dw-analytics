@@ -45,7 +45,7 @@ class CHAdapter(BaseAdapter):
         )
 
     @contextmanager
-    def get_client(self) -> Generator[Client | None]:
+    def create_client(self) -> Generator[Client | None]:
         client = clickhouse_connect.get_client(dsn=self.url)
 
         yield client
@@ -55,9 +55,10 @@ class CHAdapter(BaseAdapter):
     def has_database(self, database: str) -> bool:
         statement = "select 1 from system.databases where name = {database:String};"
 
-        with self.get_client() as client:
-            result = client.query(statement, parameters={"database": database})
-            return bool(result.result_rows)
+        with self.create_client() as client:
+            result = bool(client.query(statement, parameters={"database": database}).result_rows)
+
+        return result
 
     def create_database(self, database: str) -> None:
         if self.has_database(database):
@@ -65,7 +66,7 @@ class CHAdapter(BaseAdapter):
 
         statement = "create database {database:Identifier};"
 
-        with self.get_client() as client:
+        with self.create_client() as client:
             client.command(statement, parameters={"database": database})
 
     def drop_database(self, database: str) -> None:
@@ -74,7 +75,7 @@ class CHAdapter(BaseAdapter):
 
         statement = "drop database {database:Identifier};"
 
-        with self.get_client() as client:
+        with self.create_client() as client:
             client.command(statement, parameters={"database": database})
 
     def has_schema(self, schema: str, database: Optional[str] = None) -> bool:
@@ -92,9 +93,14 @@ class CHAdapter(BaseAdapter):
 
         statement = "select 1 from system.tables where database = {database:String} and name = {table:String};"
 
-        with self.get_client() as client:
-            result = client.query(statement, parameters={"database": database, "table": table})
-            return bool(result.result_rows)
+        with self.create_client() as client:
+            result = bool(
+                client.query(
+                    statement, parameters={"database": database, "table": table}
+                ).result_rows
+            )
+
+        return result
 
     def create_table(self, table: str, statement: str, database: Optional[str] = None) -> None:
         if database is None:
@@ -103,7 +109,7 @@ class CHAdapter(BaseAdapter):
         if self.has_table(table=table, database=database):
             return
 
-        with self.get_client() as client:
+        with self.create_client() as client:
             client.command(statement)
 
     def get_create_table_statement(self, table: str, database: Optional[str] = None) -> None:
@@ -112,7 +118,7 @@ class CHAdapter(BaseAdapter):
 
         statement = "show create table {database:Identifier}.{table:Identifier};"
 
-        with self.get_client() as client:
+        with self.create_client() as client:
             statement = client.command(statement, parameters={"database": database, "table": table})
             statement = statement.replace("\\n", "\n")
 
@@ -128,7 +134,7 @@ class CHAdapter(BaseAdapter):
         quoted_table = CHTableIdentifier(database=database, table=table).to_string()
         statement = f"drop table {quoted_table};"
 
-        with self.get_client() as client:
+        with self.create_client() as client:
             client.command(statement)
 
     def get_table(self, table: str, database: Optional[str] = None) -> Table:
@@ -164,9 +170,10 @@ class CHAdapter(BaseAdapter):
     def has_user(self, username: str) -> bool:
         statement = "select 1 from system.users where name = {username:String};"
 
-        with self.get_client() as client:
-            result = client.query(statement, parameters={"username": username})
-            return bool(result.result_rows)
+        with self.create_client() as client:
+            result = bool(client.query(statement, parameters={"username": username}).result_rows)
+
+        return result
 
     def create_user(self, username: str, password: str) -> None:
         if self.has_user(username):
@@ -175,7 +182,7 @@ class CHAdapter(BaseAdapter):
         quoted_username = CHIdentifier.quote(username)
         statement = f"create user {quoted_username} identified by %(password)s;"
 
-        with self.get_client() as client:
+        with self.create_client() as client:
             client.command(statement, parameters={"password": password})
 
     def drop_user(self, username: str) -> None:
@@ -185,7 +192,7 @@ class CHAdapter(BaseAdapter):
         quoted_username = CHIdentifier.quote(username)
         statement = f"drop user {quoted_username};"
 
-        with self.get_client() as client:
+        with self.create_client() as client:
             client.command(statement, parameters={"username": username})
 
     def grant_user_privileges(self, username: str, database: str) -> None:
