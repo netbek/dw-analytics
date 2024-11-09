@@ -9,29 +9,28 @@ from typing import Any, Generator
 import pytest
 
 
-@pytest.fixture(scope="function")
-def ch_table(ch_adapter: CHAdapter) -> Generator[CHTableIdentifier, Any, None]:
-    table = "test_table"
-    table_identifier = CHTableIdentifier(table=table)
-    quoted_table = table_identifier.to_string()
-    statement = f"""
-    create or replace table {quoted_table}
-    (
-        id UInt64,
-        updated_at DateTime default now()
-    )
-    engine = MergeTree
-    order by id
-    """
-
-    ch_adapter.create_table(table, statement)
-
-    yield table_identifier
-
-    ch_adapter.drop_table(table)
-
-
 class TestCHAdapter:
+    @pytest.fixture(scope="function")
+    def ch_table(self, ch_adapter: CHAdapter) -> Generator[CHTableIdentifier, Any, None]:
+        table = "test_table"
+        table_identifier = CHTableIdentifier(table=table)
+        quoted_table = table_identifier.to_string()
+        statement = f"""
+        create or replace table {quoted_table}
+        (
+            id UInt64,
+            updated_at DateTime default now()
+        )
+        engine = MergeTree
+        order by id
+        """
+
+        ch_adapter.create_table(table, statement)
+
+        yield table_identifier
+
+        ch_adapter.drop_table(table)
+
     def test_clickhouse_client(self, ch_adapter: CHAdapter):
         with ch_adapter.get_client() as client:
             actual = client.query(

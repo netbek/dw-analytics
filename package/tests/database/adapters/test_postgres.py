@@ -7,49 +7,48 @@ from typing import Any, Generator
 import pytest
 
 
-@pytest.fixture(scope="function")
-def pg_user(pg_adapter: PGAdapter) -> Generator[str, Any, None]:
-    username = "test_user"
-    password = "secret"
-
-    pg_adapter.create_user(username, password)
-
-    yield username
-
-    pg_adapter.drop_user(username)
-
-
-@pytest.fixture(scope="function")
-def pg_table(pg_adapter: PGAdapter) -> Generator[PGTableIdentifier, Any, None]:
-    table = "test_table"
-    table_identifier = PGTableIdentifier(table=table)
-    quoted_table = table_identifier.to_string()
-    statement = f"""
-    create table if not exists {quoted_table} (
-        id bigint,
-        updated_at timestamp default now()
-    );
-    """
-
-    pg_adapter.create_table(table, statement)
-
-    yield table_identifier
-
-    pg_adapter.drop_table(table)
-
-
-@pytest.fixture(scope="function")
-def pg_publication(pg_adapter: PGAdapter, pg_table: PGTableIdentifier) -> Generator[str, Any, None]:
-    publication = "test_publication"
-
-    pg_adapter.create_publication(publication, tables=[pg_table.table])
-
-    yield publication
-
-    pg_adapter.drop_publication(publication)
-
-
 class TestPGAdapter:
+    @pytest.fixture(scope="function")
+    def pg_user(self, pg_adapter: PGAdapter) -> Generator[str, Any, None]:
+        username = "test_user"
+        password = "secret"
+
+        pg_adapter.create_user(username, password)
+
+        yield username
+
+        pg_adapter.drop_user(username)
+
+    @pytest.fixture(scope="function")
+    def pg_table(self, pg_adapter: PGAdapter) -> Generator[PGTableIdentifier, Any, None]:
+        table = "test_table"
+        table_identifier = PGTableIdentifier(table=table)
+        quoted_table = table_identifier.to_string()
+        statement = f"""
+        create table if not exists {quoted_table} (
+            id bigint,
+            updated_at timestamp default now()
+        );
+        """
+
+        pg_adapter.create_table(table, statement)
+
+        yield table_identifier
+
+        pg_adapter.drop_table(table)
+
+    @pytest.fixture(scope="function")
+    def pg_publication(
+        self, pg_adapter: PGAdapter, pg_table: PGTableIdentifier
+    ) -> Generator[str, Any, None]:
+        publication = "test_publication"
+
+        pg_adapter.create_publication(publication, tables=[pg_table.table])
+
+        yield publication
+
+        pg_adapter.drop_publication(publication)
+
     def test_postgres_client(self, pg_adapter: PGAdapter):
         with pg_adapter.get_client() as (conn, cur):
             cur.execute(
