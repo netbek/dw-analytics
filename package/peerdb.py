@@ -1,11 +1,11 @@
 from package.database import CHAdapter, PGAdapter
 from package.types import CHSettings
+from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
 
 import copy
 import httpx
 import pydash
-import yaml
 
 
 class PeerDBConfig:
@@ -13,9 +13,8 @@ class PeerDBConfig:
         self._path = path
 
     def load(self) -> dict:
-        with open(self._path, "rt") as fp:
-            config = yaml.safe_load(fp) or {}
-            config = self.process(config)
+        config = safe_load_file(self._path) or {}
+        config = self.process(config)
 
         return config
 

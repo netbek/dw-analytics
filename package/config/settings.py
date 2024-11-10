@@ -1,11 +1,12 @@
 from package.config.constants import HOME_DIR
+from package.types import CHSettings, PGSettings
 from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import SettingsConfigDict
 
 import os
 
 
-class TestCHSettings(BaseSettings):
+class TestCHSettings(CHSettings):
     __test__ = False  # Exclude from Pytest collection
     model_config = SettingsConfigDict(
         env_file=os.path.join(HOME_DIR, ".env_files/database.env"), extra="ignore"
@@ -26,7 +27,7 @@ class TestCHSettings(BaseSettings):
     driver: str = Field(validation_alias="test_clickhouse_driver", serialization_alias="driver")
 
 
-class TestPGSettings(BaseSettings):
+class TestPGSettings(PGSettings):
     __test__ = False  # Exclude from Pytest collection
     model_config = SettingsConfigDict(
         env_file=os.path.join(HOME_DIR, ".env_files/database.env"), extra="ignore"

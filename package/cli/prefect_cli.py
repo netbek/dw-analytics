@@ -3,6 +3,7 @@ from package.cli.root import app
 from package.config.constants import PREFECT_PROFILES_PATH, PREFECT_PROVISION_PATH
 from package.project import Project
 from package.utils.typer_utils import typer_async
+from package.utils.yaml_utils import safe_load_file
 from prefect import get_client
 from prefect.client.orchestration import PrefectClient
 from prefect.client.schemas.actions import WorkPoolCreate, WorkPoolUpdate
@@ -16,7 +17,6 @@ import prefect
 import pydash
 import subprocess
 import typer
-import yaml
 
 prefect_app = typer.Typer(name="prefect", add_completion=False)
 app.add_typer(prefect_app)
@@ -59,9 +59,7 @@ async def provision(
     profiles = prefect.settings.load_profiles()
     current_profile = prefect.context.get_settings_context().profile
     current_name = current_profile.name if current_profile is not None else None
-
-    with open(PREFECT_PROVISION_PATH, "rt") as file:
-        provision_profiles = yaml.safe_load(file).get("profiles", {})
+    provision_profiles = safe_load_file(PREFECT_PROVISION_PATH).get("profiles", {})
 
     if profile_name:
         if profile_name not in profiles:
@@ -300,8 +298,7 @@ def _load_deploy_configs(
         selected_projects = all_projects
 
     for project in selected_projects:
-        prefect_config = project.load_prefect_config()
-        deployments = prefect_config.get("deployments") or {}
+        deployments = project.settings.prefect.config.get("deployments") or {}
 
         for deployment in deployments:
             if deployment_names and deployment["name"] not in deployment_names:

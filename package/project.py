@@ -1,19 +1,19 @@
 from functools import lru_cache
 from package.config.constants import HOME_DIR, PROJECTS_DIR, TEMPLATE_PROJECT_DIR
-from package.types import CHSettings, PGSettings
 from package.utils.environ_utils import get_env_var
 from package.utils.filesystem import rmtree, symlink
 from package.utils.template import render_template
 from pathlib import Path
 from prefect import get_client
 from prefect.client.schemas.filters import DeploymentFilter, DeploymentFilterTags
-from typing import Optional
+from pydantic import BaseModel
+from typing import List, Optional
 
+import importlib
 import os
 import prefect
 import re
 import shutil
-import yaml
 
 
 class Project:
@@ -50,7 +50,7 @@ class Project:
         return bool([project for project in cls.list_projects() if project.name == name])
 
     @classmethod
-    def list_projects(cls) -> ["Project"]:
+    def list_projects(cls) -> List["Project"]:
         return [cls(name) for name in list(os.listdir(PROJECTS_DIR))]
 
     @classmethod
@@ -133,28 +133,10 @@ class Project:
 
     @property
     @lru_cache
-    def source_db_settings(self) -> PGSettings:
-        return PGSettings(
-            host=get_env_var("SOURCE_POSTGRES_HOST"),
-            port=get_env_var("SOURCE_POSTGRES_PORT"),
-            username=get_env_var("SOURCE_POSTGRES_USERNAME"),
-            password=get_env_var("SOURCE_POSTGRES_PASSWORD"),
-            database=get_env_var("SOURCE_POSTGRES_DATABASE"),
-        )
+    def settings(self) -> BaseModel:
+        module = importlib.import_module(f"projects.{self._name}.config.settings")
 
-    @property
-    @lru_cache
-    def destination_db_settings(self) -> CHSettings:
-        namespace = self.name.upper()
-
-        return CHSettings(
-            driver=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_DRIVER"),
-            host=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_HOST"),
-            port=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_PORT"),
-            username=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_USERNAME"),
-            password=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_PASSWORD"),
-            database=get_env_var(f"{namespace}_DESTINATION_CLICKHOUSE_DATABASE"),
-        )
+        return module.get_settings()
 
     def init_directory(self):
         """Copy template project files to the project directory."""
@@ -179,18 +161,6 @@ class Project:
             os.path.join(TEMPLATE_PROJECT_DIR, "dbt", "macros", "dbt"),
             os.path.join(self.dbt_directory, "macros", "dbt"),
         )
-
-    def load_dbt_config(self) -> dict:
-        with open(self.dbt_config_path, "rt") as fp:
-            config = yaml.safe_load(fp)
-
-        return config
-
-    def load_prefect_config(self) -> dict:
-        with open(self.prefect_config_path, "rt") as fp:
-            config = yaml.safe_load(fp)
-
-        return config
 
     async def create(self):
         self.init_directory()

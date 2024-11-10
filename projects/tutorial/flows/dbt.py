@@ -12,7 +12,7 @@ settings = get_settings()
 @flow(name="tutorial__dbt_run_flow")
 async def dbt_run_flow(select: Optional[str] = None):
     return await dbt_run(
-        profiles_dir=DBT_PROFILES_DIR, project_dir=settings.dbt.DIRECTORY, select=select
+        profiles_dir=DBT_PROFILES_DIR, project_dir=settings.dbt.directory, select=select
     )
 
 

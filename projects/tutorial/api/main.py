@@ -17,7 +17,7 @@ async def get_databases() -> list[dict[str, str]]:
     from system.databases
     """
 
-    with get_clickhouse_client(settings.db.URL) as client:
+    with get_clickhouse_client(settings.destination_db.url) as client:
         df = client.query_df(query)
 
     return df.to_dict(orient="records")

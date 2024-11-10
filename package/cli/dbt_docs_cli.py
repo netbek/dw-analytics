@@ -43,20 +43,19 @@ def serve():
         raise Exception(f"No dbt_project.yml found in {cwd} or higher")
 
     project = Project.from_path(cwd)
-    dbt_config = project.load_dbt_config()
 
     # If the docs page has not been generated before, then do so now
     if not os.path.exists(os.path.join(project.dbt_docs_directory, "index.html")):
         generate()
 
     watch_paths = [project.dbt_config_path]
-    for path in dbt_config["macro-paths"]:
+    for path in project.settings.dbt.config["macro-paths"]:
         watch_paths.extend(
             [
                 os.path.join(project.dbt_directory, path, "**", "*.sql"),
             ]
         )
-    for path in dbt_config["model-paths"]:
+    for path in project.settings.dbt.config["model-paths"]:
         watch_paths.extend(
             [
                 os.path.join(project.dbt_directory, path, "**", "*.sql"),

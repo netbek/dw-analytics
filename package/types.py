@@ -1,15 +1,51 @@
-from pydantic import BaseModel, Field
+from pathlib import Path
+from pydantic import BaseModel
+from pydantic_settings import BaseSettings
 from typing import List, Optional
 
 
-class CHSettings(BaseModel):
+class CHSettings(BaseSettings):
     host: str
     port: int
     username: str
     password: str
     database: str
-    secure: Optional[bool] = False
-    driver: Optional[str] = None
+    secure: bool  # TODO Change to: Optional[bool] = False
+    driver: str  # TODO Change to: Optional[str] = None
+
+    @property
+    def url(self) -> str:
+        from package.database import CHAdapter
+
+        return CHAdapter.create_url(**self.model_dump(by_alias=True))
+
+
+class PGSettings(BaseSettings):
+    host: str
+    port: int
+    username: str
+    password: str
+    database: str
+    schema_: str
+
+    @property
+    def url(self) -> str:
+        from package.database import PGAdapter
+
+        return PGAdapter.create_url(**self.model_dump(by_alias=True))
+
+
+class DbtSettings(BaseSettings):
+    directory: Path | str
+    config: dict
+
+
+class PrefectSettings(BaseSettings):
+    config: dict
+
+
+class NotebookSettings(BaseSettings):
+    directory: Path | str
 
 
 class CHIdentifier:
@@ -42,16 +78,6 @@ class CHTableIdentifier(CHIdentifier, BaseModel):
             return f"{self.quote(self.database)}.{self.quote(self.table)}"
         else:
             return self.quote(self.table)
-
-
-class PGSettings(BaseModel):
-    driver: Optional[str] = None
-    host: str
-    port: str
-    username: str
-    password: str
-    database: str
-    schema_: str = Field(serialization_alias="schema")
 
 
 class PGIdentifier:

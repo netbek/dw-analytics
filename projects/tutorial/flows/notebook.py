@@ -10,10 +10,10 @@ settings = get_settings()
 @flow(name="tutorial__notebook_flow")
 def notebook_flow(greeting: str):
     nb = notebook.execute_notebook(
-        os.path.join(settings.notebook.DIRECTORY, "greet.ipynb"), parameters={"greeting": greeting}
+        os.path.join(settings.notebook.directory, "greet.ipynb"), parameters={"greeting": greeting}
     )
     body = notebook.export_notebook(nb)
-    export_path = os.path.join(settings.notebook.DIRECTORY, "export", "greet.ipynb")
+    export_path = os.path.join(settings.notebook.directory, "export", "greet.ipynb")
     with open(export_path, "w") as file:
         file.write(body)
     logger = get_run_logger()
