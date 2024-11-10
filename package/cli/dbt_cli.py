@@ -4,6 +4,7 @@ from package.config.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPES
 from package.project import Project
 from package.utils.dbt_utils import find_model_sql
 from package.utils.filesystem import find_up, get_file_name
+from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
 from typing import Optional
 
@@ -80,8 +81,7 @@ def model_yaml(models: list[str]):
 
         # Load existing schema
         if os.path.exists(schema_path):
-            with open(schema_path, "rt") as fp:
-                schema = yaml.safe_load(fp)
+            schema = safe_load_file(schema_path)
         else:
             schema = {"version": 2, "models": []}
 

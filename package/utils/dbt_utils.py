@@ -2,7 +2,7 @@ from package.project import Project
 from package.types import DbtSourcesConfig
 from package.utils.filesystem import rmtree
 from package.utils.pydantic_utils import dump_csv
-from package.utils.yaml_utils import PrettySafeDumper
+from package.utils.yaml_utils import PrettySafeDumper, safe_load_file
 from pathlib import Path
 from prefect_shell.commands import ShellOperation
 from typing import Any, Optional
@@ -115,9 +115,7 @@ def update_model_unit_tests(project: Project, fixtures: list[dict]):
 
             unit_tests.append(unit_test)
 
-        with open(schema_path, "rt") as fp:
-            schema = yaml.safe_load(fp) or {}
-
+        schema = safe_load_file(schema_path) or {}
         schema["unit_tests"] = unit_tests
         data = yaml.dump(schema, sort_keys=False, Dumper=PrettySafeDumper)
 
@@ -131,8 +129,7 @@ def export_fixtures(project: Project, fixtures: list[dict]):
 
 
 def load_sources_config(config_path: str) -> DbtSourcesConfig:
-    with open(config_path, "rt") as fp:
-        data = yaml.safe_load(fp)
+    data = safe_load_file(config_path)
 
     return DbtSourcesConfig(**data)
 

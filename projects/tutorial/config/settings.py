@@ -1,41 +1,20 @@
-from dataclasses import dataclass, field
 from functools import lru_cache
-from package.database import create_connection_url
 from package.project import Project
+from package.types import CHSettings, PGSettings
+from package.utils.settings import create_ch_settings, create_pg_settings
+from package.utils.yaml_utils import safe_load_file
+from pydantic import BaseModel, Field
 
 project = Project.from_path(__file__)
 
 
-@dataclass
-class ProjectSettings:
-    DIRECTORY: str = field(default_factory=lambda: project.directory)
-
-
-@dataclass
-class DatabaseSettings:
-    URL: str = field(
-        default_factory=lambda: create_connection_url(
-            **project.destination_db_settings.model_dump()
-        )
+class Settings(BaseModel):
+    source_db: PGSettings = Field(default_factory=create_pg_settings("source_"))
+    destination_db: CHSettings = Field(
+        default_factory=create_ch_settings(f"{project.name}_destination_")
     )
-
-
-@dataclass
-class DbtSettings:
-    DIRECTORY: str = field(default_factory=lambda: project.dbt_directory)
-
-
-@dataclass
-class NotebookSettings:
-    DIRECTORY: str = field(default_factory=lambda: project.notebooks_directory)
-
-
-@dataclass
-class Settings:
-    project: ProjectSettings = field(default_factory=ProjectSettings)
-    db: DatabaseSettings = field(default_factory=DatabaseSettings)
-    dbt: DbtSettings = field(default_factory=DbtSettings)
-    notebook: NotebookSettings = field(default_factory=NotebookSettings)
+    dbt: dict = Field(default_factory=lambda: safe_load_file(project.dbt_config_path))
+    prefect: dict = Field(default_factory=lambda: safe_load_file(project.prefect_config_path))
 
 
 @lru_cache(maxsize=1, typed=True)

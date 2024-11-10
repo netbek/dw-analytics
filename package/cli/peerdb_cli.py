@@ -16,9 +16,9 @@ async def install(project_name: str):
     project = Project.from_name(project_name)
     peerdb_config = PeerDBConfig(project.peerdb_config_path).load()
     peerdb_client = PeerDBClient(project.peerdb_api_url)
-    source_peer = SourcePeer(project.source_db_settings)
+    source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(
-        project.destination_db_settings,
+        project.settings.destination_db,
         peerdb_config["peers"]["destination"]["clickhouse_config"]["database"],
     )
 
@@ -92,9 +92,9 @@ async def uninstall(project_name: str):
     project = Project.from_name(project_name)
     peerdb_config = PeerDBConfig(project.peerdb_config_path).load()
     peerdb_client = PeerDBClient(project.peerdb_api_url)
-    source_peer = SourcePeer(project.source_db_settings)
+    source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(
-        project.destination_db_settings,
+        project.settings.destination_db,
         peerdb_config["peers"]["destination"]["clickhouse_config"]["database"],
     )
 
