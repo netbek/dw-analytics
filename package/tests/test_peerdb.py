@@ -1,23 +1,95 @@
+from package.config.settings import get_settings
+from package.database import PGAdapter
 from package.peerdb import process_config
+from package.tests.fixtures import DBTest
+from package.types import PGTableIdentifier
+from sqlmodel import Table
+from typing import Any, Generator, List
 
+import pytest
 import unittest
 import yaml
 
-process_config__empty_yaml = """
-"""
+settings = get_settings()
 
-process_config__peers_yaml = """
+load_config__non_existent_table_yaml = f"""
 peers:
   source:
     type: 3
     postgres_config:
-      host: host.docker.internal
-      port: 5432
+      host: {settings.test_pg.host}
+      port: {settings.test_pg.port}
+      user: {settings.test_pg.username}
+      password: {settings.test_pg.password}
+      database: {settings.test_pg.database}
+
+mirrors:
+  cdc_small:
+    source_name: source
+    destination_name: destination
+    table_mappings:
+    - source_table_identifier: public.non_existent_table
+      destination_table_identifier: non_existent_table
+"""
+
+load_config__existent_tables_yaml = f"""
+peers:
+  source:
+    type: 3
+    postgres_config:
+      host: {settings.test_pg.host}
+      port: {settings.test_pg.port}
+      user: {settings.test_pg.username}
+      password: {settings.test_pg.password}
+      database: {settings.test_pg.database}
+
+mirrors:
+  cdc_small:
+    source_name: source
+    destination_name: destination
+    table_mappings:
+    - source_table_identifier: public.table_1
+      destination_table_identifier: table_1
+
+  cdc_large:
+    source_name: source
+    destination_name: destination
+    table_mappings:
+    - source_table_identifier: public.table_2
+      destination_table_identifier: table_2
+      include:
+      - id
+      - username
+    - source_table_identifier: public.table_3
+      destination_table_identifier: table_3
+      exclude:
+      - password
+      - updated_at
+"""
+
+process_config__empty_config_yaml = """
+"""
+
+process_config__peers_yaml = f"""
+peers:
+  source:
+    type: 3
+    postgres_config:
+      host: {settings.test_pg.host}
+      port: {settings.test_pg.port}
+      user: {settings.test_pg.username}
+      password: {settings.test_pg.password}
+      database: {settings.test_pg.database}
+
   destination:
     type: 8
     clickhouse_config:
-      host: host.docker.internal
-      port: 8123
+      host: {settings.test_ch.host}
+      port: {settings.test_ch.port}
+      user: {settings.test_ch.username}
+      password: {settings.test_ch.password}
+      database: {settings.test_ch.database}
+      disable_tls: true
 """
 
 process_config__mirrors_yaml = """
@@ -71,9 +143,85 @@ publications:
 """
 
 
+class TestLoadConfig(DBTest):
+    @pytest.fixture(scope="function")
+    def pg_tables(self, pg_adapter: PGAdapter) -> Generator[List[Table], Any, None]:
+        tables = ["table_1", "table_2", "table_3"]
+
+        for table in tables:
+            quoted_table = PGTableIdentifier(table=table).to_string()
+            statement = f"""
+            create table if not exists {quoted_table} (
+                id bigint,
+                username varchar,
+                password varchar,
+                updated_at timestamp default now()
+            );
+            """
+
+            pg_adapter.create_table(table, statement)
+
+        yield [table for table in pg_adapter.list_tables() if table.name in tables]
+
+        for table in tables:
+            pg_adapter.drop_table(table)
+
+    def test_non_existent_table(self, pg_tables: List[Table]):
+        """
+        Test that an exception is raised if a mirror config has a source table that doesn't exist
+        in the source database.
+        """
+        config = yaml.safe_load(load_config__non_existent_table_yaml) or {}
+
+        with pytest.raises(Exception) as exc:
+            process_config(config)
+
+        assert str(exc.value) == "Source table 'public.non_existent_table' not found"
+
+    def test_existent_tables(self, pg_tables: List[Table]):
+        """Test that computed 'exclude' value is correct."""
+        config = yaml.safe_load(load_config__existent_tables_yaml) or {}
+        actual = process_config(config)
+        expected = {
+            "mirrors": {
+                "cdc_small": {
+                    "source_name": "source",
+                    "destination_name": "destination",
+                    "table_mappings": [
+                        {
+                            "source_table_identifier": "public.table_1",
+                            "destination_table_identifier": "table_1",
+                            "exclude": [],
+                        },
+                    ],
+                    "flow_job_name": "cdc_small",
+                },
+                "cdc_large": {
+                    "source_name": "source",
+                    "destination_name": "destination",
+                    "table_mappings": [
+                        {
+                            "source_table_identifier": "public.table_2",
+                            "destination_table_identifier": "table_2",
+                            "exclude": ["password", "updated_at"],
+                        },
+                        {
+                            "source_table_identifier": "public.table_3",
+                            "destination_table_identifier": "table_3",
+                            "exclude": ["password", "updated_at"],
+                        },
+                    ],
+                    "flow_job_name": "cdc_large",
+                },
+            },
+        }
+
+        assert actual["mirrors"] == expected["mirrors"]
+
+
 class TestConfigProcess(unittest.TestCase):
-    def test_empty(self):
-        config = yaml.safe_load(process_config__empty_yaml) or {}
+    def test_empty_config(self):
+        config = yaml.safe_load(process_config__empty_config_yaml) or {}
         actual = process_config(config)
         expected = {
             "mirrors": {},
@@ -95,16 +243,23 @@ class TestConfigProcess(unittest.TestCase):
                     "name": "source",
                     "type": 3,
                     "postgres_config": {
-                        "host": "host.docker.internal",
-                        "port": 5432,
+                        "host": settings.test_pg.host,
+                        "port": settings.test_pg.port,
+                        "user": settings.test_pg.username,
+                        "password": settings.test_pg.password,
+                        "database": settings.test_pg.database,
                     },
                 },
                 "destination": {
                     "name": "destination",
                     "type": 8,
                     "clickhouse_config": {
-                        "host": "host.docker.internal",
-                        "port": 8123,
+                        "host": settings.test_ch.host,
+                        "port": settings.test_ch.port,
+                        "user": settings.test_ch.username,
+                        "password": settings.test_ch.password,
+                        "database": settings.test_ch.database,
+                        "disable_tls": True,
                     },
                 },
             },

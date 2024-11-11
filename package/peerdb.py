@@ -1,5 +1,5 @@
 from package.database import CHAdapter, PGAdapter
-from package.types import CHSettings
+from package.types import CHSettings, PGSettings, PGTableIdentifier
 from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
 
@@ -57,6 +57,64 @@ def process_config(config: dict) -> dict:
 
         for key, value in result["mirrors"].items():
             result["mirrors"][key]["flow_job_name"] = key
+
+        source_peer = result["peers"].get("source")
+
+        if result["mirrors"] and source_peer:
+            # TODO Add function that creates instance of PGSettings from PeerDB config
+            pg_settings = PGSettings(
+                host=source_peer["postgres_config"]["host"],
+                port=source_peer["postgres_config"]["port"],
+                username=source_peer["postgres_config"]["user"],
+                password=source_peer["postgres_config"]["password"],
+                database=source_peer["postgres_config"]["database"],
+                schema_="public",
+            )
+            db = PGAdapter(pg_settings)
+
+            for mirror in result["mirrors"].values():
+                computed_table_mappings = []
+
+                for table_mapping in mirror["table_mappings"]:
+                    table_identifier = PGTableIdentifier.from_string(
+                        table_mapping["source_table_identifier"]
+                    )
+                    table = db.get_table(**table_identifier.model_dump(by_alias=True))
+
+                    if table is None:
+                        raise Exception(
+                            f"Source table '{table_mapping["source_table_identifier"]}' not found"
+                        )
+
+                    include = table_mapping.get("include", None)
+                    exclude = table_mapping.get("exclude", None)
+                    computed_exclude = []
+
+                    if include is not None and exclude is not None:
+                        raise Exception(
+                            "Table mapping may contain either 'include' or 'exclude' value, not both"
+                        )
+                    elif include is not None:
+                        columns = [column.name for column in table.columns]
+                        computed_exclude = pydash.difference(columns, include)
+                    elif exclude is not None:
+                        columns = [column.name for column in table.columns]
+                        computed_exclude = pydash.intersection(columns, exclude)
+                    else:
+                        computed_exclude = []
+
+                    computed_exclude = sorted(computed_exclude)
+                    computed_table_mappings.append(
+                        {
+                            "source_table_identifier": table_mapping["source_table_identifier"],
+                            "destination_table_identifier": table_mapping[
+                                "destination_table_identifier"
+                            ],
+                            "exclude": computed_exclude,
+                        }
+                    )
+
+                mirror["table_mappings"] = computed_table_mappings
     else:
         result["mirrors"] = {}
 
