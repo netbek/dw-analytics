@@ -12,7 +12,7 @@ class BaseAdapter(ABC):
     @overload
     @classmethod
     @abstractmethod
-    def create_url(
+    def create_uri(
         cls,
         host: str,
         port: int,
@@ -25,7 +25,7 @@ class BaseAdapter(ABC):
     @overload
     @classmethod
     @abstractmethod
-    def create_url(
+    def create_uri(
         cls,
         host: str,
         port: int,
@@ -38,7 +38,7 @@ class BaseAdapter(ABC):
 
     @classmethod
     @abstractmethod
-    def create_url(cls, *args, **kwargs) -> str:
+    def create_uri(cls, *args, **kwargs) -> str:
         pass
 
     @abstractmethod
@@ -47,7 +47,7 @@ class BaseAdapter(ABC):
 
     @contextmanager
     def create_engine(self):
-        engine = create_engine(self.url, echo=False)
+        engine = create_engine(self.uri, echo=False)
 
         yield engine
 

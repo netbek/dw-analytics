@@ -15,7 +15,7 @@ class CHAdapter(BaseAdapter):
         super().__init__(settings)
 
     @classmethod
-    def create_url(
+    def create_uri(
         cls,
         host: str,
         port: int,
@@ -33,8 +33,8 @@ class CHAdapter(BaseAdapter):
         return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
 
     @property
-    def url(self) -> str:
-        return self.create_url(
+    def uri(self) -> str:
+        return self.create_uri(
             self.settings.host,
             self.settings.port,
             self.settings.username,
@@ -46,7 +46,7 @@ class CHAdapter(BaseAdapter):
 
     @contextmanager
     def create_client(self) -> Generator[Client | None]:
-        client = clickhouse_connect.get_client(dsn=self.url)
+        client = clickhouse_connect.get_client(dsn=self.uri)
 
         yield client
 
@@ -141,8 +141,8 @@ class CHAdapter(BaseAdapter):
         if database is None:
             database = self.settings.database
 
-        url = self.create_url(**self.settings.model_dump())
-        engine = create_engine(url, echo=False)
+        uri = self.create_uri(**self.settings.model_dump())
+        engine = create_engine(uri, echo=False)
         metadata = MetaData(schema=database)
         metadata.reflect(bind=engine)
 
@@ -160,8 +160,8 @@ class CHAdapter(BaseAdapter):
         if database is None:
             database = self.settings.database
 
-        url = self.create_url(**self.settings.model_dump())
-        engine = create_engine(url, echo=False)
+        uri = self.create_uri(**self.settings.model_dump())
+        engine = create_engine(uri, echo=False)
         metadata = MetaData(schema=database)
         metadata.reflect(bind=engine)
 

@@ -14,7 +14,7 @@ class PGAdapter(BaseAdapter):
         super().__init__(settings)
 
     @classmethod
-    def create_url(
+    def create_uri(
         cls,
         host: str,
         port: int,
@@ -28,8 +28,8 @@ class PGAdapter(BaseAdapter):
         return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
 
     @property
-    def url(self) -> str:
-        return self.create_url(
+    def uri(self) -> str:
+        return self.create_uri(
             self.settings.host,
             self.settings.port,
             self.settings.username,
@@ -42,7 +42,7 @@ class PGAdapter(BaseAdapter):
     def create_client(
         self, autocommit: bool = True
     ) -> Generator[tuple[psycopg2.extensions.connection, psycopg2.extensions.cursor], Any, None]:
-        connection = psycopg2.connect(dsn=self.url)
+        connection = psycopg2.connect(dsn=self.uri)
         connection.autocommit = autocommit
 
         with connection.cursor() as cursor:
@@ -165,10 +165,10 @@ class PGAdapter(BaseAdapter):
         if schema is None:
             schema = self.settings.schema_
 
-        url = self.create_url(
+        uri = self.create_uri(
             **self.settings.model_copy(update={"database": database}).model_dump(by_alias=True)
         )
-        engine = create_engine(url, echo=False)
+        engine = create_engine(uri, echo=False)
         metadata = MetaData(schema=schema)
         metadata.reflect(bind=engine)
 
@@ -242,10 +242,10 @@ class PGAdapter(BaseAdapter):
         if schema is None:
             schema = self.settings.schema_
 
-        url = self.create_url(
+        uri = self.create_uri(
             **self.settings.model_copy(update={"database": database}).model_dump(by_alias=True)
         )
-        engine = create_engine(url, echo=False)
+        engine = create_engine(uri, echo=False)
         metadata = MetaData(schema=schema)
         metadata.reflect(bind=engine)
 
