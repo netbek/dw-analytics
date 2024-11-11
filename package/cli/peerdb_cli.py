@@ -1,5 +1,5 @@
 from package.cli.root import app
-from package.peerdb import DestinationPeer, PeerDBClient, PeerDBConfig, SourcePeer
+from package.peerdb import DestinationPeer, PeerDBClient, SourcePeer
 from package.project import Project
 from package.types import PGTableIdentifier
 from package.utils.typer_utils import typer_async
@@ -12,9 +12,9 @@ app.add_typer(peerdb_app)
 
 @peerdb_app.command()
 @typer_async
-async def install(project_name: str):
+async def install(project_name: str) -> None:
     project = Project.from_name(project_name)
-    peerdb_config = PeerDBConfig(project.peerdb_config_path).load()
+    peerdb_config = project.settings.peerdb
     peerdb_client = PeerDBClient(project.peerdb_api_url)
     source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(
@@ -88,9 +88,9 @@ async def install(project_name: str):
 
 @peerdb_app.command()
 @typer_async
-async def uninstall(project_name: str):
+async def uninstall(project_name: str) -> None:
     project = Project.from_name(project_name)
-    peerdb_config = PeerDBConfig(project.peerdb_config_path).load()
+    peerdb_config = project.settings.peerdb
     peerdb_client = PeerDBClient(project.peerdb_api_url)
     source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(

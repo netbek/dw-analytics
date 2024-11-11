@@ -1,5 +1,13 @@
 from package.config.constants import HOME_DIR
-from package.types import CHSettings, DbtSettings, NotebookSettings, PGSettings, PrefectSettings
+from package.peerdb import load_config
+from package.types import (
+    CHSettings,
+    DbtSettings,
+    NotebookSettings,
+    PeerDBSettings,
+    PGSettings,
+    PrefectSettings,
+)
 from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
 from pydantic import Field
@@ -91,6 +99,13 @@ def create_dbt_settings(directory: Path | str, config_path: Path | str) -> DbtSe
 def create_notebook_settings(directory: Path | str) -> NotebookSettings:
     class Settings(NotebookSettings):
         directory: Path | str = Field(default_factory=lambda: directory)
+
+    return Settings
+
+
+def create_peerdb_settings(config_path: Path | str) -> PeerDBSettings:
+    class Settings(PeerDBSettings):
+        config: dict = Field(default_factory=lambda: load_config(config_path))
 
     return Settings
 

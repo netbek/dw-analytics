@@ -40,6 +40,10 @@ class DbtSettings(BaseSettings):
     config: dict
 
 
+class PeerDBSettings(BaseSettings):
+    config: dict
+
+
 class PrefectSettings(BaseSettings):
     config: dict
 

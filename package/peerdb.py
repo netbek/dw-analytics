@@ -8,78 +8,75 @@ import httpx
 import pydash
 
 
-class PeerDBConfig:
-    def __init__(self, path: Path) -> None:
-        self._path = path
+def load_config(path: Path | str) -> dict:
+    config = safe_load_file(path)
+    config = process_config(config)
 
-    def load(self) -> dict:
-        config = safe_load_file(self._path) or {}
-        config = self.process(config)
+    return config
 
-        return config
 
-    @classmethod
-    def process(cls, config: dict) -> dict:
-        def process_node(node: dict) -> dict:
-            default_keys = [key for key in node.keys() if key.startswith("+")]
-            defaults = {key.lstrip("+").strip(): node[key] for key in default_keys}
+def process_node(node: dict) -> dict:
+    default_keys = [key for key in node.keys() if key.startswith("+")]
+    defaults = {key.lstrip("+").strip(): node[key] for key in default_keys}
 
-            if defaults:
-                for key in node.keys():
-                    if not key.startswith("+"):
-                        node[key] = pydash.defaults(node[key], defaults)
+    if defaults:
+        for key in node.keys():
+            if not key.startswith("+"):
+                node[key] = pydash.defaults(node[key], defaults)
 
-                node = pydash.omit(node, *default_keys)
+        node = pydash.omit(node, *default_keys)
 
-            return node
+    return node
 
-        result = copy.deepcopy(config)
 
-        if "users" not in result:
-            result["users"] = {}
+def process_config(config: dict) -> dict:
+    result = copy.deepcopy(config)
 
-        if "publications" in result:
-            for key, value in result["publications"].items():
-                result["publications"][key] = {
-                    "name": key,
-                    "table_identifiers": value,
-                }
-        else:
-            result["publications"] = {}
+    if "users" not in result:
+        result["users"] = {}
 
-        if "peers" in result:
-            result["peers"] = process_node(result["peers"])
+    if "publications" in result:
+        for key, value in result["publications"].items():
+            result["publications"][key] = {
+                "name": key,
+                "table_identifiers": value,
+            }
+    else:
+        result["publications"] = {}
 
-            for key, value in result["peers"].items():
-                result["peers"][key]["name"] = key
-        else:
-            result["peers"] = {}
+    if "peers" in result:
+        result["peers"] = process_node(result["peers"])
 
-        if "mirrors" in result:
-            result["mirrors"] = process_node(result["mirrors"])
+        for key, value in result["peers"].items():
+            result["peers"][key]["name"] = key
+    else:
+        result["peers"] = {}
 
-            for key, value in result["mirrors"].items():
-                result["mirrors"][key]["flow_job_name"] = key
-        else:
-            result["mirrors"] = {}
+    if "mirrors" in result:
+        result["mirrors"] = process_node(result["mirrors"])
 
-        publication_schemas = []
+        for key, value in result["mirrors"].items():
+            result["mirrors"][key]["flow_job_name"] = key
+    else:
+        result["mirrors"] = {}
 
-        for value in result["publications"].values():
-            for identifier in value["table_identifiers"]:
-                parts = identifier.split(".")
-                if len(parts) == 2:
-                    publication_schemas.append(parts[0])
+    publication_schemas = []
 
-        for value in result["mirrors"].values():
-            for table_mapping in value["table_mappings"]:
-                parts = table_mapping["source_table_identifier"].split(".")
-                if len(parts) == 2:
-                    publication_schemas.append(parts[0])
+    for value in result["publications"].values():
+        for identifier in value["table_identifiers"]:
+            parts = identifier.split(".")
+            if len(parts) == 2:
+                publication_schemas.append(parts[0])
 
-        result["publication_schemas"] = sorted(pydash.uniq(publication_schemas))
+    for value in result["mirrors"].values():
+        for table_mapping in value["table_mappings"]:
+            parts = table_mapping["source_table_identifier"].split(".")
+            if len(parts) == 2:
+                publication_schemas.append(parts[0])
 
-        return result
+    result["publication_schemas"] = sorted(pydash.uniq(publication_schemas))
+
+    return result
 
 
 class PeerDBClient:

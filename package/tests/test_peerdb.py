@@ -1,11 +1,11 @@
-from package.peerdb import PeerDBConfig
+from package.peerdb import process_config
 
 import unittest
 
 
 class TestConfigProcess(unittest.TestCase):
     def test_empty_config(self):
-        actual = PeerDBConfig.process({})
+        actual = process_config({})
 
         expected = {
             "mirrors": {},
@@ -18,7 +18,7 @@ class TestConfigProcess(unittest.TestCase):
         self.assertDictEqual(actual, expected)
 
     def test_peers_node(self):
-        actual = PeerDBConfig.process(
+        actual = process_config(
             {
                 "peers": {
                     "source": {
@@ -67,7 +67,7 @@ class TestConfigProcess(unittest.TestCase):
         self.assertDictEqual(actual, expected)
 
     def test_mirrors_node(self):
-        actual = PeerDBConfig.process(
+        actual = process_config(
             {
                 "mirrors": {
                     "+do_initial_snapshot": False,
@@ -143,7 +143,7 @@ class TestConfigProcess(unittest.TestCase):
         self.assertDictEqual(actual, expected)
 
     def test_publications_node(self):
-        actual = PeerDBConfig.process(
+        actual = process_config(
             {
                 "peers": {},
                 "mirrors": {
