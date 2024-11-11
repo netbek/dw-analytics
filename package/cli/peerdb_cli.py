@@ -1,4 +1,5 @@
 from package.cli.root import app
+from package.config.constants import PEERDB_DESTINATION_PEER, PEERDB_SOURCE_PEER
 from package.peerdb import DestinationPeer, PeerDBClient, SourcePeer
 from package.project import Project
 from package.types import PGTableIdentifier
@@ -19,20 +20,22 @@ async def install(project_name: str) -> None:
     source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(
         project.settings.destination_db,
-        peerdb_config["peers"]["destination"]["clickhouse_config"]["database"],
+        peerdb_config["peers"][PEERDB_DESTINATION_PEER]["clickhouse_config"]["database"],
     )
 
-    if "source" in peerdb_config["users"]:
-        source_peer.create_user(**peerdb_config["users"]["source"])
+    if PEERDB_SOURCE_PEER in peerdb_config["users"]:
+        source_peer.create_user(**peerdb_config["users"][PEERDB_SOURCE_PEER])
         app.console.print(
-            f"Created user '{peerdb_config["users"]["source"]["username"]}' on source",
+            f"Created user '{peerdb_config["users"][PEERDB_SOURCE_PEER]["username"]}' on source",
             style="green",
         )
 
         for schema in peerdb_config["publication_schemas"]:
-            source_peer.grant_user_privileges(peerdb_config["users"]["source"]["username"], schema)
+            source_peer.grant_user_privileges(
+                peerdb_config["users"][PEERDB_SOURCE_PEER]["username"], schema
+            )
             app.console.print(
-                f"Granted privileges to user '{peerdb_config["users"]["source"]["username"]}' on source schema '{schema}'",
+                f"Granted privileges to user '{peerdb_config["users"][PEERDB_SOURCE_PEER]["username"]}' on source schema '{schema}'",
                 style="green",
             )
 
@@ -95,7 +98,7 @@ async def uninstall(project_name: str) -> None:
     source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(
         project.settings.destination_db,
-        peerdb_config["peers"]["destination"]["clickhouse_config"]["database"],
+        peerdb_config["peers"][PEERDB_DESTINATION_PEER]["clickhouse_config"]["database"],
     )
 
     for mirror in peerdb_config["mirrors"].values():
@@ -137,17 +140,19 @@ async def uninstall(project_name: str) -> None:
                     style="green",
                 )
 
-    if "source" in peerdb_config["users"]:
+    if PEERDB_SOURCE_PEER in peerdb_config["users"]:
         for schema in peerdb_config["publication_schemas"]:
-            source_peer.revoke_user_privileges(peerdb_config["users"]["source"]["username"], schema)
+            source_peer.revoke_user_privileges(
+                peerdb_config["users"][PEERDB_SOURCE_PEER]["username"], schema
+            )
             app.console.print(
-                f"Revoked privileges from user '{peerdb_config["users"]["source"]["username"]}' on source schema '{schema}'",
+                f"Revoked privileges from user '{peerdb_config["users"][PEERDB_SOURCE_PEER]["username"]}' on source schema '{schema}'",
                 style="green",
             )
 
-        source_peer.drop_user(peerdb_config["users"]["source"]["username"])
+        source_peer.drop_user(peerdb_config["users"][PEERDB_SOURCE_PEER]["username"])
         app.console.print(
-            f"Dropped user '{peerdb_config["users"]["source"]["username"]}' on source",
+            f"Dropped user '{peerdb_config["users"][PEERDB_SOURCE_PEER]["username"]}' on source",
             style="green",
         )
 

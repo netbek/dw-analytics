@@ -36,7 +36,7 @@ def process_config(config: dict) -> dict:
         for key, value in result["mirrors"].items():
             result["mirrors"][key]["flow_job_name"] = key
 
-        source_peer = result["peers"].get("source")
+        source_peer = result["peers"].get(PEERDB_SOURCE_PEER)
 
         if result["mirrors"] and source_peer:
             pg_settings = to_pg_settings(source_peer["postgres_config"])
