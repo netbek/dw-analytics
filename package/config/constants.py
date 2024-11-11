@@ -9,6 +9,10 @@ TEMPLATE_PROJECT_DIR = os.path.join(HOME_DIR, "template_project")
 DBT_PROFILES_DIR = os.environ["DBT_PROFILES_DIR"]
 DBT_PROFILES_FILE = os.path.join(DBT_PROFILES_DIR, "profiles.yml")
 
+# PeerDB
+PEERDB_SOURCE_PEER = "source"
+PEERDB_DESTINATION_PEER = "destination"
+
 # Prefect
 PREFECT_HOME = os.environ["PREFECT_HOME"]
 PREFECT_PROFILES_PATH = os.path.join(PREFECT_HOME, "profiles.toml")

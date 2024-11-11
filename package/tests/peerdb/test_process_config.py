@@ -126,10 +126,10 @@ publications:
 class TestProcessConfig(DBTest):
     @pytest.fixture(scope="function")
     def pg_tables(self, pg_adapter: PGAdapter) -> Generator[List[Table], Any, None]:
-        tables = ["table_1", "table_2", "table_3"]
+        table_names = ["table_1", "table_2", "table_3"]
 
-        for table in tables:
-            quoted_table = PGTableIdentifier(table=table).to_string()
+        for table_name in table_names:
+            quoted_table = PGTableIdentifier(table=table_name).to_string()
             statement = f"""
             create table if not exists {quoted_table} (
                 id bigint,
@@ -139,12 +139,14 @@ class TestProcessConfig(DBTest):
             );
             """
 
-            pg_adapter.create_table(table, statement)
+            pg_adapter.create_table(table_name, statement)
 
-        yield [table for table in pg_adapter.list_tables() if table.name in tables]
+        tables = [table for table in pg_adapter.list_tables() if table.name in table_names]
 
-        for table in tables:
-            pg_adapter.drop_table(table)
+        yield tables
+
+        for table_name in table_names:
+            pg_adapter.drop_table(table_name)
 
     def test_empty_config(self):
         config = yaml.safe_load(empty_config_yaml) or {}
