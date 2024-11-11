@@ -26,7 +26,7 @@ class PGSettings(BaseSettings):
     username: str
     password: str
     database: str
-    schema_: str
+    schema_: str = Field(serialization_alias="schema")
 
     @property
     def url(self) -> str:
