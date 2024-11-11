@@ -61,17 +61,11 @@ def process_config(config: dict) -> dict:
         source_peer = result["peers"].get("source")
 
         if result["mirrors"] and source_peer:
-            # TODO Add function that creates instance of PGSettings from PeerDB config
-            pg_settings = PGSettings(
-                host=source_peer["postgres_config"]["host"],
-                port=source_peer["postgres_config"]["port"],
-                username=source_peer["postgres_config"]["user"],
-                password=source_peer["postgres_config"]["password"],
-                database=source_peer["postgres_config"]["database"],
-                schema_="public",
-            )
+            pg_settings = to_pg_settings(source_peer["postgres_config"])
             db = PGAdapter(pg_settings)
+            tables = db.list_tables()
 
+            # Validate the table mappings and compute the excluded columns
             for mirror in result["mirrors"].values():
                 computed_table_mappings = []
 
@@ -79,7 +73,13 @@ def process_config(config: dict) -> dict:
                     table_identifier = PGTableIdentifier.from_string(
                         table_mapping["source_table_identifier"]
                     )
-                    table = db.get_table(**table_identifier.model_dump(by_alias=True))
+                    table = pydash.find(
+                        tables,
+                        lambda table: (
+                            table.schema == table_identifier.schema_
+                            and table.name == table_identifier.table
+                        ),
+                    )
 
                     if table is None:
                         raise Exception(
@@ -92,7 +92,7 @@ def process_config(config: dict) -> dict:
 
                     if include is not None and exclude is not None:
                         raise Exception(
-                            "Table mapping may contain either 'include' or 'exclude' value, not both"
+                            "Table mapping may contain either 'include' or 'exclude', not both"
                         )
                     elif include is not None:
                         columns = [column.name for column in table.columns]
@@ -135,6 +135,27 @@ def process_config(config: dict) -> dict:
     result["publication_schemas"] = sorted(pydash.uniq(publication_schemas))
 
     return result
+
+
+def to_ch_settings(clickhouse_config: dict) -> CHSettings:
+    return CHSettings(
+        host=clickhouse_config["host"],
+        port=clickhouse_config["port"],
+        username=clickhouse_config["user"],
+        password=clickhouse_config["password"],
+        database=clickhouse_config["database"],
+    )
+
+
+def to_pg_settings(postgres_config: dict) -> PGSettings:
+    return PGSettings(
+        host=postgres_config["host"],
+        port=postgres_config["port"],
+        username=postgres_config["user"],
+        password=postgres_config["password"],
+        database=postgres_config["database"],
+        schema_="public",
+    )
 
 
 class PeerDBClient:
