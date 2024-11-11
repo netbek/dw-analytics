@@ -1,4 +1,4 @@
-from package.config.settings import TestCHSettings, TestPGSettings
+from package.config.settings import get_settings
 from package.database import CHAdapter, PGAdapter
 from sqlmodel import Session, SQLModel
 from typing import Any, Generator, List
@@ -6,11 +6,13 @@ from typing import Any, Generator, List
 import pydash
 import pytest
 
+settings = get_settings()
+
 
 class DBTest:
     @pytest.fixture(scope="session")
     def ch_adapter(self) -> Generator[CHAdapter, Any, None]:
-        yield CHAdapter(TestCHSettings())
+        yield CHAdapter(settings.test_ch)
 
     @pytest.fixture(scope="session")
     def ch_database(self, ch_adapter: CHAdapter) -> Generator[List[str], Any, None]:
@@ -62,4 +64,4 @@ class DBTest:
 
     @pytest.fixture(scope="session")
     def pg_adapter(self) -> Generator[PGAdapter, Any, None]:
-        yield PGAdapter(TestPGSettings())
+        yield PGAdapter(settings.test_pg)
