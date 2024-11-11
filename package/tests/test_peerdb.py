@@ -33,7 +33,6 @@ peers:
       user: {settings.test_ch.username}
       password: {settings.test_ch.password}
       database: {settings.test_ch.database}
-      disable_tls: true
 
 mirrors:
   cdc_small:
@@ -63,7 +62,6 @@ peers:
       user: {settings.test_ch.username}
       password: {settings.test_ch.password}
       database: {settings.test_ch.database}
-      disable_tls: true
 
 mirrors:
   +do_initial_snapshot: false
@@ -232,7 +230,6 @@ class TestProcessConfig(DBTest):
                         "user": settings.test_ch.username,
                         "password": settings.test_ch.password,
                         "database": settings.test_ch.database,
-                        "disable_tls": True,
                     },
                 },
             },
