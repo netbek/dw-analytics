@@ -8,7 +8,7 @@ import httpx
 import pydash
 
 
-def load_config(path: Path | str) -> dict:
+def load_config_file(path: Path | str) -> dict:
     config = safe_load_file(path)
     config = process_config(config)
 
