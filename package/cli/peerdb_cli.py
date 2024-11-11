@@ -14,7 +14,7 @@ app.add_typer(peerdb_app)
 @typer_async
 async def install(project_name: str) -> None:
     project = Project.from_name(project_name)
-    peerdb_config = project.settings.peerdb
+    peerdb_config = project.settings.peerdb.processed_config
     peerdb_client = PeerDBClient(project.peerdb_api_url)
     source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(
@@ -90,7 +90,7 @@ async def install(project_name: str) -> None:
 @typer_async
 async def uninstall(project_name: str) -> None:
     project = Project.from_name(project_name)
-    peerdb_config = project.settings.peerdb
+    peerdb_config = project.settings.peerdb.processed_config
     peerdb_client = PeerDBClient(project.peerdb_api_url)
     source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(

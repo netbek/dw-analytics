@@ -10,8 +10,8 @@ class CHSettings(BaseSettings):
     username: str
     password: str
     database: str
-    secure: bool  # TODO Change to: Optional[bool] = False
-    driver: str  # TODO Change to: Optional[str] = None
+    secure: Optional[bool] = Field(default=False)
+    driver: Optional[str] = Field(default=None)
 
     @property
     def url(self) -> str:
@@ -42,6 +42,12 @@ class DbtSettings(BaseSettings):
 
 class PeerDBSettings(BaseSettings):
     config: dict
+
+    @property
+    def processed_config(self) -> dict:
+        from package.peerdb import process_config
+
+        return process_config(self.config)
 
 
 class PrefectSettings(BaseSettings):

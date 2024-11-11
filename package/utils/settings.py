@@ -1,5 +1,4 @@
 from package.config.constants import HOME_DIR
-from package.peerdb import load_config_file
 from package.types import (
     CHSettings,
     DbtSettings,
@@ -105,7 +104,7 @@ def create_notebook_settings(directory: Path | str) -> NotebookSettings:
 
 def create_peerdb_settings(config_path: Path | str) -> PeerDBSettings:
     class Settings(PeerDBSettings):
-        config: dict = Field(default_factory=lambda: load_config_file(config_path))
+        config: dict = Field(default_factory=lambda: safe_load_file(config_path))
 
     return Settings
 

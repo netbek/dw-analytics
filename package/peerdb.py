@@ -1,32 +1,9 @@
 from package.database import CHAdapter, PGAdapter
 from package.types import CHSettings, PGSettings, PGTableIdentifier
-from package.utils.yaml_utils import safe_load_file
-from pathlib import Path
 
 import copy
 import httpx
 import pydash
-
-
-def load_config_file(path: Path | str) -> dict:
-    config = safe_load_file(path)
-    config = process_config(config)
-
-    return config
-
-
-def process_node(node: dict) -> dict:
-    default_keys = [key for key in node.keys() if key.startswith("+")]
-    defaults = {key.lstrip("+").strip(): node[key] for key in default_keys}
-
-    if defaults:
-        for key in node.keys():
-            if not key.startswith("+"):
-                node[key] = pydash.defaults(node[key], defaults)
-
-        node = pydash.omit(node, *default_keys)
-
-    return node
 
 
 def process_config(config: dict) -> dict:
@@ -137,6 +114,20 @@ def process_config(config: dict) -> dict:
     return result
 
 
+def process_node(node: dict) -> dict:
+    default_keys = [key for key in node.keys() if key.startswith("+")]
+    defaults = {key.lstrip("+").strip(): node[key] for key in default_keys}
+
+    if defaults:
+        for key in node.keys():
+            if not key.startswith("+"):
+                node[key] = pydash.defaults(node[key], defaults)
+
+        node = pydash.omit(node, *default_keys)
+
+    return node
+
+
 def to_ch_settings(clickhouse_config: dict) -> CHSettings:
     return CHSettings(
         host=clickhouse_config["host"],
@@ -144,6 +135,8 @@ def to_ch_settings(clickhouse_config: dict) -> CHSettings:
         username=clickhouse_config["user"],
         password=clickhouse_config["password"],
         database=clickhouse_config["database"],
+        driver="native",
+        secure=not clickhouse_config.get("disable_tls", False),
     )
 
 
