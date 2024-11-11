@@ -155,8 +155,8 @@ def add_columns_from_dbt(peerdb_config: dict, dbt_sources_config: dict) -> dict:
         raise Exception(f"Destination '{database}' not found in dbt config")
 
     pg_settings = to_pg_settings(peerdb_source_peer["postgres_config"])
-    db_adapter = PGAdapter(pg_settings)
-    source_tables = db_adapter.list_tables()
+    source_adapter = PGAdapter(pg_settings)
+    source_tables = source_adapter.list_tables()
 
     for mirror in result["mirrors"].values():
         for table_mapping in mirror["table_mappings"]:
