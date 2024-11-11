@@ -1,5 +1,5 @@
 from package.database import CHAdapter, PGAdapter
-from package.types import CHSettings, PGSettings, PGTableIdentifier
+from package.types import CHSettings, CHTableIdentifier, PGSettings, PGTableIdentifier
 
 import copy
 import httpx
@@ -126,6 +126,41 @@ def process_node(node: dict) -> dict:
         node = pydash.omit(node, *default_keys)
 
     return node
+
+
+def add_columns_from_dbt(peerdb_config: dict, dbt_sources_config: dict) -> dict:
+    result = copy.deepcopy(peerdb_config)
+    peerdb_destination = result["peers"].get("destination")
+
+    if not peerdb_destination:
+        raise Exception("Peer 'destination' not found in PeerDB config")
+
+    database = peerdb_destination["clickhouse_config"]["database"]
+    dbt_source = pydash.find(
+        dbt_sources_config["sources"],
+        lambda source: source["name"] == database and source["loader"] == "peerdb",
+    )
+
+    if not dbt_source:
+        raise Exception(f"Source '{database}' not found in dbt config")
+
+    for mirror in result["mirrors"].values():
+        for table_mapping in mirror["table_mappings"]:
+            table_identifier = CHTableIdentifier.from_string(
+                table_mapping["destination_table_identifier"]
+            )
+            dbt_table = pydash.find(
+                dbt_source["tables"], lambda table: table["name"] == table_identifier.table
+            )
+
+            if not dbt_table:
+                raise Exception(
+                    f"Table '{table_mapping["destination_table_identifier"]}' not found in dbt config"
+                )
+
+            table_mapping["include"] = [column["name"] for column in dbt_table["columns"]]
+
+    return result
 
 
 def to_ch_settings(clickhouse_config: dict) -> CHSettings:

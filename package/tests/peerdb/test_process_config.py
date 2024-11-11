@@ -11,8 +11,7 @@ import yaml
 
 settings = get_settings()
 
-empty_config_yaml = """
-"""
+empty_config_yaml = ""
 
 mirrors_non_existent_table_yaml = f"""
 peers:
@@ -66,6 +65,7 @@ peers:
 mirrors:
   +do_initial_snapshot: false
   +resync: false
+
   cdc_small:
     source_name: source
     destination_name: destination
@@ -94,6 +94,7 @@ publications_yaml = """
 mirrors:
   +do_initial_snapshot: false
   +resync: false
+
   cdc_large:
     publication_name: publication_1
     source_name: source
@@ -104,6 +105,7 @@ mirrors:
     - source_table_identifier: public.table_2
       destination_table_identifier: table_2
     resync: true
+
   cdc_small:
     publication_name: publication_2
     source_name: source
