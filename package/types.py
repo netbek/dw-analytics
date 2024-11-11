@@ -1,5 +1,5 @@
 from pathlib import Path
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
 from typing import List, Optional
 
@@ -63,8 +63,8 @@ class CHIdentifier:
 
 
 class CHTableIdentifier(CHIdentifier, BaseModel):
-    database: Optional[str] = None
-    table: str
+    database: Optional[str] = Field(default=None, serialization_alias="database")
+    table: str = Field(serialization_alias="table")
 
     @classmethod
     def from_string(cls, identifier: str) -> "CHTableIdentifier":
@@ -95,9 +95,9 @@ class PGIdentifier:
 
 
 class PGTableIdentifier(PGIdentifier, BaseModel):
-    database: Optional[str] = None
-    schema_: Optional[str] = None
-    table: str
+    database: Optional[str] = Field(default=None, serialization_alias="database")
+    schema_: Optional[str] = Field(default=None, serialization_alias="schema")
+    table: str = Field(serialization_alias="table")
 
     @classmethod
     def from_string(cls, identifier: str) -> "PGTableIdentifier":
