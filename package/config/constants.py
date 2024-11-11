@@ -8,6 +8,7 @@ TEMPLATE_PROJECT_DIR = os.path.join(HOME_DIR, "template_project")
 # dbt
 DBT_PROFILES_DIR = os.environ["DBT_PROFILES_DIR"]
 DBT_PROFILES_FILE = os.path.join(DBT_PROFILES_DIR, "profiles.yml")
+DBT_LOADER_PEERDB = "peerdb"
 
 # PeerDB
 PEERDB_SOURCE_PEER = "source"

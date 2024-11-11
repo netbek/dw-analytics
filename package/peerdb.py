@@ -1,4 +1,4 @@
-from package.config.constants import PEERDB_DESTINATION_PEER, PEERDB_SOURCE_PEER
+from package.config.constants import DBT_LOADER_PEERDB, PEERDB_DESTINATION_PEER, PEERDB_SOURCE_PEER
 from package.database import CHAdapter, PGAdapter
 from package.types import CHSettings, CHTableIdentifier, PGSettings, PGTableIdentifier
 
@@ -136,10 +136,11 @@ def add_columns_from_dbt(peerdb_config: dict, dbt_sources_config: dict) -> dict:
         raise Exception("Peers not found in PeerDB config")
 
     peerdb_source_peer = result["peers"].get(PEERDB_SOURCE_PEER)
-    peerdb_destination_peer = result["peers"].get(PEERDB_DESTINATION_PEER)
 
     if not peerdb_source_peer:
         raise Exception(f"Peer '{PEERDB_SOURCE_PEER}' not found in PeerDB config")
+
+    peerdb_destination_peer = result["peers"].get(PEERDB_DESTINATION_PEER)
 
     if not peerdb_destination_peer:
         raise Exception(f"Peer '{PEERDB_DESTINATION_PEER}' not found in PeerDB config")
@@ -147,15 +148,15 @@ def add_columns_from_dbt(peerdb_config: dict, dbt_sources_config: dict) -> dict:
     database = peerdb_destination_peer["clickhouse_config"]["database"]
     dbt_source = pydash.find(
         dbt_sources_config["sources"],
-        lambda source: source["name"] == database and source["loader"] == "peerdb",
+        lambda source: source["name"] == database and source["loader"] == DBT_LOADER_PEERDB,
     )
 
     if not dbt_source:
         raise Exception(f"Destination '{database}' not found in dbt config")
 
     pg_settings = to_pg_settings(peerdb_source_peer["postgres_config"])
-    db = PGAdapter(pg_settings)
-    source_tables = db.list_tables()
+    db_adapter = PGAdapter(pg_settings)
+    source_tables = db_adapter.list_tables()
 
     for mirror in result["mirrors"].values():
         for table_mapping in mirror["table_mappings"]:
