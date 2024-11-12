@@ -1,4 +1,4 @@
-from functools import lru_cache
+from functools import cached_property
 from package.config.constants import HOME_DIR, PROJECTS_DIR, TEMPLATE_PROJECT_DIR
 from package.utils.environ_utils import get_env_var
 from package.utils.filesystem import rmtree, symlink
@@ -76,63 +76,51 @@ class Project:
     def name(self) -> str:
         return self._name
 
-    @property
-    @lru_cache
+    @cached_property
     def directory(self) -> Path:
         return Path(os.path.join(PROJECTS_DIR, self.name))
 
-    @property
-    @lru_cache
+    @cached_property
     def dbt_directory(self) -> Path:
         return Path(os.path.join(self.directory, "dbt"))
 
-    @property
-    @lru_cache
+    @cached_property
     def dbt_config_path(self) -> Path:
         return Path(os.path.join(self.directory, "dbt", "dbt_project.yml"))
 
-    @property
-    @lru_cache
+    @cached_property
     def dbt_docs_directory(self) -> Path:
         return Path(os.path.join(self.directory, "dbt", "docs"))
 
-    @property
-    @lru_cache
+    @cached_property
     def dbt_tests_directory(self) -> Path:
         return Path(os.path.join(self.directory, "dbt", "tests"))
 
-    @property
-    @lru_cache
+    @cached_property
     def flows_directory(self) -> Path:
         return Path(os.path.join(self.directory, "flows"))
 
-    @property
-    @lru_cache
+    @cached_property
     def notebooks_directory(self) -> Path:
         return Path(os.path.join(self.directory, "notebooks"))
 
-    @property
-    @lru_cache
+    @cached_property
     def tests_directory(self) -> Path:
         return Path(os.path.join(self.directory, "tests"))
 
-    @property
-    @lru_cache
+    @cached_property
     def peerdb_api_url(self) -> str:
         return get_env_var("PEERDB_API_URL")
 
-    @property
-    @lru_cache
+    @cached_property
     def peerdb_config_path(self) -> Path:
         return Path(os.path.join(self.directory, "peerdb.yaml"))
 
-    @property
-    @lru_cache
+    @cached_property
     def prefect_config_path(self) -> Path:
         return Path(os.path.join(self.directory, "prefect.yaml"))
 
-    @property
-    @lru_cache
+    @cached_property
     def settings(self) -> BaseModel:
         module = importlib.import_module(f"projects.{self._name}.config.settings")
 
