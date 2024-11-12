@@ -1,6 +1,5 @@
 from functools import cached_property
 from package.config.constants import HOME_DIR, PROJECTS_DIR, TEMPLATE_PROJECT_DIR
-from package.utils.environ_utils import get_env_var
 from package.utils.filesystem import rmtree, symlink
 from package.utils.template import render_template
 from pathlib import Path
@@ -107,10 +106,6 @@ class Project:
     @cached_property
     def tests_directory(self) -> Path:
         return Path(os.path.join(self.directory, "tests"))
-
-    @cached_property
-    def peerdb_api_url(self) -> str:
-        return get_env_var("PEERDB_API_URL")
 
     @cached_property
     def peerdb_config_path(self) -> Path:

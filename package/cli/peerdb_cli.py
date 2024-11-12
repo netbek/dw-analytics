@@ -20,7 +20,7 @@ async def install(project_name: str) -> None:
         dbt_project_dir=project.dbt_directory,
         generate_table_mappings=True,
     )
-    peerdb_client = PeerDBClient(project.peerdb_api_url)
+    peerdb_client = PeerDBClient(project.settings.peerdb.api_url)
     source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(
         project.settings.destination_db,
@@ -101,7 +101,7 @@ async def uninstall(project_name: str) -> None:
         dbt_project_dir=project.dbt_directory,
         generate_table_mappings=False,
     )
-    peerdb_client = PeerDBClient(project.peerdb_api_url)
+    peerdb_client = PeerDBClient(project.settings.peerdb.api_url)
     source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(
         project.settings.destination_db,

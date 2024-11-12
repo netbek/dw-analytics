@@ -104,6 +104,11 @@ def create_notebook_settings(directory: Path | str) -> NotebookSettings:
 
 def create_peerdb_settings(config_path: Path | str) -> PeerDBSettings:
     class Settings(PeerDBSettings):
+        model_config = SettingsConfigDict(
+            env_file=os.path.join(HOME_DIR, ".env_files/database.env"), extra="ignore"
+        )
+
+        api_url: str = Field(validation_alias="peerdb_api_url")
         config: dict = Field(default_factory=lambda: safe_load_file(config_path))
 
     return Settings
