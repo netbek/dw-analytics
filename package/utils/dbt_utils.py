@@ -1,35 +1,17 @@
+from package.config.constants import DBT_PROFILES_DIR
 from package.project import Project
-from package.types import DbtSourcesConfig
-from package.utils.filesystem import rmtree
-from package.utils.pydantic_utils import dump_csv
-from package.utils.yaml_utils import PrettySafeDumper, safe_load_file
+from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
 from prefect_shell.commands import ShellOperation
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 import json
 import os
 import pydash
-import re
-import yaml
+import subprocess
 
 RE_REF = r"^ref\(['\"](.*?)['\"]\)$"
 RE_SOURCE = r"^source\(['\"](.*?)['\"], ['\"](.*?)['\"]\)$"
-
-
-def extract_table_name(string: str) -> str | None:
-    """Extract the table name from a string that contains a dbt ref or source function."""
-    matches = re.search(RE_REF, string)
-
-    if matches:
-        return matches.group(1)
-
-    matches = re.search(RE_SOURCE, string)
-
-    if matches:
-        return matches.group(2)
-
-    return None
 
 
 def find_model_sql(project: Project, model: str) -> str | None:
@@ -42,96 +24,170 @@ def find_model_sql(project: Project, model: str) -> str | None:
         return None
 
 
-def find_model_yaml(project: Project, model: str) -> str | None:
-    paths = list(project.dbt_directory.glob(os.path.join("models", "**", f"{model}.yml")))
+def list_resources(project_dir: Path | str, resource_type: Optional[str] = None) -> List[dict]:
+    result = []
 
-    if paths:
-        # TODO Raise exception if multiple matches
-        return paths[0]
-    else:
-        return None
+    cmd = dbt_list_command(
+        profiles_dir=DBT_PROFILES_DIR,
+        project_dir=project_dir,
+        resource_type=resource_type,
+        output="json",
+    )
+    stdout = run_command(cmd)
 
-
-def dump_fixtures_csv(project: Project, fixtures: list[dict]):
-    fixtures_path = os.path.join(project.dbt_tests_directory, "fixtures")
-
-    for model_name, model_fixtures in pydash.group_by(fixtures, "model").items():
-        for fixture in model_fixtures:
-            fixture_path = os.path.join(fixtures_path, model_name)
-
-            rmtree(fixture_path)
-            os.makedirs(fixture_path, exist_ok=True)
-
-            # Given
-            for value in fixture["given"]:
-                input_name = extract_table_name(value["input"])
-                csv_filename = f'{model_name}__{fixture["name"]}__{input_name}.csv'
-                csv_path = os.path.join(fixture_path, csv_filename)
-                csv_data = dump_csv(*value["data"])
-
-                with open(csv_path, "wt") as fp:
-                    fp.write(csv_data)
-
-            # Expected
-            csv_filename = f'{model_name}__{fixture["name"]}__expect.csv'
-            csv_path = os.path.join(fixture_path, csv_filename)
-            csv_data = dump_csv(*fixture["expect"]["data"])
-
-            with open(csv_path, "wt") as fp:
-                fp.write(csv_data)
-
-
-def update_model_unit_tests(project: Project, fixtures: list[dict]):
-    for model_name, model_fixtures in pydash.group_by(fixtures, "model").items():
-        schema_path = find_model_yaml(project, model_name)
-
-        if not schema_path:
+    for line in stdout.splitlines():
+        try:
+            data = json.loads(line)
+        except json.decoder.JSONDecodeError:
             continue
 
-        unit_tests = []
-        for fixture in model_fixtures:
-            unit_test = {
-                "model": model_name,
-                "name": fixture["name"],
-            }
+        result.append(data)
 
-            # Given
-            unit_test["given"] = []
-            for value in fixture["given"]:
-                input_name = extract_table_name(value["input"])
-                unit_test["given"].append(
-                    {
-                        "input": value["input"],
-                        "format": value["format"],
-                        "fixture": f'{model_name}__{fixture["name"]}__{input_name}',
-                    }
-                )
+    # Add original config not returned by `dbt list` command
+    if resource_type == "source":
+        file_paths = pydash.uniq([resource["original_file_path"] for resource in result])
+        files = {
+            file_path: safe_load_file(os.path.join(project_dir, file_path))
+            for file_path in file_paths
+        }
 
-            # Expected
-            unit_test["expect"] = {
-                "format": value["format"],
-                "fixture": f'{model_name}__{fixture["name"]}__expect',
-            }
+        for resource in result:
+            original_config = None
+            data = files[resource["original_file_path"]]
 
-            unit_tests.append(unit_test)
+            for source in data["sources"]:
+                if source["name"] == resource["source_name"]:
+                    for table in source["tables"]:
+                        if table["name"] == resource["name"]:
+                            original_config = table
+                            break
+                if original_config:
+                    break
 
-        schema = safe_load_file(schema_path) or {}
-        schema["unit_tests"] = unit_tests
-        data = yaml.dump(schema, sort_keys=False, Dumper=PrettySafeDumper)
+            resource["original_config"] = original_config
 
-        with open(schema_path, "wt") as fp:
-            fp.write(data)
+    return result
 
 
-def export_fixtures(project: Project, fixtures: list[dict]):
-    dump_fixtures_csv(project, fixtures)
-    update_model_unit_tests(project, fixtures)
+def run_command(command):
+    try:
+        result = subprocess.run(command, text=True, capture_output=True, check=True)
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        return f"Command failed with error:\n{e.stderr}"
 
 
-def load_sources_config(config_path: str) -> DbtSourcesConfig:
-    data = safe_load_file(config_path)
+def dbt_list_command_args(
+    fail_fast=True,
+    use_colors=False,
+    exclude: Optional[str] = None,
+    models: Optional[str] = None,
+    output: Optional[str] = None,
+    resource_type: Optional[str] = None,
+    select: Optional[str] = None,
+    selector: Optional[str] = None,
+    target: Optional[str] = None,
+    vars: Optional[dict[str, Any]] = None,
+) -> list[str]:
+    args = []
 
-    return DbtSourcesConfig(**data)
+    if fail_fast:
+        args.extend(["--fail-fast"])
+    else:
+        args.extend(["--no-fail-fast"])
+
+    if use_colors:
+        args.extend(["--use-colors"])
+    else:
+        args.extend(["--no-use-colors"])
+
+    if exclude:
+        args.extend(["--exclude", exclude])
+
+    if models:
+        args.extend(["--models", models])
+
+    if output:
+        args.extend(["--output", output])
+
+    if resource_type:
+        args.extend(["--resource-type", resource_type])
+
+    if select:
+        args.extend(["--select", select])
+
+    if selector:
+        args.extend(["--selector", selector])
+
+    if target:
+        args.extend(["--target", target])
+
+    if vars:
+        args.extend(["--vars", f"'{json.dumps(vars)}'"])
+
+    return args
+
+
+def dbt_list_command(
+    profiles_dir: Path | str,
+    project_dir: Path | str,
+    exclude: Optional[str] = None,
+    models: Optional[str] = None,
+    output: Optional[str] = None,
+    resource_type: Optional[str] = None,
+    select: Optional[str] = None,
+    selector: Optional[str] = None,
+    target: Optional[str] = None,
+    vars: Optional[dict[str, Any]] = None,
+) -> list[str]:
+    cmd = ["dbt", "list", "--profiles-dir", str(profiles_dir), "--project-dir", str(project_dir)]
+    cmd.extend(
+        dbt_list_command_args(
+            exclude=exclude,
+            models=models,
+            output=output,
+            resource_type=resource_type,
+            select=select,
+            selector=selector,
+            target=target,
+            vars=vars,
+        )
+    )
+
+    return cmd
+
+
+async def dbt_list(
+    profiles_dir: str,
+    project_dir: str,
+    exclude: Optional[str] = None,
+    models: Optional[str] = None,
+    output: Optional[str] = None,
+    resource_type: Optional[str] = None,
+    select: Optional[str] = None,
+    selector: Optional[str] = None,
+    target: Optional[str] = None,
+    vars: Optional[dict[str, Any]] = None,
+) -> str:
+    cmd = dbt_list_command(
+        profiles_dir=profiles_dir,
+        project_dir=project_dir,
+        exclude=exclude,
+        models=models,
+        output=output,
+        resource_type=resource_type,
+        select=select,
+        selector=selector,
+        target=target,
+        vars=vars,
+    )
+
+    async with ShellOperation(commands=[" ".join(cmd)], working_dir=project_dir) as op:
+        process = await op.trigger()
+        await process.wait_for_completion()
+        result = await process.fetch_result()
+
+    return result
 
 
 def dbt_run_command_args(
