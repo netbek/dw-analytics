@@ -1,5 +1,6 @@
 from package.config.constants import DBT_PROFILES_DIR
 from package.project import Project
+from package.types import DbtResourceType, DbtSourceResource
 from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
 from prefect_shell.commands import ShellOperation
@@ -24,8 +25,16 @@ def find_model_sql(project: Project, model: str) -> str | None:
         return None
 
 
-def list_resources(project_dir: Path | str, resource_type: Optional[str] = None) -> List[dict]:
-    resources = []
+def list_resources(
+    project_dir: Path | str, resource_type: Optional[str] = None
+) -> List[DbtSourceResource]:
+    if resource_type is None:
+        resource_type = DbtResourceType.SOURCE
+
+    if resource_type != DbtResourceType.SOURCE:
+        raise ValueError(f"'resource_type' must be: {DbtResourceType.SOURCE}")
+
+    resource_dicts = []
 
     cmd = dbt_list_command(
         profiles_dir=DBT_PROFILES_DIR,
@@ -41,13 +50,13 @@ def list_resources(project_dir: Path | str, resource_type: Optional[str] = None)
         except json.decoder.JSONDecodeError:
             continue
 
-        resources.append(resource)
+        resource_dicts.append(resource)
 
     source_file_paths = pydash.uniq(
         [
             resource["original_file_path"]
-            for resource in resources
-            if resource["resource_type"] == "source"
+            for resource in resource_dicts
+            if resource["resource_type"] == DbtResourceType.SOURCE
         ]
     )
 
@@ -57,8 +66,8 @@ def list_resources(project_dir: Path | str, resource_type: Optional[str] = None)
             for file_path in source_file_paths
         }
 
-        for resource in resources:
-            if resource["resource_type"] == "source":
+        for resource in resource_dicts:
+            if resource["resource_type"] == DbtResourceType.SOURCE:
                 original_config = None
                 data = source_files[resource["original_file_path"]]
 
@@ -72,6 +81,11 @@ def list_resources(project_dir: Path | str, resource_type: Optional[str] = None)
                         break
 
                 resource["original_config"] = original_config
+
+    resources = []
+    for resource in resource_dicts:
+        if resource["resource_type"] == DbtResourceType.SOURCE:
+            resources.append(DbtSourceResource(**resource))
 
     return resources
 

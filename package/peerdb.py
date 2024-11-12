@@ -1,6 +1,12 @@
 from package.config.constants import PEERDB_SOURCE_PEER
 from package.database import CHAdapter, PGAdapter
-from package.types import CHSettings, CHTableIdentifier, PGSettings, PGTableIdentifier
+from package.types import (
+    CHSettings,
+    CHTableIdentifier,
+    DbtResourceType,
+    PGSettings,
+    PGTableIdentifier,
+)
 from package.utils.dbt_utils import list_resources
 from pathlib import Path
 from typing import Optional
@@ -56,7 +62,7 @@ def process_config(
             source_adapter = PGAdapter(pg_settings)
             source_tables = source_adapter.list_tables()
 
-            dbt_resources = list_resources(dbt_project_dir, resource_type="source")
+            dbt_sources = list_resources(dbt_project_dir, resource_type=DbtResourceType.SOURCE)
 
             # Validate the table mappings and compute the excluded columns
             for mirror in result["mirrors"].values():
@@ -84,22 +90,22 @@ def process_config(
                     destination_table_identifier = CHTableIdentifier.from_string(
                         table_mapping["destination_table_identifier"]
                     )
-                    dbt_resource = pydash.find(
-                        dbt_resources,
-                        lambda resource: resource["name"] == destination_table_identifier.table,
+                    dbt_source = pydash.find(
+                        dbt_sources,
+                        lambda source: source.name == destination_table_identifier.table,
                     )
 
-                    if dbt_resource is None:
+                    if dbt_source is None:
                         raise Exception(
                             f"Destination table '{table_mapping["destination_table_identifier"]}' not found in dbt config"
                         )
 
                     # Compute the excluded columns (difference between source and destination tables)
                     source_columns = [str(column.name) for column in source_table.columns]
-                    dbt_resource_columns = [
-                        column["name"] for column in dbt_resource["original_config"]["columns"]
+                    dbt_source_columns = [
+                        column.name for column in dbt_source.original_config.columns
                     ]
-                    computed_exclude = pydash.difference(source_columns, dbt_resource_columns)
+                    computed_exclude = pydash.difference(source_columns, dbt_source_columns)
                     computed_exclude = sorted(computed_exclude)
 
                     # Compute the table mapping

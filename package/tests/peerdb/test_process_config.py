@@ -2,6 +2,7 @@ from package.config.settings import get_settings
 from package.database import PGAdapter
 from package.peerdb import process_config
 from package.tests.fixtures import DBTest
+from package.types import DbtSourceResource
 from sqlmodel import Table
 from typing import Any, Generator, List
 
@@ -158,6 +159,9 @@ list_resources__return_value = [
             ],
         },
     },
+]
+list_resources__return_value = [
+    DbtSourceResource(**resource) for resource in list_resources__return_value
 ]
 
 

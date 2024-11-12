@@ -1,3 +1,4 @@
+from enum import StrEnum
 from pathlib import Path
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
@@ -156,3 +157,23 @@ class DbtSourcesConfig(BaseModel):
 
     def get_sources_by_name(self, *names: str) -> List[DbtSource]:
         return [source for source in self.sources if source.name in names]
+
+
+class DbtResourceType(StrEnum):
+    SOURCE = "source"
+
+
+class DbtResourceConfig(BaseModel):
+    enabled: bool
+
+
+class DbtSourceResource(BaseModel):
+    name: str
+    resource_type: DbtResourceType
+    package_name: str
+    unique_id: str
+    tags: List[str]
+    config: DbtResourceConfig
+    original_file_path: str
+    original_config: Optional[DbtSourceTable] = None
+    source_name: str
