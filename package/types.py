@@ -124,6 +124,10 @@ class PGTableIdentifier(PGIdentifier, BaseModel):
             return self.quote(self.table)
 
 
+class DbtResourceType(StrEnum):
+    SOURCE = "source"
+
+
 class DbtColumnMeta(BaseModel):
     sqlalchemy_type: str
 
@@ -138,42 +142,24 @@ class DbtSourceTableMeta(BaseModel):
     class_name: str
 
 
-class DbtSourceTable(BaseModel):
+class DbtSourceOriginalConfig(BaseModel):
     name: str
     meta: Optional[DbtSourceTableMeta] = None
     loaded_at_field: Optional[str] = None
     columns: Optional[List[DbtColumn]] = None
 
 
-class DbtSource(BaseModel):
-    name: str
-    loader: Optional[str] = None
-    tables: List[DbtSourceTable]
-
-
-class DbtSourcesConfig(BaseModel):
-    version: int
-    sources: List[DbtSource]
-
-    def get_sources_by_name(self, *names: str) -> List[DbtSource]:
-        return [source for source in self.sources if source.name in names]
-
-
-class DbtResourceType(StrEnum):
-    SOURCE = "source"
-
-
-class DbtResourceConfig(BaseModel):
+class DbtSourceConfig(BaseModel):
     enabled: bool
 
 
-class DbtSourceResource(BaseModel):
+class DbtSource(BaseModel):
     name: str
     resource_type: DbtResourceType
     package_name: str
     unique_id: str
     tags: List[str]
-    config: DbtResourceConfig
+    config: DbtSourceConfig
     original_file_path: str
-    original_config: Optional[DbtSourceTable] = None
+    original_config: Optional[DbtSourceOriginalConfig] = None
     source_name: str

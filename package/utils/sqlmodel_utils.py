@@ -1,9 +1,9 @@
 from clickhouse_sqlalchemy import types
 from package.database import CHAdapter
-from package.types import CHSettings, DbtSourceTable
+from package.types import CHSettings, DbtSource
 from package.utils.python_utils import is_python_keyword
 from sqlalchemy import Column
-from typing import Any
+from typing import Any, List
 
 import os
 import pydash
@@ -220,11 +220,11 @@ def create_factory_name(model_name: str) -> str:
     return f"{model_name}Factory"
 
 
-def create_model_code(db_settings: CHSettings, database: str, table: DbtSourceTable) -> str:
+def create_model_code(db_settings: CHSettings, database: str, dbt_resource: DbtSource) -> str:
     """Create the code of a SQLModel class from a table schema."""
     ch_adapter = CHAdapter(db_settings)
-    table_name = table.name
-    model_name = table.meta.class_name
+    table_name = dbt_resource.name
+    model_name = dbt_resource.original_config.meta.class_name
     sa_table = ch_adapter.get_table(table_name, database=database)
     statement = ch_adapter.get_create_table_statement(table_name, database=database)
     parsed_statement = parse_create_table_statement(statement)
@@ -250,7 +250,9 @@ def create_model_code(db_settings: CHSettings, database: str, table: DbtSourceTa
     columns = []
 
     for column in sa_table.columns:
-        dbt_column = pydash.find(table.columns, lambda x: x.name == column.name)
+        dbt_column = pydash.find(
+            dbt_resource.original_config.columns, lambda x: x.name == column.name
+        )
         field_name = to_field_name(column.name)
         python_type = get_python_type(column)
         pydantic_type = get_pydantic_type(column)
@@ -316,20 +318,20 @@ def create_model_code(db_settings: CHSettings, database: str, table: DbtSourceTa
 
 
 def create_model_file(
-    db_settings: CHSettings, database: str, table: DbtSourceTable, directory: str
+    db_settings: CHSettings, database: str, dbt_resource: DbtSource, directory: str
 ) -> None:
-    model_name = table.meta.class_name
+    model_name = dbt_resource.original_config.meta.class_name
     filename = create_class_filename(model_name)
     file_path = os.path.join(directory, f"{filename}.py")
-    code = create_model_code(db_settings, database, table)
+    code = create_model_code(db_settings, database, dbt_resource)
 
     with open(file_path, "wt") as fp:
         fp.write(code)
 
 
-def create_factory_code(table: DbtSourceTable, random_seed: int = 0) -> str:
+def create_factory_code(dbt_resource: DbtSource, random_seed: int = 0) -> str:
     """Create the code of a Pydantic model factory."""
-    model_name = table.meta.class_name
+    model_name = dbt_resource.original_config.meta.class_name
     model_filename = create_class_filename(model_name)
     factory_name = create_factory_name(model_name)
 
@@ -354,24 +356,24 @@ def create_factory_code(table: DbtSourceTable, random_seed: int = 0) -> str:
     return "\n".join(lines) + "\n"
 
 
-def create_factory_file(table: DbtSourceTable, directory: str) -> None:
-    model_name = table.meta.class_name
+def create_factory_file(dbt_resource: DbtSource, directory: str) -> None:
+    model_name = dbt_resource.original_config.meta.class_name
     factory_name = create_factory_name(model_name)
     filename = create_class_filename(factory_name)
     file_path = os.path.join(directory, f"{filename}.py")
-    code = create_factory_code(table)
+    code = create_factory_code(dbt_resource)
 
     with open(file_path, "wt") as fp:
         fp.write(code)
 
 
-def create_init_file(tables: list[DbtSourceTable], directory: str) -> None:
+def create_init_file(dbt_resources: List[DbtSource], directory: str) -> None:
     file_path = os.path.join(directory, "__init__.py")
     all = []
     imports = []
 
-    for table in tables:
-        class_name = table.meta.class_name
+    for dbt_resource in dbt_resources:
+        class_name = dbt_resource.original_config.meta.class_name
 
         model_filename = create_class_filename(class_name)
         all.append(class_name)

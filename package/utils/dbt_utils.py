@@ -1,6 +1,6 @@
 from package.config.constants import DBT_PROFILES_DIR
 from package.project import Project
-from package.types import DbtResourceType, DbtSourceResource
+from package.types import DbtResourceType, DbtSource
 from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
 from prefect_shell.commands import ShellOperation
@@ -25,9 +25,7 @@ def find_model_sql(project: Project, model: str) -> str | None:
         return None
 
 
-def list_resources(
-    project_dir: Path | str, resource_type: Optional[str] = None
-) -> List[DbtSourceResource]:
+def list_resources(project_dir: Path | str, resource_type: Optional[str] = None) -> List[DbtSource]:
     if resource_type is None:
         resource_type = DbtResourceType.SOURCE
 
@@ -85,7 +83,7 @@ def list_resources(
     resources = []
     for resource in resource_dicts:
         if resource["resource_type"] == DbtResourceType.SOURCE:
-            resources.append(DbtSourceResource(**resource))
+            resources.append(DbtSource(**resource))
 
     return resources
 
