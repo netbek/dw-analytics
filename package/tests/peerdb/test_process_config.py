@@ -2,7 +2,6 @@ from package.config.settings import get_settings
 from package.database import PGAdapter
 from package.peerdb import process_config
 from package.tests.fixtures import DBTest
-from package.types import PGTableIdentifier
 from sqlmodel import Table
 from typing import Any, Generator, List
 
@@ -11,38 +10,44 @@ import yaml
 
 settings = get_settings()
 
-empty_config_yaml = ""
+table_defs = [
+    (
+        "table_1",
+        """
+        create table table_1 (
+            id bigint,
+            username text,
+            password text,
+            age smallint,
+            modified_at timestamp(6)
+        );
+        """,
+    ),
+    (
+        "table_2",
+        """
+        create table table_2 (
+            id bigint,
+            longitude double precision,
+            latitude double precision,
+            is_secret boolean,
+            modified_at timestamp(6)
+        );
+        """,
+    ),
+    (
+        "table_3",
+        """
+        create table table_3 (
+            id bigint,
+            ts timestamp(6),
+            modified_at timestamp(6)
+        );
+        """,
+    ),
+]
 
-mirrors_non_existent_table_yaml = f"""
-peers:
-  source:
-    type: 3
-    postgres_config:
-      host: {settings.test_pg.host}
-      port: {settings.test_pg.port}
-      user: {settings.test_pg.username}
-      password: {settings.test_pg.password}
-      database: {settings.test_pg.database}
-
-  destination:
-    type: 8
-    clickhouse_config:
-      host: {settings.test_ch.host}
-      port: {settings.test_ch.port}
-      user: {settings.test_ch.username}
-      password: {settings.test_ch.password}
-      database: {settings.test_ch.database}
-
-mirrors:
-  cdc_small:
-    source_name: source
-    destination_name: destination
-    table_mappings:
-    - source_table_identifier: public.non_existent_table
-      destination_table_identifier: non_existent_table
-"""
-
-mirrors_existent_tables_yaml = f"""
+peerdb_yaml = f"""
 peers:
   source:
     type: 3
@@ -80,37 +85,6 @@ mirrors:
     table_mappings:
     - source_table_identifier: public.table_2
       destination_table_identifier: table_2
-      include:
-      - id
-      - username
-    - source_table_identifier: public.table_3
-      destination_table_identifier: table_3
-      exclude:
-      - password
-      - updated_at
-"""
-
-publications_yaml = """
-mirrors:
-  +do_initial_snapshot: false
-  +resync: false
-
-  cdc_large:
-    publication_name: publication_1
-    source_name: source
-    destination_name: destination
-    table_mappings:
-    - source_table_identifier: public.table_1
-      destination_table_identifier: table_1
-    - source_table_identifier: public.table_2
-      destination_table_identifier: table_2
-    resync: true
-
-  cdc_small:
-    publication_name: publication_2
-    source_name: source
-    destination_name: destination
-    table_mappings:
     - source_table_identifier: public.table_3
       destination_table_identifier: table_3
 
@@ -122,25 +96,78 @@ publications:
   - private.table_3
 """
 
+list_resources__return_value = [
+    {
+        "name": "table_1",
+        "resource_type": "source",
+        "package_name": "test",
+        "original_file_path": "models/sources.yml",
+        "unique_id": "source.test.default.table_1",
+        "source_name": settings.test_ch.database,
+        "tags": [],
+        "config": {"enabled": True},
+        "original_config": {
+            "name": "table_1",
+            "columns": [
+                {"name": "id", "data_type": "Int64"},
+                {"name": "username", "data_type": "String"},
+                {"name": "_peerdb_is_deleted", "data_type": "Int8"},
+                {"name": "_peerdb_synced_at", "data_type": "DateTime64(9)"},
+                {"name": "_peerdb_version", "data_type": "Int64"},
+            ],
+        },
+    },
+    {
+        "name": "table_2",
+        "resource_type": "source",
+        "package_name": "test",
+        "original_file_path": "models/sources.yml",
+        "unique_id": "source.test.default.table_2",
+        "source_name": settings.test_ch.database,
+        "tags": [],
+        "config": {"enabled": True},
+        "original_config": {
+            "name": "table_2",
+            "columns": [
+                {"name": "id", "data_type": "Int64"},
+                {"name": "longitude", "data_type": "Float64"},
+                {"name": "latitude", "data_type": "Float64"},
+                {"name": "_peerdb_is_deleted", "data_type": "Int8"},
+                {"name": "_peerdb_synced_at", "data_type": "DateTime64(9)"},
+                {"name": "_peerdb_version", "data_type": "Int64"},
+            ],
+        },
+    },
+    {
+        "name": "table_3",
+        "resource_type": "source",
+        "package_name": "test",
+        "original_file_path": "models/sources.yml",
+        "unique_id": "source.test.default.table_3",
+        "source_name": settings.test_ch.database,
+        "tags": [],
+        "config": {"enabled": True},
+        "original_config": {
+            "name": "table_3",
+            "columns": [
+                {"name": "id", "data_type": "Int64"},
+                {"name": "ts", "data_type": "DateTime64(6)"},
+                {"name": "_peerdb_is_deleted", "data_type": "Int8"},
+                {"name": "_peerdb_synced_at", "data_type": "DateTime64(9)"},
+                {"name": "_peerdb_version", "data_type": "Int64"},
+            ],
+        },
+    },
+]
 
-class TestProcessConfig(DBTest):
+
+class TestEmptyPeerDBConfig(DBTest):
     @pytest.fixture(scope="function")
     def pg_tables(self, pg_adapter: PGAdapter) -> Generator[List[Table], Any, None]:
-        table_names = ["table_1", "table_2", "table_3"]
+        for table_def in table_defs:
+            pg_adapter.create_table(*table_def)
 
-        for table_name in table_names:
-            quoted_table = PGTableIdentifier(table=table_name).to_string()
-            statement = f"""
-            create table if not exists {quoted_table} (
-                id bigint,
-                username varchar,
-                password varchar,
-                updated_at timestamp default now()
-            );
-            """
-
-            pg_adapter.create_table(table_name, statement)
-
+        table_names = [table_def[0] for table_def in table_defs]
         tables = [table for table in pg_adapter.list_tables() if table.name in table_names]
 
         yield tables
@@ -148,9 +175,9 @@ class TestProcessConfig(DBTest):
         for table_name in table_names:
             pg_adapter.drop_table(table_name)
 
-    def test_empty_config(self):
-        config = yaml.safe_load(empty_config_yaml) or {}
-        actual = process_config(config)
+    def test_func(self, pg_tables: List[Table]):
+        peerdb_config = {}
+        actual = process_config(peerdb_config, dbt_project_dir="/", generate_table_mappings=True)
         expected = {
             "mirrors": {},
             "peers": {},
@@ -161,22 +188,91 @@ class TestProcessConfig(DBTest):
 
         assert actual == expected
 
-    def test_mirrors_non_existent_table(self, pg_tables: List[Table]):
-        """
-        Test that an exception is raised if a mirror config has a source table that doesn't exist
-        in the source database.
-        """
-        config = yaml.safe_load(mirrors_non_existent_table_yaml) or {}
+
+class TestSourceMissingTable(DBTest):
+    @pytest.fixture(scope="function")
+    def pg_tables(self, pg_adapter: PGAdapter) -> Generator[List[Table], Any, None]:
+        for table_def in table_defs[:1]:
+            pg_adapter.create_table(*table_def)
+
+        table_names = [table_def[0] for table_def in table_defs[:1]]
+        tables = [table for table in pg_adapter.list_tables() if table.name in table_names]
+
+        yield tables
+
+        for table_name in table_names:
+            pg_adapter.drop_table(table_name)
+
+    @pytest.fixture(scope="function")
+    def list_resources(self, monkeypatch) -> None:
+        monkeypatch.setattr(
+            "package.peerdb.list_resources", lambda *args, **kwargs: list_resources__return_value
+        )
+
+    def test_func(self, pg_tables: List[Table], list_resources: None):
+        peerdb_config = yaml.safe_load(peerdb_yaml)
 
         with pytest.raises(Exception) as exc:
-            process_config(config)
+            process_config(peerdb_config, dbt_project_dir="/", generate_table_mappings=True)
 
-        assert str(exc.value) == "Source table 'public.non_existent_table' not found"
+        assert (
+            str(exc.value) == "Source table 'public.table_2' not found in database of peer 'source'"
+        )
 
-    def test_mirrors_existent_tables(self, pg_tables: List[Table]):
-        """Test that computed 'exclude' value is correct."""
-        config = yaml.safe_load(mirrors_existent_tables_yaml) or {}
-        actual = process_config(config)
+
+class TestDbtMissingTable(DBTest):
+    @pytest.fixture(scope="function")
+    def pg_tables(self, pg_adapter: PGAdapter) -> Generator[List[Table], Any, None]:
+        for table_def in table_defs:
+            pg_adapter.create_table(*table_def)
+
+        table_names = [table_def[0] for table_def in table_defs]
+        tables = [table for table in pg_adapter.list_tables() if table.name in table_names]
+
+        yield tables
+
+        for table_name in table_names:
+            pg_adapter.drop_table(table_name)
+
+    @pytest.fixture(scope="function")
+    def list_resources(self, monkeypatch) -> None:
+        monkeypatch.setattr(
+            "package.peerdb.list_resources",
+            lambda *args, **kwargs: list_resources__return_value[:1],
+        )
+
+    def test_func(self, pg_tables: List[Table], list_resources: None):
+        peerdb_config = yaml.safe_load(peerdb_yaml)
+
+        with pytest.raises(Exception) as exc:
+            process_config(peerdb_config, dbt_project_dir="/", generate_table_mappings=True)
+
+        assert str(exc.value) == "Destination table 'table_2' not found in dbt config"
+
+
+class TestOK(DBTest):
+    @pytest.fixture(scope="function")
+    def pg_tables(self, pg_adapter: PGAdapter) -> Generator[List[Table], Any, None]:
+        for table_def in table_defs:
+            pg_adapter.create_table(*table_def)
+
+        table_names = [table_def[0] for table_def in table_defs]
+        tables = [table for table in pg_adapter.list_tables() if table.name in table_names]
+
+        yield tables
+
+        for table_name in table_names:
+            pg_adapter.drop_table(table_name)
+
+    @pytest.fixture(scope="function")
+    def list_resources(self, monkeypatch) -> None:
+        monkeypatch.setattr(
+            "package.peerdb.list_resources", lambda *args, **kwargs: list_resources__return_value
+        )
+
+    def test_func(self, pg_tables: List[Table], list_resources: None):
+        peerdb_config = yaml.safe_load(peerdb_yaml)
+        actual = process_config(peerdb_config, dbt_project_dir="/", generate_table_mappings=True)
         expected = {
             "mirrors": {
                 "cdc_small": {
@@ -186,8 +282,8 @@ class TestProcessConfig(DBTest):
                         {
                             "source_table_identifier": "public.table_1",
                             "destination_table_identifier": "table_1",
-                            "exclude": [],
-                        },
+                            "exclude": ["age", "modified_at", "password"],
+                        }
                     ],
                     "do_initial_snapshot": False,
                     "resync": True,
@@ -200,12 +296,12 @@ class TestProcessConfig(DBTest):
                         {
                             "source_table_identifier": "public.table_2",
                             "destination_table_identifier": "table_2",
-                            "exclude": ["password", "updated_at"],
+                            "exclude": ["is_secret", "modified_at"],
                         },
                         {
                             "source_table_identifier": "public.table_3",
                             "destination_table_identifier": "table_3",
-                            "exclude": ["password", "updated_at"],
+                            "exclude": ["modified_at"],
                         },
                     ],
                     "do_initial_snapshot": False,
@@ -215,7 +311,6 @@ class TestProcessConfig(DBTest):
             },
             "peers": {
                 "source": {
-                    "name": "source",
                     "type": 3,
                     "postgres_config": {
                         "host": settings.test_pg.host,
@@ -224,9 +319,9 @@ class TestProcessConfig(DBTest):
                         "password": settings.test_pg.password,
                         "database": settings.test_pg.database,
                     },
+                    "name": "source",
                 },
                 "destination": {
-                    "name": "destination",
                     "type": 8,
                     "clickhouse_config": {
                         "host": settings.test_ch.host,
@@ -235,54 +330,9 @@ class TestProcessConfig(DBTest):
                         "password": settings.test_ch.password,
                         "database": settings.test_ch.database,
                     },
+                    "name": "destination",
                 },
             },
-            "publication_schemas": ["public"],
-            "publications": {},
-            "users": {},
-        }
-
-        assert actual == expected
-
-    def test_publications(self):
-        config = yaml.safe_load(publications_yaml) or {}
-        actual = process_config(config)
-        expected = {
-            "mirrors": {
-                "cdc_large": {
-                    "flow_job_name": "cdc_large",
-                    "publication_name": "publication_1",
-                    "source_name": "source",
-                    "destination_name": "destination",
-                    "table_mappings": [
-                        {
-                            "source_table_identifier": "public.table_1",
-                            "destination_table_identifier": "table_1",
-                        },
-                        {
-                            "source_table_identifier": "public.table_2",
-                            "destination_table_identifier": "table_2",
-                        },
-                    ],
-                    "do_initial_snapshot": False,
-                    "resync": True,
-                },
-                "cdc_small": {
-                    "flow_job_name": "cdc_small",
-                    "publication_name": "publication_2",
-                    "source_name": "source",
-                    "destination_name": "destination",
-                    "table_mappings": [
-                        {
-                            "source_table_identifier": "public.table_3",
-                            "destination_table_identifier": "table_3",
-                        }
-                    ],
-                    "do_initial_snapshot": False,
-                    "resync": False,
-                },
-            },
-            "peers": {},
             "publication_schemas": ["private", "public"],
             "publications": {
                 "publication_1": {
