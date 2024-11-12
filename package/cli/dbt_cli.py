@@ -6,7 +6,6 @@ from package.utils.dbt_utils import find_model_sql
 from package.utils.filesystem import find_up, get_file_name
 from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
-from typing import Optional
 
 import dbt.version
 import json
@@ -23,38 +22,6 @@ app.add_typer(dbt_app)
 @dbt_app.command(help="Print version.")
 def version():
     app.console.print(dbt.version.__version__)
-
-
-@dbt_app.command(help="Generate test fixtures.")
-def fixtures(
-    models: Optional[list[str]] = typer.Option(None, "-m", "--model", help="1 or more model names"),
-):
-    cwd = os.getcwd()
-    dbt_project_file = find_up(cwd, "dbt_project.yml")
-
-    if not dbt_project_file:
-        raise Exception(f"No dbt_project.yml found in {cwd} or higher")
-
-    project = Project.from_path(cwd)
-
-    if models:
-        patterns = [os.path.join("fixtures", f"{model}.py") for model in models]
-    else:
-        patterns = [os.path.join("fixtures", "*.py")]
-
-    script_paths = [
-        file for pattern in patterns for file in project.dbt_tests_directory.glob(pattern)
-    ]
-
-    for script_path in script_paths:
-        try:
-            cmd = ["python", script_path]
-            subprocess.check_output(cmd, cwd=project.dbt_directory)
-            app.console.print(f"Generated test fixtures from {script_path}", style="green")
-        except subprocess.CalledProcessError as exc:
-            output = exc.output.decode().strip()
-            app.console.print(output, style="red")
-            raise exc
 
 
 @dbt_app.command(help="Generate model YAML.")
