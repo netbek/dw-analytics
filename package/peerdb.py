@@ -1,13 +1,20 @@
-from package.config.constants import DBT_LOADER_PEERDB, PEERDB_DESTINATION_PEER, PEERDB_SOURCE_PEER
+from package.config.constants import PEERDB_SOURCE_PEER
 from package.database import CHAdapter, PGAdapter
 from package.types import CHSettings, CHTableIdentifier, PGSettings, PGTableIdentifier
+from package.utils.dbt_utils import list_resources
+from pathlib import Path
+from typing import Optional
 
 import copy
 import httpx
 import pydash
 
 
-def process_config(config: dict) -> dict:
+def process_config(
+    config: dict,
+    dbt_project_dir: Optional[Path | str] = None,
+    generate_table_mappings: Optional[bool] = False,
+) -> dict:
     result = copy.deepcopy(config)
 
     if "users" not in result:
@@ -36,18 +43,27 @@ def process_config(config: dict) -> dict:
         for key, value in result["mirrors"].items():
             result["mirrors"][key]["flow_job_name"] = key
 
-        source_peer = result["peers"].get(PEERDB_SOURCE_PEER)
+        if generate_table_mappings and result["mirrors"]:
+            if dbt_project_dir is None:
+                raise Exception("'dbt_project_dir' is required")
 
-        if result["mirrors"] and source_peer:
+            source_peer = result["peers"].get(PEERDB_SOURCE_PEER)
+
+            if not source_peer:
+                raise Exception(f"Peer '{PEERDB_SOURCE_PEER}' not found in PeerDB config")
+
             pg_settings = to_pg_settings(source_peer["postgres_config"])
-            db = PGAdapter(pg_settings)
-            source_tables = db.list_tables()
+            source_adapter = PGAdapter(pg_settings)
+            source_tables = source_adapter.list_tables()
+
+            dbt_resources = list_resources(dbt_project_dir, resource_type="source")
 
             # Validate the table mappings and compute the excluded columns
             for mirror in result["mirrors"].values():
                 computed_table_mappings = []
 
                 for table_mapping in mirror["table_mappings"]:
+                    # Find the source table in the source database
                     source_table_identifier = PGTableIdentifier.from_string(
                         table_mapping["source_table_identifier"]
                     )
@@ -61,36 +77,43 @@ def process_config(config: dict) -> dict:
 
                     if source_table is None:
                         raise Exception(
-                            f"Source table '{table_mapping["source_table_identifier"]}' not found"
+                            f"Source table '{table_mapping["source_table_identifier"]}' not found in database of peer '{PEERDB_SOURCE_PEER}'"
                         )
 
-                    include = table_mapping.get("include", None)
-                    exclude = table_mapping.get("exclude", None)
-                    computed_exclude = []
-
-                    if include is not None and exclude is not None:
-                        raise Exception(
-                            "Table mapping may contain either 'include' or 'exclude', not both"
-                        )
-                    elif include is not None:
-                        columns = [column.name for column in source_table.columns]
-                        computed_exclude = pydash.difference(columns, include)
-                    elif exclude is not None:
-                        columns = [column.name for column in source_table.columns]
-                        computed_exclude = pydash.intersection(columns, exclude)
-                    else:
-                        computed_exclude = []
-
-                    computed_exclude = sorted(computed_exclude)
-                    computed_table_mappings.append(
-                        {
-                            "source_table_identifier": table_mapping["source_table_identifier"],
-                            "destination_table_identifier": table_mapping[
-                                "destination_table_identifier"
-                            ],
-                            "exclude": computed_exclude,
-                        }
+                    # Find the destination table in the dbt sources config
+                    destination_table_identifier = CHTableIdentifier.from_string(
+                        table_mapping["destination_table_identifier"]
                     )
+                    dbt_resource = pydash.find(
+                        dbt_resources,
+                        lambda resource: resource["name"] == destination_table_identifier.table,
+                    )
+
+                    if dbt_resource is None:
+                        raise Exception(
+                            f"Destination table '{table_mapping["destination_table_identifier"]}' not found in dbt config"
+                        )
+
+                    # Compute the excluded columns (difference between source and destination tables)
+                    source_columns = [str(column.name) for column in source_table.columns]
+                    dbt_resource_columns = [
+                        column["name"] for column in dbt_resource["original_config"]["columns"]
+                    ]
+                    computed_exclude = pydash.difference(source_columns, dbt_resource_columns)
+                    computed_exclude = sorted(computed_exclude)
+
+                    # Compute the table mapping
+                    computed_table_mapping = pydash.assign(
+                        pydash.pick(
+                            table_mapping,
+                            [
+                                "source_table_identifier",
+                                "destination_table_identifier",
+                            ],
+                        ),
+                        {"exclude": computed_exclude},
+                    )
+                    computed_table_mappings.append(computed_table_mapping)
 
                 mirror["table_mappings"] = computed_table_mappings
     else:
@@ -127,73 +150,6 @@ def process_node(node: dict) -> dict:
         node = pydash.omit(node, *default_keys)
 
     return node
-
-
-def add_columns_from_dbt(peerdb_config: dict, dbt_sources_config: dict) -> dict:
-    result = copy.deepcopy(peerdb_config)
-
-    if "peers" not in result:
-        raise Exception("Peers not found in PeerDB config")
-
-    peerdb_source_peer = result["peers"].get(PEERDB_SOURCE_PEER)
-
-    if not peerdb_source_peer:
-        raise Exception(f"Peer '{PEERDB_SOURCE_PEER}' not found in PeerDB config")
-
-    peerdb_destination_peer = result["peers"].get(PEERDB_DESTINATION_PEER)
-
-    if not peerdb_destination_peer:
-        raise Exception(f"Peer '{PEERDB_DESTINATION_PEER}' not found in PeerDB config")
-
-    database = peerdb_destination_peer["clickhouse_config"]["database"]
-    dbt_source = pydash.find(
-        dbt_sources_config["sources"],
-        lambda source: source["name"] == database and source["loader"] == DBT_LOADER_PEERDB,
-    )
-
-    if not dbt_source:
-        raise Exception(f"Destination '{database}' not found in dbt config")
-
-    pg_settings = to_pg_settings(peerdb_source_peer["postgres_config"])
-    source_adapter = PGAdapter(pg_settings)
-    source_tables = source_adapter.list_tables()
-
-    for mirror in result["mirrors"].values():
-        for table_mapping in mirror["table_mappings"]:
-            source_table_identifier = PGTableIdentifier.from_string(
-                table_mapping["source_table_identifier"]
-            )
-            source_table = pydash.find(
-                source_tables,
-                lambda table: (
-                    table.schema == source_table_identifier.schema_
-                    and table.name == source_table_identifier.table
-                ),
-            )
-
-            if source_table is None:
-                raise Exception(
-                    f"Table '{table_mapping["source_table_identifier"]}' not found in database of peer '{PEERDB_SOURCE_PEER}'"
-                )
-
-            destination_table_identifier = CHTableIdentifier.from_string(
-                table_mapping["destination_table_identifier"]
-            )
-            dbt_table = pydash.find(
-                dbt_source["tables"],
-                lambda table: table["name"] == destination_table_identifier.table,
-            )
-
-            if not dbt_table:
-                raise Exception(
-                    f"Destination table '{table_mapping["destination_table_identifier"]}' not found in dbt config"
-                )
-
-            source_columns = [column.name for column in source_table.columns]
-            dbt_columns = [column["name"] for column in dbt_table["columns"]]
-            table_mapping["exclude"] = pydash.difference(source_columns, dbt_columns)
-
-    return result
 
 
 def to_ch_settings(clickhouse_config: dict) -> CHSettings:
