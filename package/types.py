@@ -43,12 +43,6 @@ class DbtSettings(BaseSettings):
 class PeerDBSettings(BaseSettings):
     config: dict
 
-    @property
-    def processed_config(self) -> dict:
-        from package.peerdb import process_config
-
-        return process_config(self.config)
-
 
 class PrefectSettings(BaseSettings):
     config: dict
