@@ -49,13 +49,13 @@ def main(args):
     try:
         output = subprocess.check_output(cmd, cwd=cwd).decode().strip()
         print(output)
-    except subprocess.CalledProcessError as e:
+    except subprocess.CalledProcessError as exc:
         if command == "lint":
             # sqlfluff raises an error if the SQL file has violations
-            output = e.output.decode().strip()
+            output = exc.output.decode().strip()
             print(output)
         else:
-            raise e
+            raise exc
 
 
 if __name__ == "__main__":
