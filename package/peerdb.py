@@ -62,7 +62,7 @@ def process_config(
             source_adapter = PGAdapter(pg_settings)
             source_tables = source_adapter.list_tables()
 
-            dbt_sources = list_resources(dbt_project_dir, resource_type=DbtResourceType.SOURCE)
+            dbt_sources = list_resources(dbt_project_dir, resource_types=[DbtResourceType.SOURCE])
 
             # Validate the table mappings and compute the excluded columns
             for mirror in result["mirrors"].values():

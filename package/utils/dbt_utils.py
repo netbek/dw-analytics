@@ -25,19 +25,22 @@ def find_model_sql(project: Project, model: str) -> str | None:
         return None
 
 
-def list_resources(project_dir: Path | str, resource_type: Optional[str] = None) -> List[DbtSource]:
-    if resource_type is None:
-        resource_type = DbtResourceType.SOURCE
+def list_resources(
+    project_dir: Path | str, resource_types: Optional[List[DbtResourceType]] = None
+) -> List[DbtSource]:
+    if resource_types is None:
+        resource_types = [DbtResourceType.SOURCE]
 
-    if resource_type != DbtResourceType.SOURCE:
-        raise ValueError(f"'resource_type' must be: {DbtResourceType.SOURCE}")
+    for resource_type in resource_types:
+        if resource_type != DbtResourceType.SOURCE:
+            raise ValueError(f"'resource_types' must be any of: {DbtResourceType.SOURCE}")
 
     resource_dicts = []
 
     cmd = dbt_list_command(
         profiles_dir=DBT_PROFILES_DIR,
         project_dir=project_dir,
-        resource_type=resource_type,
+        resource_types=resource_types,
         output="json",
     )
     stdout = subprocess.check_output(cmd, text=True, cwd=project_dir)
@@ -94,7 +97,7 @@ def dbt_list_command_args(
     exclude: Optional[str] = None,
     models: Optional[str] = None,
     output: Optional[str] = None,
-    resource_type: Optional[str] = None,
+    resource_types: Optional[List[DbtResourceType]] = None,
     select: Optional[str] = None,
     selector: Optional[str] = None,
     target: Optional[str] = None,
@@ -121,8 +124,9 @@ def dbt_list_command_args(
     if output:
         args.extend(["--output", output])
 
-    if resource_type:
-        args.extend(["--resource-type", resource_type])
+    if resource_types:
+        for resource_type in resource_types:
+            args.extend(["--resource-type", resource_type])
 
     if select:
         args.extend(["--select", select])
@@ -145,7 +149,7 @@ def dbt_list_command(
     exclude: Optional[str] = None,
     models: Optional[str] = None,
     output: Optional[str] = None,
-    resource_type: Optional[str] = None,
+    resource_types: Optional[List[DbtResourceType]] = None,
     select: Optional[str] = None,
     selector: Optional[str] = None,
     target: Optional[str] = None,
@@ -157,7 +161,7 @@ def dbt_list_command(
             exclude=exclude,
             models=models,
             output=output,
-            resource_type=resource_type,
+            resource_types=resource_types,
             select=select,
             selector=selector,
             target=target,
