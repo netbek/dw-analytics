@@ -25,7 +25,7 @@ def find_model_sql(project: Project, model: str) -> str | None:
 
 
 def list_resources(project_dir: Path | str, resource_type: Optional[str] = None) -> List[dict]:
-    result = []
+    resources = []
 
     cmd = dbt_list_command(
         profiles_dir=DBT_PROFILES_DIR,
@@ -33,48 +33,47 @@ def list_resources(project_dir: Path | str, resource_type: Optional[str] = None)
         resource_type=resource_type,
         output="json",
     )
-    stdout = run_command(cmd)
+    stdout = subprocess.check_output(cmd, text=True, cwd=project_dir)
 
     for line in stdout.splitlines():
         try:
-            data = json.loads(line)
+            resource = json.loads(line)
         except json.decoder.JSONDecodeError:
             continue
 
-        result.append(data)
+        resources.append(resource)
 
-    # Add original config not returned by `dbt list` command
-    if resource_type == "source":
-        file_paths = pydash.uniq([resource["original_file_path"] for resource in result])
-        files = {
+    source_file_paths = pydash.uniq(
+        [
+            resource["original_file_path"]
+            for resource in resources
+            if resource["resource_type"] == "source"
+        ]
+    )
+
+    if source_file_paths:
+        source_files = {
             file_path: safe_load_file(os.path.join(project_dir, file_path))
-            for file_path in file_paths
+            for file_path in source_file_paths
         }
 
-        for resource in result:
-            original_config = None
-            data = files[resource["original_file_path"]]
+        for resource in resources:
+            if resource["resource_type"] == "source":
+                original_config = None
+                data = source_files[resource["original_file_path"]]
 
-            for source in data["sources"]:
-                if source["name"] == resource["source_name"]:
-                    for table in source["tables"]:
-                        if table["name"] == resource["name"]:
-                            original_config = table
-                            break
-                if original_config:
-                    break
+                for source in data["sources"]:
+                    if source["name"] == resource["source_name"]:
+                        for table in source["tables"]:
+                            if table["name"] == resource["name"]:
+                                original_config = table
+                                break
+                    if original_config:
+                        break
 
-            resource["original_config"] = original_config
+                resource["original_config"] = original_config
 
-    return result
-
-
-def run_command(command):
-    try:
-        result = subprocess.run(command, text=True, capture_output=True, check=True)
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        return f"Command failed with error:\n{e.stderr}"
+    return resources
 
 
 def dbt_list_command_args(
@@ -155,39 +154,6 @@ def dbt_list_command(
     )
 
     return cmd
-
-
-async def dbt_list(
-    profiles_dir: str,
-    project_dir: str,
-    exclude: Optional[str] = None,
-    models: Optional[str] = None,
-    output: Optional[str] = None,
-    resource_type: Optional[str] = None,
-    select: Optional[str] = None,
-    selector: Optional[str] = None,
-    target: Optional[str] = None,
-    vars: Optional[dict[str, Any]] = None,
-) -> str:
-    cmd = dbt_list_command(
-        profiles_dir=profiles_dir,
-        project_dir=project_dir,
-        exclude=exclude,
-        models=models,
-        output=output,
-        resource_type=resource_type,
-        select=select,
-        selector=selector,
-        target=target,
-        vars=vars,
-    )
-
-    async with ShellOperation(commands=[" ".join(cmd)], working_dir=project_dir) as op:
-        process = await op.trigger()
-        await process.wait_for_completion()
-        result = await process.fetch_result()
-
-    return result
 
 
 def dbt_run_command_args(
