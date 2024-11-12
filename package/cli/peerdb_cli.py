@@ -1,6 +1,6 @@
 from package.cli.root import app
 from package.config.constants import PEERDB_DESTINATION_PEER, PEERDB_SOURCE_PEER
-from package.peerdb import DestinationPeer, PeerDBClient, process_config, SourcePeer
+from package.peerdb import DestinationPeer, PeerDBClient, prepare_config, SourcePeer
 from package.project import Project
 from package.types import PGTableIdentifier
 from package.utils.typer_utils import typer_async
@@ -15,10 +15,10 @@ app.add_typer(peerdb_app)
 @typer_async
 async def install(project_name: str) -> None:
     project = Project.from_name(project_name)
-    peerdb_config = process_config(
+    peerdb_config = prepare_config(
         project.settings.peerdb.config,
         dbt_project_dir=project.dbt_directory,
-        generate_table_mappings=True,
+        generate_exclude=True,
     )
     peerdb_client = PeerDBClient(project.settings.peerdb.api_url)
     source_peer = SourcePeer(project.settings.source_db)
@@ -96,10 +96,10 @@ async def install(project_name: str) -> None:
 @typer_async
 async def uninstall(project_name: str) -> None:
     project = Project.from_name(project_name)
-    peerdb_config = process_config(
+    peerdb_config = prepare_config(
         project.settings.peerdb.config,
         dbt_project_dir=project.dbt_directory,
-        generate_table_mappings=False,
+        generate_exclude=False,
     )
     peerdb_client = PeerDBClient(project.settings.peerdb.api_url)
     source_peer = SourcePeer(project.settings.source_db)

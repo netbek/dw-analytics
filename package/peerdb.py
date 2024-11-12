@@ -16,10 +16,10 @@ import httpx
 import pydash
 
 
-def process_config(
+def prepare_config(
     config: dict,
     dbt_project_dir: Optional[Path | str] = None,
-    generate_table_mappings: Optional[bool] = False,
+    generate_exclude: Optional[bool] = False,
 ) -> dict:
     result = copy.deepcopy(config)
 
@@ -49,7 +49,7 @@ def process_config(
         for key, value in result["mirrors"].items():
             result["mirrors"][key]["flow_job_name"] = key
 
-        if generate_table_mappings and result["mirrors"]:
+        if generate_exclude and result["mirrors"]:
             if dbt_project_dir is None:
                 raise Exception("'dbt_project_dir' is required")
 

@@ -1,6 +1,6 @@
 from package.config.settings import get_settings
 from package.database import PGAdapter
-from package.peerdb import process_config
+from package.peerdb import prepare_config
 from package.tests.fixtures import DBTest
 from package.types import DbtSource
 from sqlmodel import Table
@@ -179,7 +179,7 @@ class TestEmptyPeerDBConfig(DBTest):
 
     def test_func(self, pg_tables: List[Table]):
         peerdb_config = {}
-        actual = process_config(peerdb_config, dbt_project_dir="/", generate_table_mappings=True)
+        actual = prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
         expected = {
             "mirrors": {},
             "peers": {},
@@ -191,7 +191,7 @@ class TestEmptyPeerDBConfig(DBTest):
         assert actual == expected
 
 
-class TestSourceMissingTable(DBTest):
+class TestSourcePeerMissingTable(DBTest):
     @pytest.fixture(scope="function")
     def pg_tables(self, pg_adapter: PGAdapter) -> Generator[List[Table], Any, None]:
         for table_def in table_defs[:1]:
@@ -215,7 +215,7 @@ class TestSourceMissingTable(DBTest):
         peerdb_config = yaml.safe_load(peerdb_yaml)
 
         with pytest.raises(Exception) as exc:
-            process_config(peerdb_config, dbt_project_dir="/", generate_table_mappings=True)
+            prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
 
         assert (
             str(exc.value) == "Source table 'public.table_2' not found in database of peer 'source'"
@@ -247,7 +247,7 @@ class TestDbtMissingTable(DBTest):
         peerdb_config = yaml.safe_load(peerdb_yaml)
 
         with pytest.raises(Exception) as exc:
-            process_config(peerdb_config, dbt_project_dir="/", generate_table_mappings=True)
+            prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
 
         assert str(exc.value) == "Destination table 'table_2' not found in dbt config"
 
@@ -274,7 +274,7 @@ class TestOK(DBTest):
 
     def test_func(self, pg_tables: List[Table], list_resources: None):
         peerdb_config = yaml.safe_load(peerdb_yaml)
-        actual = process_config(peerdb_config, dbt_project_dir="/", generate_table_mappings=True)
+        actual = prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
         expected = {
             "mirrors": {
                 "cdc_small": {
