@@ -224,8 +224,24 @@ class BaseAdapter(ABC):
     def has_user(self, username: str) -> bool:
         pass
 
+    @overload
     @abstractmethod
-    def create_user(self, username: str, password: str, replace: Optional[bool] = False) -> None:
+    def create_user(
+        self, username: str, password: str, replace: Optional[bool] = False
+    ) -> None: ...
+
+    @overload
+    @abstractmethod
+    def create_user(
+        self,
+        username: str,
+        password: str,
+        options: Optional[dict] = None,
+        replace: Optional[bool] = False,
+    ) -> None: ...
+
+    @abstractmethod
+    def create_user(self, *args, **kwargs) -> None:
         pass
 
     @abstractmethod
