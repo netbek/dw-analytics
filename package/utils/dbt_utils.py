@@ -1,5 +1,4 @@
 from package.config.constants import DBT_PROFILES_DIR
-from package.project import Project
 from package.types import DbtModel, DbtResourceType, DbtSource
 from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
@@ -20,18 +19,19 @@ RESOURCE_TYPE_TO_CLASS_MAP = {
 }
 
 
-def find_model_sql(project: Project, model: str) -> str | None:
-    paths = list(project.dbt_directory.glob(os.path.join("models", "**", f"{model}.sql")))
+def get_resource(project_dir: Path | str, name: str) -> DbtModel | DbtSource | None:
+    resources = list_resources(project_dir, select=name)
 
-    if paths:
-        # TODO Raise exception if multiple matches
-        return paths[0]
-    else:
+    if not resources:
         return None
+
+    return resources[0]
 
 
 def list_resources(
-    project_dir: Path | str, resource_types: Optional[List[DbtResourceType]] = None
+    project_dir: Path | str,
+    resource_types: Optional[List[DbtResourceType]] = None,
+    select: Optional[str] = None,
 ) -> List[DbtModel | DbtSource]:
     valid_resource_types = RESOURCE_TYPE_TO_CLASS_MAP.keys()
 
@@ -48,6 +48,7 @@ def list_resources(
         profiles_dir=DBT_PROFILES_DIR,
         project_dir=project_dir,
         resource_types=resource_types,
+        select=select,
         output="json",
     )
     stdout = subprocess.check_output(cmd, text=True, cwd=project_dir)
