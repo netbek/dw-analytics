@@ -105,37 +105,44 @@ def resolve_resource_path(project_dir: str, resource: dict) -> str | None:
 
 def dbt_list_command(
     project_dir: Path | str,
-    fail_fast: Optional[bool] = True,
-    use_colors: Optional[bool] = False,
+    debug: Optional[bool] = False,
     exclude: Optional[str] = None,
+    fail_fast: Optional[bool] = True,
     models: Optional[str] = None,
     output: Optional[str] = None,
+    quiet: Optional[bool] = False,
     resource_types: Optional[List[DbtResourceType]] = None,
     select: Optional[str] = None,
     selector: Optional[str] = None,
     target: Optional[str] = None,
+    use_colors: Optional[bool] = False,
     vars: Optional[dict[str, Any]] = None,
 ) -> list[str]:
     cmd = ["dbt", "list", "--profiles-dir", DBT_PROFILES_DIR, "--project-dir", str(project_dir)]
+
+    if debug:
+        cmd.extend(["--debug"])
+    else:
+        cmd.extend(["--no-debug"])
+
+    if exclude:
+        cmd.extend(["--exclude", exclude])
 
     if fail_fast:
         cmd.extend(["--fail-fast"])
     else:
         cmd.extend(["--no-fail-fast"])
 
-    if use_colors:
-        cmd.extend(["--use-colors"])
-    else:
-        cmd.extend(["--no-use-colors"])
-
-    if exclude:
-        cmd.extend(["--exclude", exclude])
-
     if models:
         cmd.extend(["--models", models])
 
     if output:
         cmd.extend(["--output", output])
+
+    if quiet:
+        cmd.extend(["--quiet"])
+    else:
+        cmd.extend(["--no-quiet"])
 
     if resource_types:
         for resource_type in resource_types:
@@ -150,44 +157,90 @@ def dbt_list_command(
     if target:
         cmd.extend(["--target", target])
 
+    if use_colors:
+        cmd.extend(["--use-colors"])
+    else:
+        cmd.extend(["--no-use-colors"])
+
     if vars:
         cmd.extend(["--vars", f"'{json.dumps(vars)}'"])
 
     return cmd
 
 
-def dbt_run_command(
-    project_dir: Path | str,
-    fail_fast: Optional[bool] = True,
-    use_colors: Optional[bool] = False,
-    full_refresh: Optional[bool] = False,
+def dbt_list_sync(
+    project_dir: str,
+    debug: Optional[bool] = False,
     exclude: Optional[str] = None,
+    fail_fast: Optional[bool] = True,
     models: Optional[str] = None,
+    output: Optional[str] = None,
+    quiet: Optional[bool] = False,
+    resource_types: Optional[List[DbtResourceType]] = None,
     select: Optional[str] = None,
     selector: Optional[str] = None,
     target: Optional[str] = None,
+    use_colors: Optional[bool] = False,
+    vars: Optional[dict[str, Any]] = None,
+) -> dbtRunnerResult:
+    cmd = dbt_list_command(
+        project_dir=project_dir,
+        debug=debug,
+        exclude=exclude,
+        fail_fast=fail_fast,
+        models=models,
+        output=output,
+        quiet=quiet,
+        resource_types=resource_types,
+        select=select,
+        selector=selector,
+        target=target,
+        use_colors=use_colors,
+        vars=vars,
+    )
+
+    return dbtRunner().invoke(cmd[1:])
+
+
+def dbt_run_command(
+    project_dir: Path | str,
+    debug: Optional[bool] = False,
+    exclude: Optional[str] = None,
+    fail_fast: Optional[bool] = True,
+    full_refresh: Optional[bool] = False,
+    models: Optional[str] = None,
+    quiet: Optional[bool] = False,
+    select: Optional[str] = None,
+    selector: Optional[str] = None,
+    target: Optional[str] = None,
+    use_colors: Optional[bool] = False,
     vars: Optional[dict[str, Any]] = None,
 ) -> list[str]:
     cmd = ["dbt", "run", "--profiles-dir", DBT_PROFILES_DIR, "--project-dir", str(project_dir)]
+
+    if debug:
+        cmd.extend(["--debug"])
+    else:
+        cmd.extend(["--no-debug"])
+
+    if exclude:
+        cmd.extend(["--exclude", exclude])
 
     if fail_fast:
         cmd.extend(["--fail-fast"])
     else:
         cmd.extend(["--no-fail-fast"])
 
-    if use_colors:
-        cmd.extend(["--use-colors"])
-    else:
-        cmd.extend(["--no-use-colors"])
-
     if full_refresh:
         cmd.extend(["--full-refresh"])
 
-    if exclude:
-        cmd.extend(["--exclude", exclude])
-
     if models:
         cmd.extend(["--models", models])
+
+    if quiet:
+        cmd.extend(["--quiet"])
+    else:
+        cmd.extend(["--no-quiet"])
 
     if select:
         cmd.extend(["--select", select])
@@ -198,30 +251,43 @@ def dbt_run_command(
     if target:
         cmd.extend(["--target", target])
 
+    if use_colors:
+        cmd.extend(["--use-colors"])
+    else:
+        cmd.extend(["--no-use-colors"])
+
     if vars:
         cmd.extend(["--vars", f"'{json.dumps(vars)}'"])
 
     return cmd
 
 
-async def dbt_run(
+async def dbt_run_async(
     project_dir: str,
-    full_refresh: Optional[bool] = False,
+    debug: Optional[bool] = False,
     exclude: Optional[str] = None,
+    fail_fast: Optional[bool] = True,
+    full_refresh: Optional[bool] = False,
     models: Optional[str] = None,
+    quiet: Optional[bool] = False,
     select: Optional[str] = None,
     selector: Optional[str] = None,
     target: Optional[str] = None,
+    use_colors: Optional[bool] = False,
     vars: Optional[dict[str, Any]] = None,
 ) -> str:
     cmd = dbt_run_command(
         project_dir=project_dir,
+        debug=debug,
+        fail_fast=fail_fast,
         full_refresh=full_refresh,
         exclude=exclude,
         models=models,
+        quiet=quiet,
         select=select,
         selector=selector,
         target=target,
+        use_colors=use_colors,
         vars=vars,
     )
 
@@ -233,24 +299,32 @@ async def dbt_run(
     return result
 
 
-def invoke_dbt_run(
+def dbt_run_sync(
     project_dir: str,
-    full_refresh: Optional[bool] = False,
+    debug: Optional[bool] = False,
     exclude: Optional[str] = None,
+    fail_fast: Optional[bool] = True,
+    full_refresh: Optional[bool] = False,
     models: Optional[str] = None,
+    quiet: Optional[bool] = False,
     select: Optional[str] = None,
     selector: Optional[str] = None,
     target: Optional[str] = None,
+    use_colors: Optional[bool] = False,
     vars: Optional[dict[str, Any]] = None,
 ) -> dbtRunnerResult:
     cmd = dbt_run_command(
         project_dir=project_dir,
+        debug=debug,
+        fail_fast=fail_fast,
         full_refresh=full_refresh,
         exclude=exclude,
         models=models,
+        quiet=quiet,
         select=select,
         selector=selector,
         target=target,
+        use_colors=use_colors,
         vars=vars,
     )
 
@@ -259,22 +333,29 @@ def invoke_dbt_run(
 
 def dbt_seed_command(
     project_dir: Path | str,
+    debug: Optional[bool] = False,
     fail_fast: Optional[bool] = True,
-    use_colors: Optional[bool] = False,
+    quiet: Optional[bool] = False,
     select: Optional[str] = None,
     target: Optional[str] = None,
+    use_colors: Optional[bool] = False,
 ) -> list[str]:
     cmd = ["dbt", "seed", "--profiles-dir", DBT_PROFILES_DIR, "--project-dir", str(project_dir)]
+
+    if debug:
+        cmd.extend(["--debug"])
+    else:
+        cmd.extend(["--no-debug"])
 
     if fail_fast:
         cmd.extend(["--fail-fast"])
     else:
         cmd.extend(["--no-fail-fast"])
 
-    if use_colors:
-        cmd.extend(["--use-colors"])
+    if quiet:
+        cmd.extend(["--quiet"])
     else:
-        cmd.extend(["--no-use-colors"])
+        cmd.extend(["--no-quiet"])
 
     if select:
         cmd.extend(["--select", select])
@@ -282,18 +363,31 @@ def dbt_seed_command(
     if target:
         cmd.extend(["--target", target])
 
+    if use_colors:
+        cmd.extend(["--use-colors"])
+    else:
+        cmd.extend(["--no-use-colors"])
+
     return cmd
 
 
-def invoke_dbt_seed(
+def dbt_seed_sync(
     project_dir: str,
+    debug: Optional[bool] = False,
+    fail_fast: Optional[bool] = True,
+    quiet: Optional[bool] = False,
     select: Optional[str] = None,
     target: Optional[str] = None,
+    use_colors: Optional[bool] = False,
 ) -> dbtRunnerResult:
     cmd = dbt_seed_command(
         project_dir=project_dir,
+        debug=debug,
+        fail_fast=fail_fast,
+        quiet=quiet,
         select=select,
         target=target,
+        use_colors=use_colors,
     )
 
     return dbtRunner().invoke(cmd[1:])
