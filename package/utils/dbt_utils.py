@@ -33,14 +33,14 @@ def find_model_sql(project: Project, model: str) -> str | None:
 def list_resources(
     project_dir: Path | str, resource_types: Optional[List[DbtResourceType]] = None
 ) -> List[DbtModel | DbtSource]:
+    valid_resource_types = RESOURCE_TYPE_TO_CLASS_MAP.keys()
+
     if resource_types is None:
-        resource_types = [DbtResourceType.SOURCE]
+        resource_types = valid_resource_types
 
     for resource_type in resource_types:
-        if resource_type not in RESOURCE_TYPE_TO_CLASS_MAP.keys():
-            raise ValueError(
-                f"'resource_types' must be any of: {", ".join(RESOURCE_TYPE_TO_CLASS_MAP.keys())}"
-            )
+        if resource_type not in valid_resource_types:
+            raise ValueError(f"'resource_types' must be any of: {", ".join(valid_resource_types)}")
 
     resource_dicts = []
 
