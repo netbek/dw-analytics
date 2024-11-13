@@ -171,7 +171,7 @@ class CHAdapter(BaseAdapter):
         uri = self.create_uri(**self.settings.model_dump())
         engine = create_engine(uri, echo=False)
         metadata = MetaData(schema=database)
-        metadata.reflect(bind=engine)
+        metadata.reflect(bind=engine, views=True)
 
         return metadata.tables.get(f"{database}.{table}")
 
@@ -197,7 +197,7 @@ class CHAdapter(BaseAdapter):
         uri = self.create_uri(**self.settings.model_dump())
         engine = create_engine(uri, echo=False)
         metadata = MetaData(schema=database)
-        metadata.reflect(bind=engine)
+        metadata.reflect(bind=engine, views=True)
 
         return pydash.sort_by(list(metadata.tables.values()), lambda table: table.name)
 

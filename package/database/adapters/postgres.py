@@ -194,7 +194,7 @@ class PGAdapter(BaseAdapter):
         )
         engine = create_engine(uri, echo=False)
         metadata = MetaData(schema=schema)
-        metadata.reflect(bind=engine)
+        metadata.reflect(bind=engine, views=True)
 
         return metadata.tables.get(f"{schema}.{table}")
 
@@ -281,7 +281,7 @@ class PGAdapter(BaseAdapter):
         )
         engine = create_engine(uri, echo=False)
         metadata = MetaData(schema=schema)
-        metadata.reflect(bind=engine)
+        metadata.reflect(bind=engine, views=True)
 
         return pydash.sort_by(list(metadata.tables.values()), lambda table: table.name)
 
