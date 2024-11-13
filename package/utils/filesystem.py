@@ -4,6 +4,12 @@ import os
 import shutil
 
 
+def get_file_extension(path: str) -> str | None:
+    name, ext = os.path.splitext(path)
+    if ext:
+        return ext
+
+
 def get_file_name(path: str) -> str:
     basename = os.path.basename(path)
     name, ext = os.path.splitext(basename)
