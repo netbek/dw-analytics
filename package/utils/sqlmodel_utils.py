@@ -224,7 +224,7 @@ def create_model_code(db_settings: CHSettings, database: str, dbt_resource: DbtS
     """Create the code of a SQLModel class from a table schema."""
     ch_adapter = CHAdapter(db_settings)
     table_name = dbt_resource.name
-    model_name = dbt_resource.original_config.meta.class_name
+    model_name = dbt_resource.original_config.meta.python_class
     sa_table = ch_adapter.get_table(table_name, database=database)
     statement = ch_adapter.get_create_table_statement(table_name, database=database)
     parsed_statement = parse_create_table_statement(statement)
@@ -320,7 +320,7 @@ def create_model_code(db_settings: CHSettings, database: str, dbt_resource: DbtS
 def create_model_file(
     db_settings: CHSettings, database: str, dbt_resource: DbtSource, directory: str
 ) -> None:
-    model_name = dbt_resource.original_config.meta.class_name
+    model_name = dbt_resource.original_config.meta.python_class
     filename = create_class_filename(model_name)
     file_path = os.path.join(directory, f"{filename}.py")
     code = create_model_code(db_settings, database, dbt_resource)
@@ -331,7 +331,7 @@ def create_model_file(
 
 def create_factory_code(dbt_resource: DbtSource, random_seed: int = 0) -> str:
     """Create the code of a Pydantic model factory."""
-    model_name = dbt_resource.original_config.meta.class_name
+    model_name = dbt_resource.original_config.meta.python_class
     model_filename = create_class_filename(model_name)
     factory_name = create_factory_name(model_name)
 
@@ -357,7 +357,7 @@ def create_factory_code(dbt_resource: DbtSource, random_seed: int = 0) -> str:
 
 
 def create_factory_file(dbt_resource: DbtSource, directory: str) -> None:
-    model_name = dbt_resource.original_config.meta.class_name
+    model_name = dbt_resource.original_config.meta.python_class
     factory_name = create_factory_name(model_name)
     filename = create_class_filename(factory_name)
     file_path = os.path.join(directory, f"{filename}.py")
@@ -373,7 +373,7 @@ def create_init_file(dbt_resources: List[DbtSource], directory: str) -> None:
     imports = []
 
     for dbt_resource in dbt_resources:
-        class_name = dbt_resource.original_config.meta.class_name
+        class_name = dbt_resource.original_config.meta.python_class
 
         model_filename = create_class_filename(class_name)
         all.append(class_name)

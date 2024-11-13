@@ -140,7 +140,7 @@ class DbtColumn(BaseModel):
 
 
 class DbtSourceTableMeta(BaseModel):
-    class_name: str
+    python_class: str
 
 
 class DbtSourceOriginalConfig(BaseModel):
