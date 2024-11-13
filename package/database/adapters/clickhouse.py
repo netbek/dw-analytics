@@ -60,9 +60,12 @@ class CHAdapter(BaseAdapter):
 
         return result
 
-    def create_database(self, database: str) -> None:
+    def create_database(self, database: str, replace: Optional[bool] = False) -> None:
         if self.has_database(database):
-            return
+            if replace:
+                self.drop_database(database)
+            else:
+                return
 
         statement = "create database {database:Identifier};"
 

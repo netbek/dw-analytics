@@ -67,7 +67,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_database(self, database: str) -> None:
+    def create_database(self, database: str, replace: Optional[bool] = False) -> None:
         pass
 
     @abstractmethod

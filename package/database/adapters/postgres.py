@@ -63,7 +63,7 @@ class PGAdapter(BaseAdapter):
 
         return result
 
-    def create_database(self, database: str) -> None:
+    def create_database(self, database: str, replace: Optional[bool] = False) -> None:
         raise NotImplementedError()
 
     def drop_database(self, database: str) -> None:
