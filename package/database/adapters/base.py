@@ -225,7 +225,7 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_user(self, username: str, password: str) -> None:
+    def create_user(self, username: str, password: str, replace: Optional[bool] = False) -> None:
         pass
 
     @abstractmethod

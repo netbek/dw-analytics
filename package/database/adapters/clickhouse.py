@@ -189,9 +189,12 @@ class CHAdapter(BaseAdapter):
 
         return result
 
-    def create_user(self, username: str, password: str) -> None:
+    def create_user(self, username: str, password: str, replace: Optional[bool] = False) -> None:
         if self.has_user(username):
-            return
+            if replace:
+                self.drop_user(username)
+            else:
+                return
 
         quoted_username = CHIdentifier.quote(username)
         statement = f"create user {quoted_username} identified by %(password)s;"

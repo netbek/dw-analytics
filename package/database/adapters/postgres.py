@@ -270,9 +270,18 @@ class PGAdapter(BaseAdapter):
 
         return result
 
-    def create_user(self, username: str, password: str, options: Optional[dict] = None) -> None:
+    def create_user(
+        self,
+        username: str,
+        password: str,
+        options: Optional[dict] = None,
+        replace: Optional[bool] = False,
+    ) -> None:
         if self.has_user(username):
-            return
+            if replace:
+                self.drop_user(username)
+            else:
+                return
 
         quoted_username = PGIdentifier.quote(username)
 
