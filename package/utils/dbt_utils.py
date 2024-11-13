@@ -10,7 +10,6 @@ from typing import Any, List, Optional
 
 import json
 import os
-import subprocess
 
 RE_REF = r"^ref\(['\"](.*?)['\"]\)$"
 RE_SOURCE = r"^source\(['\"](.*?)['\"], ['\"](.*?)['\"]\)$"
@@ -45,22 +44,14 @@ def list_resources(
         if resource_type not in valid_resource_types:
             raise ValueError(f"'resource_types' must be any of: {", ".join(valid_resource_types)}")
 
-    resource_dicts = []
-
-    cmd = dbt_list_command(
-        project_dir=project_dir,
+    result = dbt_list_sync(
+        project_dir,
+        output="json",
+        quiet=True,
         resource_types=resource_types,
         select=select,
-        output="json",
     )
-    stdout = subprocess.check_output(cmd, text=True, cwd=project_dir)
-
-    for line in stdout.splitlines():
-        try:
-            resource = json.loads(line)
-        except json.decoder.JSONDecodeError:
-            continue
-        resource_dicts.append(resource)
+    resource_dicts = [json.loads(string) for string in result.result]
 
     cache = {}
     for resource in resource_dicts:
