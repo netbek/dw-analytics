@@ -84,7 +84,9 @@ class CHAdapter(BaseAdapter):
     def has_schema(self, schema: str, database: Optional[str] = None) -> bool:
         raise NotImplementedError()
 
-    def create_schema(self, schema: str, database: Optional[str] = None) -> None:
+    def create_schema(
+        self, schema: str, database: Optional[str] = None, replace: Optional[bool] = False
+    ) -> None:
         raise NotImplementedError()
 
     def drop_schema(self, schema: str, database: Optional[str] = None) -> None:
@@ -105,12 +107,21 @@ class CHAdapter(BaseAdapter):
 
         return result
 
-    def create_table(self, table: str, statement: str, database: Optional[str] = None) -> None:
+    def create_table(
+        self,
+        table: str,
+        statement: str,
+        database: Optional[str] = None,
+        replace: Optional[bool] = False,
+    ) -> None:
         if database is None:
             database = self.settings.database
 
         if self.has_table(table=table, database=database):
-            return
+            if replace:
+                self.drop_table(table=table, database=database)
+            else:
+                return
 
         with self.create_client() as client:
             client.command(statement)

@@ -79,7 +79,9 @@ class BaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_schema(self, schema: str, database: Optional[str] = None) -> None:
+    def create_schema(
+        self, schema: str, database: Optional[str] = None, replace: Optional[bool] = False
+    ) -> None:
         pass
 
     @abstractmethod
@@ -102,7 +104,13 @@ class BaseAdapter(ABC):
 
     @overload
     @abstractmethod
-    def create_table(self, table: str, statement: str, database: Optional[str] = None) -> None: ...
+    def create_table(
+        self,
+        table: str,
+        statement: str,
+        database: Optional[str] = None,
+        replace: Optional[bool] = False,
+    ) -> None: ...
 
     @overload
     @abstractmethod
@@ -112,6 +120,7 @@ class BaseAdapter(ABC):
         statement: str,
         database: Optional[str] = None,
         schema: Optional[str] = None,
+        replace: Optional[bool] = False,
     ) -> None: ...
 
     @abstractmethod

@@ -86,7 +86,9 @@ class PGAdapter(BaseAdapter):
 
         return result
 
-    def create_schema(self, schema: str, database: Optional[str] = None) -> None:
+    def create_schema(
+        self, schema: str, database: Optional[str] = None, replace: Optional[bool] = False
+    ) -> None:
         raise NotImplementedError()
 
     def drop_schema(self, schema: str, database: Optional[str] = None) -> None:
@@ -120,6 +122,7 @@ class PGAdapter(BaseAdapter):
         statement: str,
         database: Optional[str] = None,
         schema: Optional[str] = None,
+        replace: Optional[bool] = False,
     ) -> None:
         if database is None:
             database = self.settings.database
@@ -128,7 +131,10 @@ class PGAdapter(BaseAdapter):
             schema = self.settings.schema_
 
         if self.has_table(table=table, database=database, schema=schema):
-            return
+            if replace:
+                self.drop_table(table=table, database=database, schema=schema)
+            else:
+                return
 
         with self.create_client() as (conn, cur):
             cur.execute(statement)
