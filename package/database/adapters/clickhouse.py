@@ -151,6 +151,19 @@ class CHAdapter(BaseAdapter):
         with self.create_client() as client:
             client.command(statement)
 
+    def truncate_table(self, table: str, database: Optional[str] = None) -> None:
+        if database is None:
+            database = self.settings.database
+
+        if not self.has_table(table=table, database=database):
+            return
+
+        quoted_table = CHTableIdentifier(database=database, table=table).to_string()
+        statement = f"truncate table {quoted_table};"
+
+        with self.create_client() as client:
+            client.command(statement)
+
     def get_table(self, table: str, database: Optional[str] = None) -> Table:
         if database is None:
             database = self.settings.database

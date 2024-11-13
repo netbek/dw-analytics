@@ -157,6 +157,20 @@ class BaseAdapter(ABC):
 
     @overload
     @abstractmethod
+    def truncate_table(self, table: str, database: Optional[str] = None) -> None: ...
+
+    @overload
+    @abstractmethod
+    def truncate_table(
+        self, table: str, database: Optional[str] = None, schema: Optional[str] = None
+    ) -> None: ...
+
+    @abstractmethod
+    def truncate_table(self, *args, **kwargs) -> None:
+        pass
+
+    @overload
+    @abstractmethod
     def get_table(self, table: str, database: Optional[str] = None) -> Table: ...
 
     @overload

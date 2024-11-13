@@ -162,6 +162,24 @@ class PGAdapter(BaseAdapter):
         with self.create_client() as (conn, cur):
             cur.execute(statement)
 
+    def truncate_table(
+        self, table: str, database: Optional[str] = None, schema: Optional[str] = None
+    ) -> None:
+        if database is None:
+            database = self.settings.database
+
+        if schema is None:
+            schema = self.settings.schema_
+
+        if not self.has_table(table=table, database=database, schema=schema):
+            return
+
+        quoted_table = PGTableIdentifier(database=database, schema_=schema, table=table).to_string()
+        statement = f"truncate table {quoted_table};"
+
+        with self.create_client() as (conn, cur):
+            cur.execute(statement)
+
     def get_table(
         self, table: str, database: Optional[str] = None, schema: Optional[str] = None
     ) -> Table:
