@@ -13,7 +13,7 @@ import subprocess
 RE_REF = r"^ref\(['\"](.*?)['\"]\)$"
 RE_SOURCE = r"^source\(['\"](.*?)['\"], ['\"](.*?)['\"]\)$"
 
-RESOURCE_TYPE_TO_CLASS_MAP = {
+RESOURCE_TYPE_TO_CLASS = {
     DbtResourceType.MODEL: DbtModel,
     DbtResourceType.SOURCE: DbtSource,
 }
@@ -33,7 +33,7 @@ def list_resources(
     resource_types: Optional[List[DbtResourceType]] = None,
     select: Optional[str] = None,
 ) -> List[DbtModel | DbtSource]:
-    valid_resource_types = RESOURCE_TYPE_TO_CLASS_MAP.keys()
+    valid_resource_types = RESOURCE_TYPE_TO_CLASS.keys()
 
     if resource_types is None:
         resource_types = valid_resource_types
@@ -93,7 +93,7 @@ def list_resources(
 
     resources = []
     for resource in resource_dicts:
-        class_ = RESOURCE_TYPE_TO_CLASS_MAP[resource["resource_type"]]
+        class_ = RESOURCE_TYPE_TO_CLASS[resource["resource_type"]]
         resources.append(class_(**resource))
 
     return resources

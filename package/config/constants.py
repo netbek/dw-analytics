@@ -28,7 +28,7 @@ Query:
     where not case_insensitive
     order by name;
 """
-CODEGEN_TO_CLICKHOUSE_DATA_TYPES = {
+CODEGEN_TO_CLICKHOUSE_DATA_TYPE = {
     "aggregatefunction": "AggregateFunction",
     "array": "Array",
     "enum16": "Enum16",

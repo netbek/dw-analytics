@@ -1,6 +1,6 @@
 from package.cli.dbt_docs_cli import docs_app
 from package.cli.root import app
-from package.config.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPES
+from package.config.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPE
 from package.project import Project
 from package.types import DbtResourceType
 from package.utils.dbt_utils import list_resources
@@ -95,7 +95,7 @@ def model_yaml(models: list[str]):
             "columns": [
                 {
                     "name": column["name"],
-                    "data_type": CODEGEN_TO_CLICKHOUSE_DATA_TYPES.get(
+                    "data_type": CODEGEN_TO_CLICKHOUSE_DATA_TYPE.get(
                         column["data_type"], column["data_type"]
                     ),
                 }
