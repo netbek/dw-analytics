@@ -1,5 +1,5 @@
 from package.database import PGAdapter
-from package.tests.fixtures import DBTest
+from package.tests.fixtures.database import DBTest
 from package.types import PGTableIdentifier
 from sqlmodel import Table, text
 from typing import Any, Generator

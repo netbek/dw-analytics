@@ -1,7 +1,7 @@
 from package.config.settings import get_settings
 from package.database import PGAdapter
 from package.peerdb import prepare_config
-from package.tests.fixtures import DBTest
+from package.tests.fixtures.database import DBTest
 from package.types import DbtSource
 from sqlmodel import Table
 from typing import Any, Generator, List
