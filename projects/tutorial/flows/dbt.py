@@ -1,4 +1,4 @@
-from package.utils.dbt_utils import dbt_run
+from package.utils.dbt_utils import dbt_run_async
 from prefect import flow
 from projects.tutorial.config.settings import get_settings
 from typing import Optional
@@ -10,7 +10,7 @@ settings = get_settings()
 
 @flow(name="tutorial__dbt_run_flow")
 async def dbt_run_flow(select: Optional[str] = None):
-    return await dbt_run(project_dir=settings.dbt.directory, select=select)
+    return await dbt_run_async(project_dir=settings.dbt.directory, select=select)
 
 
 if __name__ == "__tutorial__":
