@@ -4,7 +4,6 @@ from package.project import Project
 from package.types import DbtModel, DbtResourceType, DbtSeed, DbtSource
 from package.utils.filesystem import get_file_extension
 from package.utils.yaml_utils import safe_load_file
-from pathlib import Path
 from prefect_shell.commands import ShellOperation
 from typing import Any, List, Optional
 
@@ -19,66 +18,6 @@ RESOURCE_TYPE_TO_CLASS = {
     DbtResourceType.SEED: DbtSeed,
     DbtResourceType.SOURCE: DbtSource,
 }
-
-
-def get_resource(project_dir: Path | str, name: str) -> DbtModel | DbtSeed | DbtSource | None:
-    resources = list_resources(project_dir, select=name)
-
-    if not resources:
-        return None
-
-    return resources[0]
-
-
-def list_resources(
-    project_dir: Path | str,
-    resource_types: Optional[List[DbtResourceType]] = None,
-    select: Optional[str] = None,
-) -> List[DbtModel | DbtSeed | DbtSource]:
-    valid_resource_types = RESOURCE_TYPE_TO_CLASS.keys()
-
-    if resource_types is None:
-        resource_types = valid_resource_types
-
-    for resource_type in resource_types:
-        if resource_type not in valid_resource_types:
-            raise ValueError(f"'resource_types' must be any of: {", ".join(valid_resource_types)}")
-
-    result = Dbt(project_dir).list_sync(
-        output="json",
-        quiet=True,
-        resource_types=resource_types,
-        select=select,
-    )
-    resource_dicts = [json.loads(string) for string in result.result]
-
-    cache = {}
-    for resource in resource_dicts:
-        if resource["resource_type"] == DbtResourceType.SOURCE:
-            original_config = None
-            path = resolve_resource_path(project_dir, resource)
-
-            if path and get_file_extension(path) in [".yml", ".yaml"]:
-                if path not in cache:
-                    cache[path] = safe_load_file(path)
-
-                for source in cache[path]["sources"]:
-                    if source["name"] == resource["source_name"]:
-                        for table in source["tables"]:
-                            if table["name"] == resource["name"]:
-                                original_config = table
-                                break
-                    if original_config:
-                        break
-
-            resource["original_config"] = original_config
-
-    resources = []
-    for resource in resource_dicts:
-        class_ = RESOURCE_TYPE_TO_CLASS[resource["resource_type"]]
-        resources.append(class_(**resource))
-
-    return resources
 
 
 def resolve_resource_path(project_dir: str, resource: dict) -> str | None:
@@ -203,6 +142,66 @@ class Dbt:
         )
 
         return dbtRunner().invoke(cmd[1:])
+
+    def get_resource(self, name: str) -> DbtModel | DbtSeed | DbtSource | None:
+        resources = self.list_resources(select=name)
+
+        if not resources:
+            return None
+
+        return resources[0]
+
+    def list_resources(
+        self,
+        resource_types: Optional[List[DbtResourceType]] = None,
+        select: Optional[str] = None,
+    ) -> List[DbtModel | DbtSeed | DbtSource]:
+        valid_resource_types = RESOURCE_TYPE_TO_CLASS.keys()
+
+        if resource_types is None:
+            resource_types = valid_resource_types
+
+        for resource_type in resource_types:
+            if resource_type not in valid_resource_types:
+                raise ValueError(
+                    f"'resource_types' must be any of: {", ".join(valid_resource_types)}"
+                )
+
+        result = self.list_sync(
+            output="json",
+            quiet=True,
+            resource_types=resource_types,
+            select=select,
+        )
+        resource_dicts = [json.loads(string) for string in result.result]
+
+        cache = {}
+        for resource in resource_dicts:
+            if resource["resource_type"] == DbtResourceType.SOURCE:
+                original_config = None
+                path = resolve_resource_path(self.project_dir, resource)
+
+                if path and get_file_extension(path) in [".yml", ".yaml"]:
+                    if path not in cache:
+                        cache[path] = safe_load_file(path)
+
+                    for source in cache[path]["sources"]:
+                        if source["name"] == resource["source_name"]:
+                            for table in source["tables"]:
+                                if table["name"] == resource["name"]:
+                                    original_config = table
+                                    break
+                        if original_config:
+                            break
+
+                resource["original_config"] = original_config
+
+        resources = []
+        for resource in resource_dicts:
+            class_ = RESOURCE_TYPE_TO_CLASS[resource["resource_type"]]
+            resources.append(class_(**resource))
+
+        return resources
 
     def run_command(
         self,

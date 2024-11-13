@@ -1,7 +1,7 @@
 from package.cli.dbt_docs_cli import docs_app
 from package.cli.root import app
 from package.config.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPE
-from package.dbt import list_resources
+from package.dbt import Dbt
 from package.project import Project
 from package.types import DbtResourceType
 from package.utils.filesystem import find_up
@@ -35,7 +35,7 @@ def model_yaml(models: list[str]):
         raise Exception(f"No dbt_project.yml found in {cwd} or higher")
 
     project = Project.from_path(cwd)
-    resources = list_resources(project.dbt_directory, resource_types=[DbtResourceType.MODEL])
+    resources = Dbt(project.dbt_directory).list_resources(resource_types=[DbtResourceType.MODEL])
 
     for model in models:
         resource = pydash.find(resources, lambda resource: resource.name == model)

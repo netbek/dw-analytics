@@ -1,6 +1,6 @@
 from package.config.constants import PEERDB_SOURCE_PEER
 from package.database import CHAdapter, PGAdapter
-from package.dbt import list_resources
+from package.dbt import Dbt
 from package.types import (
     CHSettings,
     CHTableIdentifier,
@@ -14,6 +14,11 @@ from typing import Optional
 import copy
 import httpx
 import pydash
+
+
+# TODO Remove function after monkeypatching in package/tests/peerdb/test_prepare_config.py has been fixed
+def list_resources(project_dir, **kwargs):
+    return Dbt(project_dir).list_resources(**kwargs)
 
 
 def prepare_config(
