@@ -5,8 +5,12 @@ from pydantic import BaseModel, Field
 
 
 class Settings(BaseModel):
-    test_ch: CHSettings = Field(default_factory=create_ch_settings("package_test_clickhouse_"))
-    test_pg: PGSettings = Field(default_factory=create_pg_settings("package_test_postgres_"))
+    test_clickhouse: CHSettings = Field(
+        default_factory=create_ch_settings("package_test_clickhouse_"),
+    )
+    test_postgres: PGSettings = Field(
+        default_factory=create_pg_settings("package_test_postgres_"),
+    )
 
 
 @lru_cache(maxsize=1, typed=True)

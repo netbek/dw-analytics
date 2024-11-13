@@ -53,20 +53,20 @@ peers:
   source:
     type: 3
     postgres_config:
-      host: {settings.test_pg.host}
-      port: {settings.test_pg.port}
-      user: {settings.test_pg.username}
-      password: {settings.test_pg.password}
-      database: {settings.test_pg.database}
+      host: {settings.test_postgres.host}
+      port: {settings.test_postgres.port}
+      user: {settings.test_postgres.username}
+      password: {settings.test_postgres.password}
+      database: {settings.test_postgres.database}
 
   destination:
     type: 8
     clickhouse_config:
-      host: {settings.test_ch.host}
-      port: {settings.test_ch.port}
-      user: {settings.test_ch.username}
-      password: {settings.test_ch.password}
-      database: {settings.test_ch.database}
+      host: {settings.test_clickhouse.host}
+      port: {settings.test_clickhouse.port}
+      user: {settings.test_clickhouse.username}
+      password: {settings.test_clickhouse.password}
+      database: {settings.test_clickhouse.database}
 
 mirrors:
   +do_initial_snapshot: false
@@ -104,7 +104,7 @@ list_resources__return_value = [
         "package_name": "test",
         "original_file_path": "models/sources.yml",
         "unique_id": "source.test.default.table_1",
-        "source_name": settings.test_ch.database,
+        "source_name": settings.test_clickhouse.database,
         "tags": [],
         "config": {"enabled": True},
         "original_config": {
@@ -124,7 +124,7 @@ list_resources__return_value = [
         "package_name": "test",
         "original_file_path": "models/sources.yml",
         "unique_id": "source.test.default.table_2",
-        "source_name": settings.test_ch.database,
+        "source_name": settings.test_clickhouse.database,
         "tags": [],
         "config": {"enabled": True},
         "original_config": {
@@ -145,7 +145,7 @@ list_resources__return_value = [
         "package_name": "test",
         "original_file_path": "models/sources.yml",
         "unique_id": "source.test.default.table_3",
-        "source_name": settings.test_ch.database,
+        "source_name": settings.test_clickhouse.database,
         "tags": [],
         "config": {"enabled": True},
         "original_config": {
@@ -315,22 +315,22 @@ class TestOK(DBTest):
                 "source": {
                     "type": 3,
                     "postgres_config": {
-                        "host": settings.test_pg.host,
-                        "port": settings.test_pg.port,
-                        "user": settings.test_pg.username,
-                        "password": settings.test_pg.password,
-                        "database": settings.test_pg.database,
+                        "host": settings.test_postgres.host,
+                        "port": settings.test_postgres.port,
+                        "user": settings.test_postgres.username,
+                        "password": settings.test_postgres.password,
+                        "database": settings.test_postgres.database,
                     },
                     "name": "source",
                 },
                 "destination": {
                     "type": 8,
                     "clickhouse_config": {
-                        "host": settings.test_ch.host,
-                        "port": settings.test_ch.port,
-                        "user": settings.test_ch.username,
-                        "password": settings.test_ch.password,
-                        "database": settings.test_ch.database,
+                        "host": settings.test_clickhouse.host,
+                        "port": settings.test_clickhouse.port,
+                        "user": settings.test_clickhouse.username,
+                        "password": settings.test_clickhouse.password,
+                        "database": settings.test_clickhouse.database,
                     },
                     "name": "destination",
                 },
