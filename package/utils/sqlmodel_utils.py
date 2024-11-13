@@ -50,7 +50,7 @@ CLICKHOUSE_TYPES = [
     "UUID",
 ]
 
-SQLALCHEMY_TO_CLICKHOUSE_TYPES = {
+SQLALCHEMY_TO_CLICKHOUSE_TYPE = {
     "Bool": "Boolean",
 }
 
@@ -191,8 +191,8 @@ def get_sqlalchemy_type(column: Column) -> str:
         else:
             string = string.strip()
 
-            if string in SQLALCHEMY_TO_CLICKHOUSE_TYPES:
-                string = SQLALCHEMY_TO_CLICKHOUSE_TYPES[string]
+            if string in SQLALCHEMY_TO_CLICKHOUSE_TYPE:
+                string = SQLALCHEMY_TO_CLICKHOUSE_TYPE[string]
 
             if string in CLICKHOUSE_TYPES:
                 return SimpleTypeNode(string)
