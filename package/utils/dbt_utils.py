@@ -1,6 +1,8 @@
 from dbt.cli.main import dbtRunner, dbtRunnerResult
 from package.config.constants import DBT_PROFILES_DIR
-from package.types import DbtModel, DbtResourceType, DbtSource
+from package.project import Project
+from package.types import DbtModel, DbtResourceType, DbtSeed, DbtSource
+from package.utils.filesystem import get_file_extension
 from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
 from prefect_shell.commands import ShellOperation
@@ -8,7 +10,6 @@ from typing import Any, List, Optional
 
 import json
 import os
-import pydash
 import subprocess
 
 RE_REF = r"^ref\(['\"](.*?)['\"]\)$"
@@ -16,11 +17,12 @@ RE_SOURCE = r"^source\(['\"](.*?)['\"], ['\"](.*?)['\"]\)$"
 
 RESOURCE_TYPE_TO_CLASS = {
     DbtResourceType.MODEL: DbtModel,
+    DbtResourceType.SEED: DbtSeed,
     DbtResourceType.SOURCE: DbtSource,
 }
 
 
-def get_resource(project_dir: Path | str, name: str) -> DbtModel | DbtSource | None:
+def get_resource(project_dir: Path | str, name: str) -> DbtModel | DbtSeed | DbtSource | None:
     resources = list_resources(project_dir, select=name)
 
     if not resources:
@@ -33,7 +35,7 @@ def list_resources(
     project_dir: Path | str,
     resource_types: Optional[List[DbtResourceType]] = None,
     select: Optional[str] = None,
-) -> List[DbtModel | DbtSource]:
+) -> List[DbtModel | DbtSeed | DbtSource]:
     valid_resource_types = RESOURCE_TYPE_TO_CLASS.keys()
 
     if resource_types is None:
@@ -58,29 +60,19 @@ def list_resources(
             resource = json.loads(line)
         except json.decoder.JSONDecodeError:
             continue
-
         resource_dicts.append(resource)
 
-    source_file_paths = pydash.uniq(
-        [
-            resource["original_file_path"]
-            for resource in resource_dicts
-            if resource["resource_type"] == DbtResourceType.SOURCE
-        ]
-    )
+    cache = {}
+    for resource in resource_dicts:
+        if resource["resource_type"] == DbtResourceType.SOURCE:
+            original_config = None
+            path = resolve_resource_path(project_dir, resource)
 
-    if source_file_paths:
-        source_files = {
-            file_path: safe_load_file(os.path.join(project_dir, file_path))
-            for file_path in source_file_paths
-        }
+            if path and get_file_extension(path) in [".yml", ".yaml"]:
+                if path not in cache:
+                    cache[path] = safe_load_file(path)
 
-        for resource in resource_dicts:
-            if resource["resource_type"] == DbtResourceType.SOURCE:
-                original_config = None
-                data = source_files[resource["original_file_path"]]
-
-                for source in data["sources"]:
+                for source in cache[path]["sources"]:
                     if source["name"] == resource["source_name"]:
                         for table in source["tables"]:
                             if table["name"] == resource["name"]:
@@ -89,7 +81,7 @@ def list_resources(
                     if original_config:
                         break
 
-                resource["original_config"] = original_config
+            resource["original_config"] = original_config
 
     resources = []
     for resource in resource_dicts:
@@ -97,6 +89,18 @@ def list_resources(
         resources.append(class_(**resource))
 
     return resources
+
+
+def resolve_resource_path(project_dir: str, resource: dict) -> str | None:
+    project_name = Project.get_name_from_path(project_dir)
+
+    if resource["package_name"] == project_name:
+        path = os.path.join(project_dir, resource["original_file_path"])
+    else:
+        path = os.path.join(project_dir, "dbt_packages", resource["original_file_path"])
+
+    if os.path.exists(path):
+        return path
 
 
 def dbt_list_command(
