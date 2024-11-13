@@ -30,7 +30,13 @@ class Project:
         return cls(name)
 
     @classmethod
-    def from_path(cls, path: str) -> Optional["Project"]:
+    def from_path(cls, path: Path | str) -> Optional["Project"]:
+        name = cls.get_name_from_path(path)
+
+        return cls.from_name(name)
+
+    @classmethod
+    def get_name_from_path(cls, path: Path | str) -> str:
         parent_dir = os.path.abspath(PROJECTS_DIR)
         child_dir = os.path.abspath(path)
 
@@ -40,9 +46,7 @@ class Project:
         if parent_dir == child_dir or os.path.commonpath([parent_dir, child_dir]) != parent_dir:
             raise Exception(f"Path must be a subdirectory of {PROJECTS_DIR}")
 
-        name = os.path.relpath(child_dir, parent_dir).split(os.path.sep)[0]
-
-        return cls.from_name(name)
+        return os.path.relpath(child_dir, parent_dir).split(os.path.sep)[0]
 
     @classmethod
     def exists(cls, name: str) -> bool:
