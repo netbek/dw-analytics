@@ -126,6 +126,7 @@ class PGTableIdentifier(PGIdentifier, BaseModel):
 
 class DbtResourceType(StrEnum):
     MODEL = "model"
+    SEED = "seed"
     SOURCE = "source"
 
 
@@ -139,40 +140,43 @@ class DbtColumn(BaseModel):
     name: str
 
 
-class DbtSourceTableMeta(BaseModel):
-    python_class: str
+class DbtContract(BaseModel):
+    alias_types: bool
+    enforced: bool
 
 
-class DbtSourceOriginalConfig(BaseModel):
-    columns: Optional[List[DbtColumn]] = None
-    loaded_at_field: Optional[str] = None
-    meta: Optional[DbtSourceTableMeta] = None
-    name: str
+class DbtDependsOn(BaseModel):
+    macros: Optional[List[str]] = None
+    nodes: Optional[List[str]] = None
 
 
-class DbtSourceConfig(BaseModel):
-    enabled: bool
-
-
-class DbtSource(BaseModel):
-    config: DbtSourceConfig
-    name: str
-    original_config: Optional[DbtSourceOriginalConfig] = None
-    original_file_path: str
-    package_name: str
-    resource_type: DbtResourceType
-    source_name: str
-    tags: List[str]
-    unique_id: str
+class DbtDocs(BaseModel):
+    node_color: Optional[str] = None
+    show: bool
 
 
 class DbtPersistDocs(BaseModel):
     columns: Optional[bool] = None
 
 
-class DbtContract(BaseModel):
-    alias_types: bool
-    enforced: bool
+class DbtTableMeta(BaseModel):
+    python_class: str
+
+
+class DbtTable(BaseModel):
+    columns: Optional[List[DbtColumn]] = None
+    loaded_at_field: Optional[str] = None
+    meta: Optional[DbtTableMeta] = None
+    name: str
+
+
+class DbtBaseResource(BaseModel):
+    name: str
+    original_file_path: str
+    package_name: str
+    resource_type: DbtResourceType
+    tags: List[str]
+    unique_id: str
 
 
 class DbtModelConfig(BaseModel):
@@ -183,10 +187,10 @@ class DbtModelConfig(BaseModel):
     column_types: Dict[str, str]
     contract: DbtContract
     database: Optional[str] = None
-    docs: Dict[str, str | bool]
+    docs: DbtDocs
     enabled: bool
     engine: Optional[str] = None
-    full_refresh: Optional[bool]
+    full_refresh: Optional[bool] = False
     grants: Dict[str, List[str]]
     group: Optional[str] = None
     incremental_strategy: Optional[str] = None
@@ -207,18 +211,50 @@ class DbtModelConfig(BaseModel):
     unique_key: Optional[str] = None
 
 
-class DbtDependsOn(BaseModel):
-    macros: List[str]
-    nodes: List[str]
-
-
-class DbtModel(BaseModel):
+class DbtModel(DbtBaseResource):
     alias: str
     config: DbtModelConfig
     depends_on: DbtDependsOn
-    name: str
-    original_file_path: str
-    package_name: str
-    resource_type: str
+
+
+class DbtSeedConfig(BaseModel):
+    alias: Optional[str] = None
+    column_types: Dict[str, str]
+    contract: DbtContract
+    database: Optional[str] = None
+    delimiter: str
+    docs: DbtDocs
+    enabled: bool
+    full_refresh: Optional[bool] = False
+    grants: Dict[str, List[str]]
+    group: Optional[str] = None
+    incremental_strategy: Optional[str] = None
+    materialized: str
+    meta: Dict[str, str | int | float | bool | None]
+    on_configuration_change: str
+    on_schema_change: str
+    packages: List[str]
+    persist_docs: DbtPersistDocs
+    post_hook: Optional[List[str]] = None
+    pre_hook: Optional[List[str]] = None
+    quote_columns: Optional[bool] = None
+    quoting: Dict[str, bool]
+    schema_: Optional[str] = Field(default=None, serialization_alias="schema")
     tags: List[str]
-    unique_id: str
+    unique_key: Optional[str] = None
+
+
+class DbtSeed(DbtBaseResource):
+    alias: str
+    config: DbtSeedConfig
+    depends_on: DbtDependsOn
+
+
+class DbtSourceConfig(BaseModel):
+    enabled: bool
+
+
+class DbtSource(DbtBaseResource):
+    config: DbtSourceConfig
+    original_config: Optional[DbtTable] = None
+    source_name: str
