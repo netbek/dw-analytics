@@ -2,14 +2,16 @@ from package.cli.dbt_docs_cli import docs_app
 from package.cli.root import app
 from package.config.constants import CODEGEN_TO_CLICKHOUSE_DATA_TYPES
 from package.project import Project
-from package.utils.dbt_utils import find_model_sql
-from package.utils.filesystem import find_up, get_file_name
+from package.types import DbtResourceType
+from package.utils.dbt_utils import list_resources
+from package.utils.filesystem import find_up
 from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
 
 import dbt.version
 import json
 import os
+import pydash
 import subprocess
 import typer
 import yaml
@@ -33,15 +35,17 @@ def model_yaml(models: list[str]):
         raise Exception(f"No dbt_project.yml found in {cwd} or higher")
 
     project = Project.from_path(cwd)
+    resources = list_resources(project.dbt_directory, resource_types=[DbtResourceType.MODEL])
 
     for model in models:
-        model_path = find_model_sql(project, model)
+        resource = pydash.find(resources, lambda resource: resource.name == model)
 
-        if not model_path:
+        if not resource:
             continue
 
-        model_name = get_file_name(model_path)
-        schema_path = os.path.join(Path(model_path).parent, "schema", f"{model_name}.yml")
+        model_name = resource.name
+        model_path = Path(os.path.join(project.dbt_directory, resource.original_file_path))
+        schema_path = os.path.join(model_path.parent, "schema", f"{model_name}.yml")
         schema_dir = os.path.dirname(schema_path)
 
         os.makedirs(schema_dir, exist_ok=True)
