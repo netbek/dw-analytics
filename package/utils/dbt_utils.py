@@ -1,6 +1,6 @@
 from package.config.constants import DBT_PROFILES_DIR
 from package.project import Project
-from package.types import DbtResourceType, DbtSource
+from package.types import DbtModel, DbtResourceType, DbtSource
 from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
 from prefect_shell.commands import ShellOperation
@@ -13,6 +13,11 @@ import subprocess
 
 RE_REF = r"^ref\(['\"](.*?)['\"]\)$"
 RE_SOURCE = r"^source\(['\"](.*?)['\"], ['\"](.*?)['\"]\)$"
+
+RESOURCE_TYPE_TO_CLASS_MAP = {
+    DbtResourceType.MODEL: DbtModel,
+    DbtResourceType.SOURCE: DbtSource,
+}
 
 
 def find_model_sql(project: Project, model: str) -> str | None:
@@ -27,13 +32,15 @@ def find_model_sql(project: Project, model: str) -> str | None:
 
 def list_resources(
     project_dir: Path | str, resource_types: Optional[List[DbtResourceType]] = None
-) -> List[DbtSource]:
+) -> List[DbtModel | DbtSource]:
     if resource_types is None:
         resource_types = [DbtResourceType.SOURCE]
 
     for resource_type in resource_types:
-        if resource_type != DbtResourceType.SOURCE:
-            raise ValueError(f"'resource_types' must be any of: {DbtResourceType.SOURCE}")
+        if resource_type not in RESOURCE_TYPE_TO_CLASS_MAP.keys():
+            raise ValueError(
+                f"'resource_types' must be any of: {", ".join(RESOURCE_TYPE_TO_CLASS_MAP.keys())}"
+            )
 
     resource_dicts = []
 
@@ -85,8 +92,8 @@ def list_resources(
 
     resources = []
     for resource in resource_dicts:
-        if resource["resource_type"] == DbtResourceType.SOURCE:
-            resources.append(DbtSource(**resource))
+        class_ = RESOURCE_TYPE_TO_CLASS_MAP[resource["resource_type"]]
+        resources.append(class_(**resource))
 
     return resources
 

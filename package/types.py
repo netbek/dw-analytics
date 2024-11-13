@@ -2,7 +2,7 @@ from enum import StrEnum
 from pathlib import Path
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 
 class CHSettings(BaseSettings):
@@ -125,6 +125,7 @@ class PGTableIdentifier(PGIdentifier, BaseModel):
 
 
 class DbtResourceType(StrEnum):
+    MODEL = "model"
     SOURCE = "source"
 
 
@@ -133,9 +134,9 @@ class DbtColumnMeta(BaseModel):
 
 
 class DbtColumn(BaseModel):
-    name: str
     data_type: str
     meta: Optional[DbtColumnMeta] = None
+    name: str
 
 
 class DbtSourceTableMeta(BaseModel):
@@ -143,10 +144,10 @@ class DbtSourceTableMeta(BaseModel):
 
 
 class DbtSourceOriginalConfig(BaseModel):
-    name: str
-    meta: Optional[DbtSourceTableMeta] = None
-    loaded_at_field: Optional[str] = None
     columns: Optional[List[DbtColumn]] = None
+    loaded_at_field: Optional[str] = None
+    meta: Optional[DbtSourceTableMeta] = None
+    name: str
 
 
 class DbtSourceConfig(BaseModel):
@@ -154,12 +155,70 @@ class DbtSourceConfig(BaseModel):
 
 
 class DbtSource(BaseModel):
-    name: str
-    resource_type: DbtResourceType
-    package_name: str
-    unique_id: str
-    tags: List[str]
     config: DbtSourceConfig
-    original_file_path: str
+    name: str
     original_config: Optional[DbtSourceOriginalConfig] = None
+    original_file_path: str
+    package_name: str
+    resource_type: DbtResourceType
     source_name: str
+    tags: List[str]
+    unique_id: str
+
+
+class DbtPersistDocs(BaseModel):
+    columns: Optional[bool] = None
+
+
+class DbtContract(BaseModel):
+    alias_types: bool
+    enforced: bool
+
+
+class DbtModelConfig(BaseModel):
+    access: str
+    alias: Optional[str] = None
+    batch_filter: Optional[str] = None
+    batch_size: Optional[int] = None
+    column_types: Dict[str, str]
+    contract: DbtContract
+    database: Optional[str] = None
+    docs: Dict[str, str | bool]
+    enabled: bool
+    engine: Optional[str] = None
+    full_refresh: Optional[bool]
+    grants: Dict[str, List[str]]
+    group: Optional[str] = None
+    incremental_strategy: Optional[str] = None
+    materialized: str
+    meta: Dict[str, str | int | float | bool | None]
+    on_configuration_change: str
+    on_schema_change: str
+    order_by: Optional[str] = None
+    packages: List[str]
+    persist_docs: DbtPersistDocs
+    post_hook: Optional[List[str]] = None
+    pre_hook: Optional[List[str]] = None
+    quoting: Dict[str, bool]
+    range_max: Optional[str] = None
+    range_min: Optional[str] = None
+    schema_: Optional[str] = Field(default=None, serialization_alias="schema")
+    tags: List[str]
+    unique_key: Optional[str] = None
+
+
+class DbtDependsOn(BaseModel):
+    macros: List[str]
+    nodes: List[str]
+
+
+class DbtModel(BaseModel):
+    alias: str
+    config: DbtModelConfig
+    depends_on: DbtDependsOn
+    name: str
+    original_file_path: str
+    package_name: str
+    resource_type: str
+    tags: List[str]
+    unique_id: str
