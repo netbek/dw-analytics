@@ -208,6 +208,18 @@ class BaseAdapter(ABC):
 
     @overload
     @abstractmethod
+    def drop_tables(self, database: Optional[str] = None) -> None: ...
+
+    @overload
+    @abstractmethod
+    def drop_tables(self, database: Optional[str] = None, schema: Optional[str] = None) -> None: ...
+
+    @abstractmethod
+    def drop_tables(self, *args, **kwargs) -> None:
+        pass
+
+    @overload
+    @abstractmethod
     def list_tables(self, database: Optional[str] = None) -> List[Table]: ...
 
     @overload

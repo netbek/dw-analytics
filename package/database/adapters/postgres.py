@@ -239,6 +239,16 @@ class PGAdapter(BaseAdapter):
         with self.create_client() as (conn, cur):
             cur.execute(statement)
 
+    def drop_tables(self, database: Optional[str] = None, schema: Optional[str] = None) -> None:
+        if database is None:
+            database = self.settings.database
+
+        if schema is None:
+            schema = self.settings.schema_
+
+        for table in self.list_tables(database=database, schema=schema):
+            self.drop_table(table.name, database=database, schema=schema)
+
     def list_tables(
         self, database: Optional[str] = None, schema: Optional[str] = None
     ) -> List[Table]:

@@ -170,6 +170,13 @@ class CHAdapter(BaseAdapter):
     ) -> None:
         raise NotImplementedError()
 
+    def drop_tables(self, database: Optional[str] = None) -> None:
+        if database is None:
+            database = self.settings.database
+
+        for table in self.list_tables(database=database):
+            self.drop_table(table.name, database=database)
+
     def list_tables(self, database: Optional[str] = None) -> List[Table]:
         if database is None:
             database = self.settings.database
