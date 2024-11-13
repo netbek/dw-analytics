@@ -22,27 +22,27 @@ def create_pg_settings(env_prefix: str) -> PGSettings:
         )
 
         host: str = Field(
-            validation_alias=f"{env_prefix}postgres_host",
+            validation_alias=f"{env_prefix}host",
             serialization_alias="host",
         )
         port: int = Field(
-            validation_alias=f"{env_prefix}postgres_port",
+            validation_alias=f"{env_prefix}port",
             serialization_alias="port",
         )
         username: str = Field(
-            validation_alias=f"{env_prefix}postgres_username",
+            validation_alias=f"{env_prefix}username",
             serialization_alias="username",
         )
         password: str = Field(
-            validation_alias=f"{env_prefix}postgres_password",
+            validation_alias=f"{env_prefix}password",
             serialization_alias="password",
         )
         database: str = Field(
-            validation_alias=f"{env_prefix}postgres_database",
+            validation_alias=f"{env_prefix}database",
             serialization_alias="database",
         )
         schema_: str = Field(
-            validation_alias=f"{env_prefix}postgres_schema",
+            validation_alias=f"{env_prefix}schema",
             serialization_alias="schema",
         )
 
@@ -56,31 +56,31 @@ def create_ch_settings(env_prefix: str) -> CHSettings:
         )
 
         host: str = Field(
-            validation_alias=f"{env_prefix}clickhouse_host",
+            validation_alias=f"{env_prefix}host",
             serialization_alias="host",
         )
         port: int = Field(
-            validation_alias=f"{env_prefix}clickhouse_port",
+            validation_alias=f"{env_prefix}port",
             serialization_alias="port",
         )
         username: str = Field(
-            validation_alias=f"{env_prefix}clickhouse_username",
+            validation_alias=f"{env_prefix}username",
             serialization_alias="username",
         )
         password: str = Field(
-            validation_alias=f"{env_prefix}clickhouse_password",
+            validation_alias=f"{env_prefix}password",
             serialization_alias="password",
         )
         database: str = Field(
-            validation_alias=f"{env_prefix}clickhouse_database",
+            validation_alias=f"{env_prefix}database",
             serialization_alias="database",
         )
         secure: bool = Field(
-            validation_alias=f"{env_prefix}clickhouse_secure",
+            validation_alias=f"{env_prefix}secure",
             serialization_alias="secure",
         )
         driver: str = Field(
-            validation_alias=f"{env_prefix}clickhouse_driver",
+            validation_alias=f"{env_prefix}driver",
             serialization_alias="driver",
         )
 

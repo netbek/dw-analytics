@@ -9,7 +9,7 @@ project = Project.from_path(__file__)
 
 
 class Settings(BaseModel):
-    source_db: PGSettings = Field(default_factory=create_pg_settings("source_"))
+    source_db: PGSettings = Field(default_factory=create_pg_settings("source_postgres_"))
     destination_db: CHSettings = Field(
         default_factory=create_ch_settings(f"{project.name}_destination_")
     )
