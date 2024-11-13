@@ -1,5 +1,6 @@
 from package.config.constants import PEERDB_SOURCE_PEER
 from package.database import CHAdapter, PGAdapter
+from package.dbt_utils import list_resources
 from package.types import (
     CHSettings,
     CHTableIdentifier,
@@ -7,7 +8,6 @@ from package.types import (
     PGSettings,
     PGTableIdentifier,
 )
-from package.utils.dbt_utils import list_resources
 from pathlib import Path
 from typing import Optional
 
