@@ -1,4 +1,4 @@
-from package.dbt_utils import Dbt
+from package.dbt import Dbt
 from prefect import flow
 from projects.tutorial.config.settings import get_settings
 from typing import Optional
