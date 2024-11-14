@@ -45,14 +45,14 @@ async def install(project_name: str) -> None:
     for mirror in peerdb_config["mirrors"].values():
         for table_mapping in mirror["table_mappings"]:
             if "replica_identity" in table_mapping:
-                table_identifier = PGTableIdentifier.from_string(
+                source_table_identifier = PGTableIdentifier.from_string(
                     table_mapping["source_table_identifier"]
                 )
                 source_peer.set_table_replica_identity(
-                    table_identifier.table,
+                    source_table_identifier.table,
                     table_mapping["replica_identity"],
-                    database=table_identifier.database,
-                    schema=table_identifier.schema_,
+                    database=source_table_identifier.database,
+                    schema=source_table_identifier.schema_,
                 )
                 app.console.print(
                     f"Set replica identity of '{table_mapping["source_table_identifier"]}' to '{table_mapping["replica_identity"]}'",
@@ -133,15 +133,15 @@ async def uninstall(project_name: str) -> None:
     for mirror in peerdb_config["mirrors"].values():
         for table_mapping in mirror["table_mappings"]:
             if "replica_identity" in table_mapping:
-                table_identifier = PGTableIdentifier.from_string(
+                source_table_identifier = PGTableIdentifier.from_string(
                     table_mapping["source_table_identifier"]
                 )
                 replica_identity = "default"
                 source_peer.set_table_replica_identity(
-                    table_identifier.table,
+                    source_table_identifier.table,
                     replica_identity,
-                    database=table_identifier.database,
-                    schema=table_identifier.schema_,
+                    database=source_table_identifier.database,
+                    schema=source_table_identifier.schema_,
                 )
                 app.console.print(
                     f"Set replica identity of '{table_mapping["source_table_identifier"]}' to '{replica_identity}'",
