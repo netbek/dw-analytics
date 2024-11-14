@@ -38,12 +38,10 @@ class BaseAdapter(ABC):
 
     @classmethod
     @abstractmethod
-    def create_uri(cls, *args, **kwargs) -> str:
-        pass
+    def create_uri(cls, *args, **kwargs) -> str: ...
 
     @abstractmethod
-    def create_client():
-        pass
+    def create_client(): ...
 
     @contextmanager
     def create_engine(self):
@@ -63,30 +61,24 @@ class BaseAdapter(ABC):
         session.close()
 
     @abstractmethod
-    def has_database(self, database: str) -> bool:
-        pass
+    def has_database(self, database: str) -> bool: ...
 
     @abstractmethod
-    def create_database(self, database: str, replace: Optional[bool] = False) -> None:
-        pass
+    def create_database(self, database: str, replace: Optional[bool] = False) -> None: ...
 
     @abstractmethod
-    def drop_database(self, database: str) -> None:
-        pass
+    def drop_database(self, database: str) -> None: ...
 
     @abstractmethod
-    def has_schema(self, schema: str, database: Optional[str] = None) -> bool:
-        pass
+    def has_schema(self, schema: str, database: Optional[str] = None) -> bool: ...
 
     @abstractmethod
     def create_schema(
         self, schema: str, database: Optional[str] = None, replace: Optional[bool] = False
-    ) -> None:
-        pass
+    ) -> None: ...
 
     @abstractmethod
-    def drop_schema(self, schema: str, database: Optional[str] = None) -> None:
-        pass
+    def drop_schema(self, schema: str, database: Optional[str] = None) -> None: ...
 
     @overload
     @abstractmethod
@@ -99,8 +91,7 @@ class BaseAdapter(ABC):
     ) -> bool: ...
 
     @abstractmethod
-    def has_table(self, *args, **kwargs) -> bool:
-        pass
+    def has_table(self, *args, **kwargs) -> bool: ...
 
     @overload
     @abstractmethod
@@ -124,8 +115,7 @@ class BaseAdapter(ABC):
     ) -> None: ...
 
     @abstractmethod
-    def create_table(self, *args, **kwargs) -> None:
-        pass
+    def create_table(self, *args, **kwargs) -> None: ...
 
     @overload
     @abstractmethod
@@ -138,8 +128,7 @@ class BaseAdapter(ABC):
     ) -> None: ...
 
     @abstractmethod
-    def get_create_table_statement(self, *args, **kwargs) -> None:
-        pass
+    def get_create_table_statement(self, *args, **kwargs) -> None: ...
 
     @overload
     @abstractmethod
@@ -152,8 +141,7 @@ class BaseAdapter(ABC):
     ) -> None: ...
 
     @abstractmethod
-    def drop_table(self, *args, **kwargs) -> None:
-        pass
+    def drop_table(self, *args, **kwargs) -> None: ...
 
     @overload
     @abstractmethod
@@ -166,8 +154,7 @@ class BaseAdapter(ABC):
     ) -> None: ...
 
     @abstractmethod
-    def truncate_table(self, *args, **kwargs) -> None:
-        pass
+    def truncate_table(self, *args, **kwargs) -> None: ...
 
     @overload
     @abstractmethod
@@ -180,8 +167,7 @@ class BaseAdapter(ABC):
     ) -> Table: ...
 
     @abstractmethod
-    def get_table(self, *args, **kwargs) -> Table:
-        pass
+    def get_table(self, *args, **kwargs) -> Table: ...
 
     @overload
     @abstractmethod
@@ -197,8 +183,7 @@ class BaseAdapter(ABC):
     ) -> None: ...
 
     @abstractmethod
-    def get_table_replica_identity(self, *args, **kwargs) -> None:
-        pass
+    def get_table_replica_identity(self, *args, **kwargs) -> None: ...
 
     @overload
     @abstractmethod
@@ -217,8 +202,7 @@ class BaseAdapter(ABC):
     ) -> None: ...
 
     @abstractmethod
-    def set_table_replica_identity(self, *args, **kwargs) -> None:
-        pass
+    def set_table_replica_identity(self, *args, **kwargs) -> None: ...
 
     @overload
     @abstractmethod
@@ -229,8 +213,7 @@ class BaseAdapter(ABC):
     def drop_tables(self, database: Optional[str] = None, schema: Optional[str] = None) -> None: ...
 
     @abstractmethod
-    def drop_tables(self, *args, **kwargs) -> None:
-        pass
+    def drop_tables(self, *args, **kwargs) -> None: ...
 
     @overload
     @abstractmethod
@@ -243,12 +226,10 @@ class BaseAdapter(ABC):
     ) -> List[Table]: ...
 
     @abstractmethod
-    def list_tables(self, *args, **kwargs) -> List[Table]:
-        pass
+    def list_tables(self, *args, **kwargs) -> List[Table]: ...
 
     @abstractmethod
-    def has_user(self, username: str) -> bool:
-        pass
+    def has_user(self, username: str) -> bool: ...
 
     @overload
     @abstractmethod
@@ -267,12 +248,10 @@ class BaseAdapter(ABC):
     ) -> None: ...
 
     @abstractmethod
-    def create_user(self, *args, **kwargs) -> None:
-        pass
+    def create_user(self, *args, **kwargs) -> None: ...
 
     @abstractmethod
-    def drop_user(self, username: str) -> None:
-        pass
+    def drop_user(self, username: str) -> None: ...
 
     @overload
     @abstractmethod
@@ -283,8 +262,7 @@ class BaseAdapter(ABC):
     def grant_user_privileges(self, username: str, schema: str) -> None: ...
 
     @abstractmethod
-    def grant_user_privileges(self, *args, **kwargs) -> None:
-        pass
+    def grant_user_privileges(self, *args, **kwargs) -> None: ...
 
     @overload
     @abstractmethod
@@ -295,25 +273,19 @@ class BaseAdapter(ABC):
     def revoke_user_privileges(self, username: str, schema: str) -> None: ...
 
     @abstractmethod
-    def revoke_user_privileges(self, *args, **kwargs) -> None:
-        pass
+    def revoke_user_privileges(self, *args, **kwargs) -> None: ...
 
     @abstractmethod
-    def list_user_privileges(self, username: str) -> List[tuple]:
-        pass
+    def list_user_privileges(self, username: str) -> List[tuple]: ...
 
     @abstractmethod
-    def has_publication(self, publication: str) -> bool:
-        pass
+    def has_publication(self, publication: str) -> bool: ...
 
     @abstractmethod
-    def create_publication(self, publication: str, tables: List[str]) -> None:
-        pass
+    def create_publication(self, publication: str, tables: List[str]) -> None: ...
 
     @abstractmethod
-    def drop_publication(self, publication: str) -> None:
-        pass
+    def drop_publication(self, publication: str) -> None: ...
 
     @abstractmethod
-    def list_publications(self) -> List[str]:
-        pass
+    def list_publications(self) -> List[str]: ...
