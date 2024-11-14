@@ -173,15 +173,15 @@ class PeerDB:
 
         for value in result["publications"].values():
             for identifier in value["table_identifiers"]:
-                parts = identifier.split(".")
-                if len(parts) == 2:
-                    publication_schemas.append(parts[0])
+                source_table_identifier = PGTableIdentifier.from_string(identifier)
+                publication_schemas.append(source_table_identifier.schema_)
 
         for value in result["mirrors"].values():
             for table_mapping in value["table_mappings"]:
-                parts = table_mapping["source_table_identifier"].split(".")
-                if len(parts) == 2:
-                    publication_schemas.append(parts[0])
+                source_table_identifier = PGTableIdentifier.from_string(
+                    table_mapping["source_table_identifier"]
+                )
+                publication_schemas.append(source_table_identifier.schema_)
 
         result["publication_schemas"] = sorted(pydash.uniq(publication_schemas))
 
