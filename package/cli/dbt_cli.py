@@ -35,7 +35,8 @@ def model_yaml(models: list[str]):
         raise Exception(f"No dbt_project.yml found in {cwd} or higher")
 
     project = Project.from_path(cwd)
-    resources = Dbt(project.dbt_directory).list_resources(resource_types=[DbtResourceType.MODEL])
+    dbt = Dbt(project.dbt_directory)
+    resources = dbt.list_resources(resource_types=[DbtResourceType.MODEL])
 
     for model in models:
         resource = pydash.find(resources, lambda resource: resource.name == model)
