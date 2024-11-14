@@ -1,6 +1,6 @@
 from package.cli.root import app
 from package.config.constants import PEERDB_DESTINATION_PEER, PEERDB_SOURCE_PEER
-from package.peerdb import DestinationPeer, PeerDBClient, prepare_config, SourcePeer
+from package.peerdb import DestinationPeer, PeerDB, prepare_config, SourcePeer
 from package.project import Project
 from package.types import PGTableIdentifier
 from package.utils.typer_utils import typer_async
@@ -20,7 +20,7 @@ async def install(project_name: str) -> None:
         dbt_project_dir=project.dbt_directory,
         generate_exclude=True,
     )
-    peerdb_client = PeerDBClient(project.settings.peerdb.api_url)
+    peerdb = PeerDB(project.settings.peerdb.api_url)
     source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(
         project.settings.destination_db,
@@ -74,18 +74,18 @@ async def install(project_name: str) -> None:
         style="green",
     )
 
-    peerdb_client.update_settings(peerdb_config["settings"])
+    peerdb.update_settings(peerdb_config["settings"])
     app.console.print("Updated PeerDB settings", style="green")
 
     for peer in peerdb_config["peers"].values():
-        peerdb_client.create_peer(peer)
+        peerdb.create_peer(peer)
         app.console.print(
             f"Created PeerDB peer '{peer['name']}'",
             style="green",
         )
 
     for mirror in peerdb_config["mirrors"].values():
-        peerdb_client.create_mirror(mirror)
+        peerdb.create_mirror(mirror)
         app.console.print(
             f"Created PeerDB mirror '{mirror['flow_job_name']}'",
             style="green",
@@ -101,7 +101,7 @@ async def uninstall(project_name: str) -> None:
         dbt_project_dir=project.dbt_directory,
         generate_exclude=False,
     )
-    peerdb_client = PeerDBClient(project.settings.peerdb.api_url)
+    peerdb = PeerDB(project.settings.peerdb.api_url)
     source_peer = SourcePeer(project.settings.source_db)
     destination_peer = DestinationPeer(
         project.settings.destination_db,
@@ -110,14 +110,14 @@ async def uninstall(project_name: str) -> None:
     source_user = peerdb_config["users"].get(PEERDB_SOURCE_PEER)
 
     for mirror in peerdb_config["mirrors"].values():
-        peerdb_client.drop_mirror(mirror)
+        peerdb.drop_mirror(mirror)
         app.console.print(
             f"Dropped PeerDB mirror '{mirror['flow_job_name']}'",
             style="green",
         )
 
     for peer in peerdb_config["peers"].values():
-        peerdb_client.drop_peer(peer)
+        peerdb.drop_peer(peer)
         app.console.print(
             f"Dropped PeerDB peer '{peer['name']}'",
             style="green",

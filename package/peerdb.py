@@ -183,7 +183,7 @@ def to_pg_settings(postgres_config: dict) -> PGSettings:
     )
 
 
-class PeerDBClient:
+class PeerDB:
     def __init__(self, api_url: str) -> None:
         self._api_url = api_url
         self._headers = {"Content-Type": "application/json"}
