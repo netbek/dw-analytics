@@ -1,7 +1,7 @@
-from .base import BaseAdapter
 from clickhouse_connect.driver.client import Client
 from collections.abc import Generator
 from contextlib import contextmanager
+from package.database.adapters.base import BaseAdapter
 from package.types import CHIdentifier, CHSettings, CHTableIdentifier
 from sqlmodel import create_engine, MetaData, Table
 from typing import List, Optional

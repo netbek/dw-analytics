@@ -1,6 +1,6 @@
-from .base import BaseAdapter
 from collections.abc import Generator
 from contextlib import contextmanager
+from package.database.adapters.base import BaseAdapter
 from package.types import PGIdentifier, PGSettings, PGTableIdentifier
 from sqlmodel import create_engine, MetaData, Table
 from typing import Any, List, Optional
