@@ -16,11 +16,6 @@ import httpx
 import pydash
 
 
-# TODO Remove function after monkeypatching in package/tests/peerdb/test_prepare_config.py has been fixed
-def list_resources(project_dir, **kwargs):
-    return Dbt(project_dir).list_resources(**kwargs)
-
-
 def prepare_config(
     config: dict,
     dbt_project_dir: Optional[Path | str] = None,
@@ -67,7 +62,9 @@ def prepare_config(
             source_adapter = PGAdapter(pg_settings)
             source_tables = source_adapter.list_tables()
 
-            dbt_sources = list_resources(dbt_project_dir, resource_types=[DbtResourceType.SOURCE])
+            dbt_sources = Dbt(dbt_project_dir).list_resources(
+                resource_types=[DbtResourceType.SOURCE]
+            )
 
             # Validate the table mappings and compute the excluded columns
             for mirror in result["mirrors"].values():

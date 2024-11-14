@@ -208,7 +208,8 @@ class TestSourcePeerMissingTable(DBTest):
     @pytest.fixture(scope="function")
     def list_resources(self, monkeypatch) -> None:
         monkeypatch.setattr(
-            "package.peerdb.list_resources", lambda *args, **kwargs: list_resources__return_value
+            "package.peerdb.Dbt.list_resources",
+            lambda *args, **kwargs: list_resources__return_value,
         )
 
     def test_func(self, pg_tables: List[Table], list_resources: None):
@@ -239,7 +240,7 @@ class TestDbtMissingTable(DBTest):
     @pytest.fixture(scope="function")
     def list_resources(self, monkeypatch) -> None:
         monkeypatch.setattr(
-            "package.peerdb.list_resources",
+            "package.peerdb.Dbt.list_resources",
             lambda *args, **kwargs: list_resources__return_value[:1],
         )
 
@@ -269,7 +270,8 @@ class TestOK(DBTest):
     @pytest.fixture(scope="function")
     def list_resources(self, monkeypatch) -> None:
         monkeypatch.setattr(
-            "package.peerdb.list_resources", lambda *args, **kwargs: list_resources__return_value
+            "package.peerdb.Dbt.list_resources",
+            lambda *args, **kwargs: list_resources__return_value,
         )
 
     def test_func(self, pg_tables: List[Table], list_resources: None):
