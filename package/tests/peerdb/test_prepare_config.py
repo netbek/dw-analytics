@@ -1,6 +1,6 @@
 from package.config.settings import get_settings
 from package.database import PGAdapter
-from package.peerdb import prepare_config
+from package.peerdb import PeerDB
 from package.tests.fixtures.database import DBTest
 from package.types import DbtSource
 from sqlmodel import Table
@@ -179,7 +179,7 @@ class TestEmptyPeerDBConfig(DBTest):
 
     def test_func(self, pg_tables: List[Table]):
         peerdb_config = {}
-        actual = prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
+        actual = PeerDB.prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
         expected = {
             "mirrors": {},
             "peers": {},
@@ -216,7 +216,7 @@ class TestSourcePeerMissingTable(DBTest):
         peerdb_config = yaml.safe_load(peerdb_yaml)
 
         with pytest.raises(Exception) as exc:
-            prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
+            PeerDB.prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
 
         assert (
             str(exc.value) == "Source table 'public.table_2' not found in database of peer 'source'"
@@ -248,7 +248,7 @@ class TestDbtMissingTable(DBTest):
         peerdb_config = yaml.safe_load(peerdb_yaml)
 
         with pytest.raises(Exception) as exc:
-            prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
+            PeerDB.prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
 
         assert str(exc.value) == "Destination table 'table_2' not found in dbt config"
 
@@ -276,7 +276,7 @@ class TestOK(DBTest):
 
     def test_func(self, pg_tables: List[Table], list_resources: None):
         peerdb_config = yaml.safe_load(peerdb_yaml)
-        actual = prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
+        actual = PeerDB.prepare_config(peerdb_config, dbt_project_dir="/", generate_exclude=True)
         expected = {
             "mirrors": {
                 "cdc_small": {

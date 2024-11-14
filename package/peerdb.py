@@ -16,150 +16,6 @@ import httpx
 import pydash
 
 
-def prepare_config(
-    config: dict,
-    dbt_project_dir: Optional[Path | str] = None,
-    generate_exclude: Optional[bool] = False,
-) -> dict:
-    result = copy.deepcopy(config)
-
-    if "users" not in result:
-        result["users"] = {}
-
-    if "publications" in result:
-        for key, value in result["publications"].items():
-            result["publications"][key] = {
-                "name": key,
-                "table_identifiers": value,
-            }
-    else:
-        result["publications"] = {}
-
-    if "peers" in result:
-        result["peers"] = process_node(result["peers"])
-
-        for key, value in result["peers"].items():
-            result["peers"][key]["name"] = key
-    else:
-        result["peers"] = {}
-
-    if "mirrors" in result:
-        result["mirrors"] = process_node(result["mirrors"])
-
-        for key, value in result["mirrors"].items():
-            result["mirrors"][key]["flow_job_name"] = key
-
-        if generate_exclude and result["mirrors"]:
-            if dbt_project_dir is None:
-                raise Exception("'dbt_project_dir' is required")
-
-            source_peer = result["peers"].get(PEERDB_SOURCE_PEER)
-
-            if not source_peer:
-                raise Exception(f"Peer '{PEERDB_SOURCE_PEER}' not found in PeerDB config")
-
-            pg_settings = to_pg_settings(source_peer["postgres_config"])
-            source_adapter = PGAdapter(pg_settings)
-            source_tables = source_adapter.list_tables()
-
-            dbt_sources = Dbt(dbt_project_dir).list_resources(
-                resource_types=[DbtResourceType.SOURCE]
-            )
-
-            # Validate the table mappings and compute the excluded columns
-            for mirror in result["mirrors"].values():
-                computed_table_mappings = []
-
-                for table_mapping in mirror["table_mappings"]:
-                    # Find the source table in the source database
-                    source_table_identifier = PGTableIdentifier.from_string(
-                        table_mapping["source_table_identifier"]
-                    )
-                    source_table = pydash.find(
-                        source_tables,
-                        lambda table: (
-                            table.schema == source_table_identifier.schema_
-                            and table.name == source_table_identifier.table
-                        ),
-                    )
-
-                    if source_table is None:
-                        raise Exception(
-                            f"Source table '{table_mapping["source_table_identifier"]}' not found in database of peer '{PEERDB_SOURCE_PEER}'"
-                        )
-
-                    # Find the destination table in the dbt sources config
-                    destination_table_identifier = CHTableIdentifier.from_string(
-                        table_mapping["destination_table_identifier"]
-                    )
-                    dbt_source = pydash.find(
-                        dbt_sources,
-                        lambda source: source.name == destination_table_identifier.table,
-                    )
-
-                    if dbt_source is None:
-                        raise Exception(
-                            f"Destination table '{table_mapping["destination_table_identifier"]}' not found in dbt config"
-                        )
-
-                    # Compute the excluded columns (difference between source and destination tables)
-                    source_columns = [str(column.name) for column in source_table.columns]
-                    dbt_source_columns = [
-                        column.name for column in dbt_source.original_config.columns
-                    ]
-                    computed_exclude = pydash.difference(source_columns, dbt_source_columns)
-                    computed_exclude = sorted(computed_exclude)
-
-                    # Compute the table mapping
-                    computed_table_mapping = pydash.assign(
-                        pydash.pick(
-                            table_mapping,
-                            [
-                                "source_table_identifier",
-                                "destination_table_identifier",
-                            ],
-                        ),
-                        {"exclude": computed_exclude},
-                    )
-                    computed_table_mappings.append(computed_table_mapping)
-
-                mirror["table_mappings"] = computed_table_mappings
-    else:
-        result["mirrors"] = {}
-
-    publication_schemas = []
-
-    for value in result["publications"].values():
-        for identifier in value["table_identifiers"]:
-            parts = identifier.split(".")
-            if len(parts) == 2:
-                publication_schemas.append(parts[0])
-
-    for value in result["mirrors"].values():
-        for table_mapping in value["table_mappings"]:
-            parts = table_mapping["source_table_identifier"].split(".")
-            if len(parts) == 2:
-                publication_schemas.append(parts[0])
-
-    result["publication_schemas"] = sorted(pydash.uniq(publication_schemas))
-
-    return result
-
-
-def process_node(node: dict) -> dict:
-    default_keys = [key for key in node.keys() if key.startswith("+")]
-    defaults = {key.lstrip("+").strip(): node[key] for key in default_keys}
-
-    if defaults:
-        for key in node.keys():
-            if not key.startswith("+"):
-                node[key] = pydash.defaults(node[key], defaults)
-
-        node = pydash.omit(node, *default_keys)
-
-    return node
-
-
 def to_ch_settings(clickhouse_config: dict) -> CHSettings:
     return CHSettings(
         host=clickhouse_config["host"],
@@ -187,6 +43,149 @@ class PeerDB:
     def __init__(self, api_url: str) -> None:
         self._api_url = api_url
         self._headers = {"Content-Type": "application/json"}
+
+    @classmethod
+    def prepare_config(
+        cls,
+        config: dict,
+        dbt_project_dir: Optional[Path | str] = None,
+        generate_exclude: Optional[bool] = False,
+    ) -> dict:
+        def process_node(node: dict) -> dict:
+            default_keys = [key for key in node.keys() if key.startswith("+")]
+            defaults = {key.lstrip("+").strip(): node[key] for key in default_keys}
+
+            if defaults:
+                for key in node.keys():
+                    if not key.startswith("+"):
+                        node[key] = pydash.defaults(node[key], defaults)
+
+                node = pydash.omit(node, *default_keys)
+
+            return node
+
+        result = copy.deepcopy(config)
+
+        if "users" not in result:
+            result["users"] = {}
+
+        if "publications" in result:
+            for key, value in result["publications"].items():
+                result["publications"][key] = {
+                    "name": key,
+                    "table_identifiers": value,
+                }
+        else:
+            result["publications"] = {}
+
+        if "peers" in result:
+            result["peers"] = process_node(result["peers"])
+
+            for key, value in result["peers"].items():
+                result["peers"][key]["name"] = key
+        else:
+            result["peers"] = {}
+
+        if "mirrors" in result:
+            result["mirrors"] = process_node(result["mirrors"])
+
+            for key, value in result["mirrors"].items():
+                result["mirrors"][key]["flow_job_name"] = key
+
+            if generate_exclude and result["mirrors"]:
+                if dbt_project_dir is None:
+                    raise Exception("'dbt_project_dir' is required")
+
+                source_peer = result["peers"].get(PEERDB_SOURCE_PEER)
+
+                if not source_peer:
+                    raise Exception(f"Peer '{PEERDB_SOURCE_PEER}' not found in PeerDB config")
+
+                pg_settings = to_pg_settings(source_peer["postgres_config"])
+                source_adapter = PGAdapter(pg_settings)
+                source_tables = source_adapter.list_tables()
+
+                dbt = Dbt(dbt_project_dir)
+                dbt_sources = dbt.list_resources(resource_types=[DbtResourceType.SOURCE])
+
+                # Validate the table mappings and compute the excluded columns
+                for mirror in result["mirrors"].values():
+                    computed_table_mappings = []
+
+                    for table_mapping in mirror["table_mappings"]:
+                        # Find the source table in the source database
+                        source_table_identifier = PGTableIdentifier.from_string(
+                            table_mapping["source_table_identifier"]
+                        )
+                        source_table = pydash.find(
+                            source_tables,
+                            lambda table: (
+                                table.schema == source_table_identifier.schema_
+                                and table.name == source_table_identifier.table
+                            ),
+                        )
+
+                        if source_table is None:
+                            raise Exception(
+                                f"Source table '{table_mapping["source_table_identifier"]}' not found in database of peer '{PEERDB_SOURCE_PEER}'"
+                            )
+
+                        # Find the destination table in the dbt sources config
+                        destination_table_identifier = CHTableIdentifier.from_string(
+                            table_mapping["destination_table_identifier"]
+                        )
+                        dbt_source = pydash.find(
+                            dbt_sources,
+                            lambda source: source.name == destination_table_identifier.table,
+                        )
+
+                        if dbt_source is None:
+                            raise Exception(
+                                f"Destination table '{table_mapping["destination_table_identifier"]}' not found in dbt config"
+                            )
+
+                        # Compute the excluded columns (difference between source and destination tables)
+                        source_columns = [str(column.name) for column in source_table.columns]
+                        dbt_source_columns = [
+                            column.name for column in dbt_source.original_config.columns
+                        ]
+                        computed_exclude = pydash.difference(source_columns, dbt_source_columns)
+                        computed_exclude = sorted(computed_exclude)
+
+                        # Compute the table mapping
+                        computed_table_mapping = pydash.assign(
+                            pydash.pick(
+                                table_mapping,
+                                [
+                                    "source_table_identifier",
+                                    "destination_table_identifier",
+                                ],
+                            ),
+                            {"exclude": computed_exclude},
+                        )
+                        computed_table_mappings.append(computed_table_mapping)
+
+                    mirror["table_mappings"] = computed_table_mappings
+        else:
+            result["mirrors"] = {}
+
+        publication_schemas = []
+
+        for value in result["publications"].values():
+            for identifier in value["table_identifiers"]:
+                parts = identifier.split(".")
+                if len(parts) == 2:
+                    publication_schemas.append(parts[0])
+
+        for value in result["mirrors"].values():
+            for table_mapping in value["table_mappings"]:
+                parts = table_mapping["source_table_identifier"].split(".")
+                if len(parts) == 2:
+                    publication_schemas.append(parts[0])
+
+        result["publication_schemas"] = sorted(pydash.uniq(publication_schemas))
+
+        return result
 
     def update_settings(self, settings: dict) -> None:
         url = f"{self._api_url}/v1/dynamic_settings"
