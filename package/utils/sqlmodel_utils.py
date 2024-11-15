@@ -3,7 +3,7 @@ from package.database import CHAdapter
 from package.types import CHSettings, DbtSource
 from package.utils.python_utils import is_python_keyword
 from sqlalchemy import Column
-from typing import Any, List
+from typing import Any, List, Optional
 
 import os
 import pydash
@@ -285,8 +285,8 @@ def create_model_code(db_settings: CHSettings, database: str, dbt_resource: DbtS
             "sa_column": f"Column({serialize_dict(sqlalchemy_column_kwargs)})",
         }
 
-        # If the column is an integer primary key, then generate a globally unique integer.
-        if column.primary_key and python_type is int:
+        # If the column is an integer primary key, then generate a globally unique integer
+        if python_type is int and column.primary_key:
             field_kwargs["default_factory"] = "lambda: int(pydash.unique_id())"
             imports.append("import pydash")
 
@@ -331,15 +331,21 @@ def create_model_code(db_settings: CHSettings, database: str, dbt_resource: DbtS
 
 
 def create_model_file(
-    db_settings: CHSettings, database: str, dbt_resource: DbtSource, directory: str
+    db_settings: CHSettings,
+    database: str,
+    dbt_resource: DbtSource,
+    directory: str,
+    replace: Optional[bool] = False,
 ) -> None:
     model_name = dbt_resource.original_config.meta.python_class
     filename = create_class_filename(model_name)
     file_path = os.path.join(directory, f"{filename}.py")
-    code = create_model_code(db_settings, database, dbt_resource)
 
-    with open(file_path, "wt") as fp:
-        fp.write(code)
+    if not os.path.exists(file_path) or replace:
+        code = create_model_code(db_settings, database, dbt_resource)
+
+        with open(file_path, "wt") as fp:
+            fp.write(code)
 
 
 def create_factory_code(dbt_resource: DbtSource, random_seed: int = 0) -> str:
@@ -369,15 +375,19 @@ def create_factory_code(dbt_resource: DbtSource, random_seed: int = 0) -> str:
     return "\n".join(lines) + "\n"
 
 
-def create_factory_file(dbt_resource: DbtSource, directory: str) -> None:
+def create_factory_file(
+    dbt_resource: DbtSource, directory: str, replace: Optional[bool] = False
+) -> None:
     model_name = dbt_resource.original_config.meta.python_class
     factory_name = create_factory_name(model_name)
     filename = create_class_filename(factory_name)
     file_path = os.path.join(directory, f"{filename}.py")
-    code = create_factory_code(dbt_resource)
 
-    with open(file_path, "wt") as fp:
-        fp.write(code)
+    if not os.path.exists(file_path) or replace:
+        code = create_factory_code(dbt_resource)
+
+        with open(file_path, "wt") as fp:
+            fp.write(code)
 
 
 def create_init_file(dbt_resources: List[DbtSource], directory: str) -> None:
