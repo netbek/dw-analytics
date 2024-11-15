@@ -7,7 +7,7 @@ from typing import Any, List
 
 import os
 import pydash
-import re
+import sqlglot
 import uuid
 
 CLICKHOUSE_TYPES = [
@@ -63,43 +63,48 @@ FIELD_KWARGS = {
 
 
 def parse_create_table_statement(statement: str) -> dict:
-    pattern = (
-        r"(PRIMARY\s+KEY|ORDER\s+BY)\s*\(([\w\s,]+)\)|(PRIMARY\s+KEY|ORDER\s+BY)\s+(\w+)|"
-        r"ENGINE\s*=\s*([\w]+)\s*\(?([\w\s,]*)\)?"
-    )
-
-    results = {
+    result = {
         "engine": None,
         "version": None,
+        "is_deleted": None,
         "primary_key": [],
         "order_by": [],
+        "settings": {},
     }
 
-    # Find all matches for PRIMARY KEY, ORDER BY, and ENGINE
-    matches = re.finditer(pattern, statement, re.IGNORECASE)
+    parsed = sqlglot.parse_one(statement, dialect="clickhouse")
 
-    for match in matches:
-        # Check for PRIMARY KEY or ORDER BY
-        key_type = match.group(1) or match.group(3)
-        columns = match.group(2) or match.group(4)
+    engine = parsed.find(sqlglot.exp.EngineProperty)
 
-        if key_type:
-            key_type = pydash.snake_case(key_type)
+    if engine:
+        result["engine"] = engine.this.name
+        params = [p.name for p in engine.this.iter_expressions()]
 
-            if columns:
-                results[key_type].extend([col.strip() for col in columns.split(",")])
+        if len(params) == 2:
+            result["version"] = params[0]
+            result["is_deleted"] = params[1]
+        elif len(params) == 1:
+            result["version"] = params[0]
 
-        # Check for ENGINE
-        engine_name = match.group(5)
-        engine_params = match.group(6)
+    primary_key = parsed.find(sqlglot.exp.PrimaryKey)
 
-        if engine_name:
-            results["engine"] = engine_name
+    if primary_key:
+        result["primary_key"] = [expression.name for expression in primary_key.iter_expressions()]
 
-            if engine_params:
-                results["version"] = engine_params.strip()
+    order_by = parsed.find(sqlglot.exp.Ordered)
 
-    return results
+    if order_by:
+        for expression in order_by.iter_expressions():
+            for inner_expression in expression.iter_expressions():
+                result["order_by"].append(inner_expression.name)
+
+    settings = parsed.find(sqlglot.exp.SettingsProperty)
+
+    if settings:
+        for expression in settings.iter_expressions():
+            result["settings"][expression.this.name] = str(expression.expression)
+
+    return result
 
 
 def to_field_name(column_name: str) -> str:
