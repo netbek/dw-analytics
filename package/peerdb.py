@@ -39,6 +39,10 @@ def to_pg_settings(postgres_config: dict) -> PGSettings:
     )
 
 
+class MirrorNotFound(Exception):
+    pass
+
+
 class PeerDB:
     def __init__(self, api_url: str) -> None:
         self._api_url = api_url
@@ -202,17 +206,19 @@ class PeerDB:
     def has_peer(self, peer: dict) -> bool:
         url = f"{self._api_url}/v1/peers/list"
         response = httpx.get(url, headers=self._headers)
-        matches = [item for item in response.json()["items"] if item["name"] == peer["name"]]
+        items = response.json().get("items", [])
+        matched_items = [item for item in items if item["name"] == peer["name"]]
 
-        return bool(matches)
+        return bool(matched_items)
 
     def create_peer(self, peer: dict) -> None:
         if not self.has_peer(peer):
             url = f"{self._api_url}/v1/peers/create"
             data = {"peer": peer}
             response = httpx.post(url, json=data, headers=self._headers)
+            status = response.json().get("status")
 
-            if not (response.status_code == 200 and response.json()["status"] == "CREATED"):
+            if not (response.status_code == 200 and status == "CREATED"):
                 raise Exception(
                     f"Failed to create peer '{peer['name']}' (error {response.status_code}: {response.text})"
                 )
@@ -223,28 +229,44 @@ class PeerDB:
             data = {"peerName": peer["name"]}
             response = httpx.post(url, json=data, headers=self._headers, timeout=None)
 
-            if not (response.status_code == 200 and response.json()["ok"]):
+            if not (response.status_code == 200):
                 raise Exception(
                     f"Failed to drop peer '{peer['name']}' (error {response.status_code}: {response.text})"
                 )
 
     def has_mirror(self, mirror: dict) -> bool:
-        return self.get_mirror_status(mirror) != "STATUS_UNKNOWN"
+        try:
+            return self.get_mirror_status(mirror) != "STATUS_UNKNOWN"
+        except MirrorNotFound:
+            return False
 
-    def get_mirror_status(self, mirror: dict) -> None:
+    def get_mirror_status(self, mirror: dict) -> str | None:
         url = f"{self._api_url}/v1/mirrors/status"
         data = {"flowJobName": mirror["flow_job_name"]}
         response = httpx.post(url, json=data, headers=self._headers)
+        current_flow_state = response.json().get("currentFlowState")
+        message = response.json().get("message", "")
 
-        return response.json()["currentFlowState"]
+        if response.status_code == 200:
+            return current_flow_state
+        elif (
+            response.status_code == 500
+            and "unable to get the workflow id of mirror" in message.lower()
+        ):
+            raise MirrorNotFound()
+        else:
+            raise Exception(
+                f"Failed to get status of mirror '{mirror['flow_job_name']}' (error {response.status_code}: {response.text})"
+            )
 
     def create_mirror(self, mirror: dict) -> None:
         if not self.has_mirror(mirror):
             url = f"{self._api_url}/v1/flows/cdc/create"
             data = {"connection_configs": mirror}
             response = httpx.post(url, json=data, headers=self._headers)
+            workflow_id = response.json().get("workflowId")
 
-            if not (response.status_code == 200 and "workflowId" in response.json()):
+            if not (response.status_code == 200 and workflow_id):
                 raise Exception(
                     f"Failed to create mirror '{mirror['flow_job_name']}' (error {response.status_code}: {response.text})"
                 )
@@ -258,7 +280,7 @@ class PeerDB:
             }
             response = httpx.post(url, json=data, headers=self._headers, timeout=None)
 
-            if not (response.status_code == 200 and response.json()["ok"]):
+            if not (response.status_code == 200):
                 raise Exception(
                     f"Failed to drop mirror '{mirror['flow_job_name']}' (error {response.status_code}: {response.text})"
                 )
