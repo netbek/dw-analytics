@@ -285,7 +285,7 @@ def create_model_code(db_settings: CHSettings, database: str, dbt_resource: DbtS
             "sa_column": f"Column({serialize_dict(sqlalchemy_column_kwargs)})",
         }
 
-        # If column is an integer primary key (possibly auto-incrementing), then generate a globally unique integer
+        # If the column is an integer primary key, then generate a globally unique integer.
         if column.primary_key and python_type is int:
             field_kwargs["default_factory"] = "lambda: int(pydash.unique_id())"
             imports.append("import pydash")
