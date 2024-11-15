@@ -246,6 +246,9 @@ def create_model_code(db_settings: CHSettings, database: str, dbt_resource: DbtS
     if parsed_statement["primary_key"]:
         engine_kwargs["primary_key"] = tuple(parsed_statement["primary_key"])
 
+    if parsed_statement["settings"]:
+        engine_kwargs.update(parsed_statement["settings"])
+
     imports = [
         "from clickhouse_sqlalchemy import engines",
         "from package.sqlalchemy.clickhouse import types",
