@@ -69,11 +69,11 @@ def parse_create_table_statement(statement: str) -> dict:
 
     parsed = sqlglot.parse_one(statement, dialect="clickhouse")
 
-    engine = parsed.find(sqlglot.exp.EngineProperty)
+    node = parsed.find(sqlglot.exp.EngineProperty)
 
-    if engine:
-        result["engine"] = engine.this.name
-        params = [p.name for p in engine.this.iter_expressions()]
+    if node:
+        result["engine"] = node.this.name
+        params = [param.name for param in node.this.iter_expressions()]
 
         if len(params) == 2:
             result["version"] = params[0]
@@ -81,22 +81,22 @@ def parse_create_table_statement(statement: str) -> dict:
         elif len(params) == 1:
             result["version"] = params[0]
 
-    primary_key = parsed.find(sqlglot.exp.PrimaryKey)
+    node = parsed.find(sqlglot.exp.PrimaryKey)
 
-    if primary_key:
-        result["primary_key"] = [expression.name for expression in primary_key.iter_expressions()]
+    if node:
+        result["primary_key"] = [expression.name for expression in node.iter_expressions()]
 
-    order_by = parsed.find(sqlglot.exp.Ordered)
+    node = parsed.find(sqlglot.exp.Ordered)
 
-    if order_by:
-        for expression in order_by.iter_expressions():
+    if node:
+        for expression in node.iter_expressions():
             for inner_expression in expression.iter_expressions():
                 result["order_by"].append(inner_expression.name)
 
-    settings = parsed.find(sqlglot.exp.SettingsProperty)
+    node = parsed.find(sqlglot.exp.SettingsProperty)
 
-    if settings:
-        for expression in settings.iter_expressions():
+    if node:
+        for expression in node.iter_expressions():
             result["settings"][expression.this.name] = str(expression.expression)
 
     return result
