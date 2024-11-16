@@ -5,9 +5,11 @@ from package.utils.python_utils import is_python_keyword
 from sqlalchemy import Column
 from typing import Any, Dict, List, Optional
 
+import datetime
 import os
 import pydash
 import sqlglot
+import sqlglot.expressions
 import uuid
 
 CLICKHOUSE_TYPES = [
@@ -56,6 +58,28 @@ SQLALCHEMY_TO_CLICKHOUSE_TYPE = {
 
 INDENT = pydash.repeat(" ", 4)
 
+SQLGLOT_TO_PYTHON_TYPE = {
+    sqlglot.expressions.DataType.Type.BIGINT: int,
+    sqlglot.expressions.DataType.Type.BOOLEAN: bool,
+    sqlglot.expressions.DataType.Type.DATETIME: datetime.datetime,
+    sqlglot.expressions.DataType.Type.DATETIME64: datetime.datetime,
+    sqlglot.expressions.DataType.Type.TEXT: str,
+    sqlglot.expressions.DataType.Type.TINYINT: int,
+    sqlglot.expressions.DataType.Type.UBIGINT: int,
+    sqlglot.expressions.DataType.Type.UUID: uuid.UUID,
+}
+
+SQLGLOT_TO_SQLALCHEMY_TYPE = {
+    sqlglot.expressions.DataType.Type.BIGINT: types.Int64,
+    sqlglot.expressions.DataType.Type.BOOLEAN: types.Boolean,
+    sqlglot.expressions.DataType.Type.DATETIME: types.DateTime,
+    sqlglot.expressions.DataType.Type.DATETIME64: types.DateTime64,
+    sqlglot.expressions.DataType.Type.TEXT: types.String,
+    sqlglot.expressions.DataType.Type.TINYINT: types.Int8,
+    sqlglot.expressions.DataType.Type.UBIGINT: types.UInt64,
+    sqlglot.expressions.DataType.Type.UUID: types.UUID,
+}
+
 
 def parse_create_table_statement(statement: str) -> dict:
     result = {
@@ -65,10 +89,11 @@ def parse_create_table_statement(statement: str) -> dict:
         "primary_key": [],
         "order_by": [],
         "settings": {},
+        # "columns": [],
     }
-
     parsed = sqlglot.parse_one(statement, dialect="clickhouse")
 
+    # Table engine
     node = parsed.find(sqlglot.exp.EngineProperty)
 
     if node:
@@ -81,11 +106,13 @@ def parse_create_table_statement(statement: str) -> dict:
         elif len(params) == 1:
             result["version"] = params[0]
 
+    # Primary key
     node = parsed.find(sqlglot.exp.PrimaryKey)
 
     if node:
         result["primary_key"] = [expression.name for expression in node.iter_expressions()]
 
+    # Order by
     node = parsed.find(sqlglot.exp.Ordered)
 
     if node:
@@ -93,11 +120,46 @@ def parse_create_table_statement(statement: str) -> dict:
             for inner_expression in expression.iter_expressions():
                 result["order_by"].append(inner_expression.name)
 
+    # Settings
     node = parsed.find(sqlglot.exp.SettingsProperty)
 
     if node:
         for expression in node.iter_expressions():
             result["settings"][expression.this.name] = str(expression.expression)
+
+    # Columns
+    for node in parsed.find_all(sqlglot.exp.ColumnDef):
+        name = node.name
+        primary_key = name in result["primary_key"]
+        nullable = node.kind.args.get("nullable")
+
+        sqlglot_type = node.kind.args.get("this")
+        python_type = SQLGLOT_TO_PYTHON_TYPE.get(sqlglot_type)
+        sqlalchemy_type = SQLGLOT_TO_SQLALCHEMY_TYPE.get(sqlglot_type)
+
+        if python_type is None:
+            pydantic_type = "None"
+        elif python_type.__module__ in ["datetime"]:
+            pydantic_type = f"{python_type.__module__}.{python_type.__qualname__}"
+            if nullable:
+                pydantic_type = f"{pydantic_type} | None"
+        else:
+            pydantic_type = python_type.__qualname__
+            if nullable:
+                pydantic_type = f"{pydantic_type} | None"
+
+        if not pydantic_type or not sqlalchemy_type:
+            print(repr(node))
+
+            # print(
+            #     name,
+            #     primary_key,
+            #     nullable,
+            #     sqlglot_type,
+            #     python_type,
+            #     pydantic_type,
+            #     sqlalchemy_type,
+            # )
 
     return result
 
