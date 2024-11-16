@@ -56,11 +56,6 @@ SQLALCHEMY_TO_CLICKHOUSE_TYPE = {
 
 INDENT = pydash.repeat(" ", 4)
 
-FIELD_KWARGS = {
-    "_peerdb_is_deleted": {"ge": 0, "le": 1},
-    "_peerdb_version": {"ge": 0},
-}
-
 
 def parse_create_table_statement(statement: str) -> dict:
     result = {
@@ -288,14 +283,6 @@ def create_model_code(
             "sa_column": f"Column({serialize_dict(sqlalchemy_column_kwargs)})",
         }
 
-        # If the column is an integer primary key, then generate a globally unique integer
-        if python_type is int and column.primary_key:
-            field_kwargs["default_factory"] = "lambda: int(pydash.unique_id())"
-            imports.append("import pydash")
-
-        if column.name in FIELD_KWARGS:
-            field_kwargs.update(FIELD_KWARGS[column.name])
-
         column_def = f"{field_name}: {pydantic_type} = Field({serialize_dict(field_kwargs)})"
         columns.append(column_def)
 
@@ -305,18 +292,7 @@ def create_model_code(
 
     lines = []
 
-    # Add statement for reference
-    lines.append('"""\nCreated from:\n\n' + statement + '\n"""')
-    lines.append("")
-
-    # Add imports
-    imports = sorted(list(set(imports)))
-    for class_import in imports:
-        lines.append(class_import)
-
     # Add table class
-    lines.append("")
-    lines.append("")
     lines.append(f"class {model_name}(SQLModel, table=True):")
     lines.append(INDENT + f"__tablename__ = '{table_name}'")
     lines.append(
@@ -328,6 +304,10 @@ def create_model_code(
     # Add columns
     for column in columns:
         lines.append(INDENT + column)
+
+    # Add statement for reference, add imports
+    imports = sorted(list(set(imports)))
+    lines = ['"""\nCreated from:\n\n' + statement + '\n"""', ""] + imports + ["", ""] + lines
 
     model_code = "\n".join(lines) + "\n"
 
@@ -343,16 +323,25 @@ def create_model_code(
 
     lines = []
 
-    # Add imports
-    imports = sorted(list(set(imports)))
-    for import_ in imports:
-        lines.append(import_)
-
     # Add factory class
-    lines.append("")
-    lines.append("")
     lines.append(f"class {factory_name}(PeerDBMixin, SQLModelFactory[{model_name}]):")
     lines.append(INDENT + f"__random_seed__ = {random_seed}")
+
+    for column in sa_table.columns:
+        python_type = get_python_type(column)
+
+        # If the column is an integer primary key, then generate a globally unique integer
+        if python_type is int and column.primary_key:
+            lines.append("")
+            lines.append(INDENT + "@classmethod")
+            lines.append(INDENT + f"def {column.name}(cls) -> int:")
+            lines.append(INDENT + INDENT + "return int(pydash.unique_id())")
+
+            imports.append("import pydash")
+
+    # Add imports
+    imports = sorted(list(set(imports)))
+    lines = imports + ["", ""] + lines
 
     factory_code = "\n".join(lines) + "\n"
 
