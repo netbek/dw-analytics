@@ -17,9 +17,19 @@ python_class = "TestTable"
 create_table_statement = f"""
 create or replace table {table_identifier.to_string()}
 (
-    `id` UInt64,
+    `uint64` UInt64,
+    `int64` Int64,
+    `uint32` UInt32,
+    `int32` Int32,
+    `uint16` UInt16,
+    `int16` Int16,
+    `uint8` UInt8,
+    `int8` Int8,
+    `float64` Float64,
+    `float32` Float32,
     `bool` Boolean,
     `nullable_bool` Nullable(Boolean),
+    `date32` Date32,
     `datetime` DateTime default now(),
     `nullable(datetime)` Nullable(DateTime),
     `datetime64` DateTime64(9) default now(),
@@ -33,8 +43,8 @@ create or replace table {table_identifier.to_string()}
     `_peerdb_version` Int64
 )
 engine = MergeTree
-primary key `id`
-order by `id`
+primary key `uint64`
+order by `uint64`
 """
 
 dbt_source = {
@@ -52,9 +62,19 @@ dbt_source = {
             "python_class": python_class,
         },
         "columns": [
-            {"name": "id", "data_type": "UInt64"},
+            {"name": "uint64", "data_type": "UInt64"},
+            {"name": "int64", "data_type": "Int64"},
+            {"name": "uint32", "data_type": "UInt32"},
+            {"name": "int32", "data_type": "Int32"},
+            {"name": "uint16", "data_type": "UInt16"},
+            {"name": "int16", "data_type": "Int16"},
+            {"name": "uint8", "data_type": "UInt8"},
+            {"name": "int8", "data_type": "Int8"},
+            {"name": "float64", "data_type": "Float64"},
+            {"name": "float32", "data_type": "Float32"},
             {"name": "bool", "data_type": "Boolean"},
             {"name": "nullable_bool", "data_type": "Nullable(Boolean)"},
+            {"name": "date32", "data_type": "Date32"},
             {"name": "datetime", "data_type": "DateTime"},
             {"name": "nullable_datetime", "data_type": "Nullable(DateTime)"},
             {"name": "datetime64", "data_type": "DateTime64(9)"},
@@ -77,9 +97,19 @@ Created from:
 
 CREATE TABLE {table_identifier.database}.{table_identifier.table}
 (
-    `id` UInt64,
+    `uint64` UInt64,
+    `int64` Int64,
+    `uint32` UInt32,
+    `int32` Int32,
+    `uint16` UInt16,
+    `int16` Int16,
+    `uint8` UInt8,
+    `int8` Int8,
+    `float64` Float64,
+    `float32` Float32,
     `bool` Bool,
     `nullable_bool` Nullable(Bool),
+    `date32` Date32,
     `datetime` DateTime DEFAULT now(),
     `nullable(datetime)` Nullable(DateTime),
     `datetime64` DateTime64(9) DEFAULT now(),
@@ -93,8 +123,8 @@ CREATE TABLE {table_identifier.database}.{table_identifier.table}
     `_peerdb_version` Int64
 )
 ENGINE = MergeTree
-PRIMARY KEY id
-ORDER BY id
+PRIMARY KEY uint64
+ORDER BY uint64
 SETTINGS index_granularity = 8192
 \"""
 
@@ -107,11 +137,21 @@ import datetime
 
 class {python_class}(SQLModel, table=True):
     __tablename__ = '{table_identifier.table}'
-    __table_args__ = (engines.MergeTree(order_by=('id',), primary_key=('id',), index_granularity=8192), {{'schema': '{table_identifier.database}'}},)
+    __table_args__ = (engines.MergeTree(order_by=('uint64',), primary_key=('uint64',), index_granularity=8192), {{'schema': '{table_identifier.database}'}},)
 
-    id: int = Field(sa_column=Column(name='id', type_=types.UInt64, primary_key=True))
+    uint64: int = Field(sa_column=Column(name='uint64', type_=types.UInt64, primary_key=True))
+    int64: int = Field(sa_column=Column(name='int64', type_=types.Int64, nullable=False))
+    uint32: int = Field(sa_column=Column(name='uint32', type_=types.UInt32, nullable=False))
+    int32: int = Field(sa_column=Column(name='int32', type_=types.Int32, nullable=False))
+    uint16: int = Field(sa_column=Column(name='uint16', type_=types.UInt16, nullable=False))
+    int16: int = Field(sa_column=Column(name='int16', type_=types.Int16, nullable=False))
+    uint8: int = Field(sa_column=Column(name='uint8', type_=types.UInt8, nullable=False))
+    int8: int = Field(sa_column=Column(name='int8', type_=types.Int8, nullable=False))
+    float64: float = Field(sa_column=Column(name='float64', type_=types.Float64, nullable=False))
+    float32: float = Field(sa_column=Column(name='float32', type_=types.Float32, nullable=False))
     bool: bool = Field(sa_column=Column(name='bool', type_=types.Boolean, nullable=False))
     nullable_bool: bool | None = Field(sa_column=Column(name='nullable_bool', type_=types.Nullable(types.Boolean), nullable=True))
+    date32: datetime.date = Field(sa_column=Column(name='date32', type_=types.Date32, nullable=False))
     datetime: datetime.datetime = Field(sa_column=Column(name='datetime', type_=types.DateTime, nullable=False))
     nullable(datetime): datetime.datetime | None = Field(sa_column=Column(name='nullable(datetime)', type_=types.Nullable(types.DateTime), nullable=True))
     datetime64: datetime.datetime = Field(sa_column=Column(name='datetime64', type_=types.DateTime64(9), nullable=False))
@@ -136,7 +176,7 @@ class {python_class}Factory(PeerDBMixin, SQLModelFactory[{python_class}]):
     __random_seed__ = 0
 
     @classmethod
-    def id(cls) -> int:
+    def uint64(cls) -> int:
         return int(pydash.unique_id())
 """
 

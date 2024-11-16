@@ -1,9 +1,7 @@
-from clickhouse_sqlalchemy import types
 from package.database import CHAdapter
 from package.types import CHSettings, DbtSource
 from package.utils.python_utils import is_python_keyword
-from sqlalchemy import Column
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import datetime
 import os
@@ -56,29 +54,26 @@ SQLALCHEMY_TO_CLICKHOUSE_TYPE = {
     "Bool": "Boolean",
 }
 
-INDENT = pydash.repeat(" ", 4)
-
 SQLGLOT_TO_PYTHON_TYPE = {
-    sqlglot.expressions.DataType.Type.BIGINT: int,
-    sqlglot.expressions.DataType.Type.BOOLEAN: bool,
-    sqlglot.expressions.DataType.Type.DATETIME: datetime.datetime,
-    sqlglot.expressions.DataType.Type.DATETIME64: datetime.datetime,
-    sqlglot.expressions.DataType.Type.TEXT: str,
-    sqlglot.expressions.DataType.Type.TINYINT: int,
-    sqlglot.expressions.DataType.Type.UBIGINT: int,
-    sqlglot.expressions.DataType.Type.UUID: uuid.UUID,
+    sqlglot.expressions.DataType.Type.BIGINT: int,  # Int64
+    sqlglot.expressions.DataType.Type.BOOLEAN: bool,  # Boolean
+    sqlglot.expressions.DataType.Type.DATE32: datetime.date,  # Date32
+    sqlglot.expressions.DataType.Type.DATETIME: datetime.datetime,  # DateTime
+    sqlglot.expressions.DataType.Type.DATETIME64: datetime.datetime,  # DateTime64
+    sqlglot.expressions.DataType.Type.DOUBLE: float,  # Float64
+    sqlglot.expressions.DataType.Type.FLOAT: float,  # Float32
+    sqlglot.expressions.DataType.Type.INT: int,  # Int32
+    sqlglot.expressions.DataType.Type.SMALLINT: int,  # Int16
+    sqlglot.expressions.DataType.Type.TEXT: str,  # String
+    sqlglot.expressions.DataType.Type.TINYINT: int,  # Int8
+    sqlglot.expressions.DataType.Type.UBIGINT: int,  # UInt64
+    sqlglot.expressions.DataType.Type.UINT: int,  # UInt32
+    sqlglot.expressions.DataType.Type.USMALLINT: int,  # UInt16
+    sqlglot.expressions.DataType.Type.UTINYINT: int,  # UInt8
+    sqlglot.expressions.DataType.Type.UUID: uuid.UUID,  # UUID
 }
 
-SQLGLOT_TO_SQLALCHEMY_TYPE = {
-    sqlglot.expressions.DataType.Type.BIGINT: types.Int64,
-    sqlglot.expressions.DataType.Type.BOOLEAN: types.Boolean,
-    sqlglot.expressions.DataType.Type.DATETIME: types.DateTime,
-    sqlglot.expressions.DataType.Type.DATETIME64: types.DateTime64,
-    sqlglot.expressions.DataType.Type.TEXT: types.String,
-    sqlglot.expressions.DataType.Type.TINYINT: types.Int8,
-    sqlglot.expressions.DataType.Type.UBIGINT: types.UInt64,
-    sqlglot.expressions.DataType.Type.UUID: types.UUID,
-}
+INDENT = pydash.repeat(" ", 4)
 
 
 def parse_create_table_statement(statement: str) -> dict:
@@ -89,7 +84,7 @@ def parse_create_table_statement(statement: str) -> dict:
         "primary_key": [],
         "order_by": [],
         "settings": {},
-        # "columns": [],
+        "columns": [],
     }
     parsed = sqlglot.parse_one(statement, dialect="clickhouse")
 
@@ -135,7 +130,7 @@ def parse_create_table_statement(statement: str) -> dict:
 
         sqlglot_type = node.kind.args.get("this")
         python_type = SQLGLOT_TO_PYTHON_TYPE.get(sqlglot_type)
-        sqlalchemy_type = SQLGLOT_TO_SQLALCHEMY_TYPE.get(sqlglot_type)
+        sqlalchemy_type = to_sqlalchemy_type(node)
 
         if python_type is None:
             pydantic_type = "None"
@@ -148,62 +143,23 @@ def parse_create_table_statement(statement: str) -> dict:
             if nullable:
                 pydantic_type = f"{pydantic_type} | None"
 
-        if not pydantic_type or not sqlalchemy_type:
-            print(repr(node))
-
-            # print(
-            #     name,
-            #     primary_key,
-            #     nullable,
-            #     sqlglot_type,
-            #     python_type,
-            #     pydantic_type,
-            #     sqlalchemy_type,
-            # )
+        result["columns"].append(
+            {
+                "name": name,
+                "primary_key": primary_key,
+                "nullable": nullable,
+                "sqlglot_type": sqlglot_type,
+                "python_type": python_type,
+                "pydantic_type": pydantic_type,
+                "sqlalchemy_type": sqlalchemy_type,
+            }
+        )
 
     return result
 
 
 def to_field_name(column_name: str) -> str:
     return column_name.lstrip("_")
-
-
-def get_pydantic_type(column: Column) -> str:
-    python_type = get_python_type(column)
-
-    if python_type is None:
-        pydantic_type = "None"
-    elif python_type.__module__ in ["datetime"]:
-        pydantic_type = f"{python_type.__module__}.{python_type.__qualname__}"
-    else:
-        pydantic_type = python_type.__qualname__
-
-    if column.nullable:
-        pydantic_type = f"{pydantic_type} | None"
-
-    return pydantic_type
-
-
-def get_python_type(column: Column) -> Any:
-    try:
-        nested_type = getattr(column.type, "nested_type")
-    except AttributeError:
-        nested_type = None
-
-    if nested_type:
-        type_ = nested_type
-    else:
-        type_ = column.type
-
-    if isinstance(column.type, types.UUID):
-        python_type = uuid.UUID
-    else:
-        try:
-            python_type = getattr(type_, "python_type")
-        except NotImplementedError:
-            python_type = None
-
-    return python_type
 
 
 def get_class_import_string(class_) -> str | None:
@@ -215,41 +171,37 @@ def get_class_import_string(class_) -> str | None:
         return f"from {class_.__module__} import {class_.__name__}"
 
 
-class ASTNode:
-    pass
+def to_sqlalchemy_type(column_def: sqlglot.exp.ColumnDef) -> str:
+    class ASTNode:
+        pass
 
+    class ArgumentNode(ASTNode):
+        def __init__(self, value: str):
+            self.value = value
 
-class ArgumentNode(ASTNode):
-    def __init__(self, value: str):
-        self.value = value
+        def __repr__(self):
+            return self.value
 
-    def __repr__(self):
-        return self.value
+    class SimpleTypeNode(ASTNode):
+        def __init__(self, type_name: str):
+            self.type_name = type_name
 
+        def __repr__(self):
+            return f"types.{self.type_name}"
 
-class SimpleTypeNode(ASTNode):
-    def __init__(self, type_name: str):
-        self.type_name = type_name
+    class NestedTypeNode(ASTNode):
+        def __init__(self, modifier: str, inner: ASTNode):
+            self.modifier = modifier
+            self.inner = inner
 
-    def __repr__(self):
-        return f"types.{self.type_name}"
+        def __repr__(self):
+            return f"types.{self.modifier}({self.inner})"
 
-
-class NestedTypeNode(ASTNode):
-    def __init__(self, modifier: str, inner: ASTNode):
-        self.modifier = modifier
-        self.inner = inner
-
-    def __repr__(self):
-        return f"types.{self.modifier}({self.inner})"
-
-
-def get_sqlalchemy_type(column: Column) -> str:
-    def parse_inner(string: str) -> ASTNode | None:
+    def parse(string: str) -> ASTNode | None:
         if "(" in string and ")" in string:
             modifier, inner = string.split("(", 1)
             inner = inner.rsplit(")", 1)[0]  # Remove the outermost parentheses
-            return NestedTypeNode(modifier.strip(), parse_inner(inner.strip()))
+            return NestedTypeNode(modifier.strip(), parse(inner.strip()))
         else:
             string = string.strip()
 
@@ -261,7 +213,7 @@ def get_sqlalchemy_type(column: Column) -> str:
             else:
                 return ArgumentNode(string)
 
-    return str(parse_inner(str(column.type)))
+    return parse(column_def.kind.sql(dialect="clickhouse"))
 
 
 def serialize_dict(data: dict) -> str:
@@ -285,12 +237,11 @@ def create_factory_name(model_name: str) -> str:
 def create_model_code(
     db_settings: CHSettings, database: str, dbt_resource: DbtSource, random_seed: int = 0
 ) -> Dict[str, str]:
-    """Create the code of a SQLModel class from a table schema."""
+    """Create the code of a SQLModel class from a table statement."""
     # 1. Create model
     ch_adapter = CHAdapter(db_settings)
     table_name = dbt_resource.name
     model_name = dbt_resource.original_config.meta.python_class
-    sa_table = ch_adapter.get_table(table_name, database=database)
     statement = ch_adapter.get_create_table_statement(table_name, database=database)
     parsed_statement = parse_create_table_statement(statement)
     table_kwargs = {"schema": database}
@@ -317,38 +268,38 @@ def create_model_code(
 
     columns = []
 
-    for column in sa_table.columns:
+    for column in parsed_statement["columns"]:
         dbt_column = pydash.find(
-            dbt_resource.original_config.columns, lambda x: x.name == column.name
+            dbt_resource.original_config.columns, lambda c: c.name == column["name"]
         )
-        field_name = to_field_name(column.name)
-        python_type = get_python_type(column)
-        pydantic_type = get_pydantic_type(column)
+        field_name = to_field_name(column["name"])
 
         if dbt_column and dbt_column.meta and dbt_column.meta.sqlalchemy_type:
             sqlalchemy_type = dbt_column.meta.sqlalchemy_type
         else:
-            sqlalchemy_type = get_sqlalchemy_type(column)
+            sqlalchemy_type = column["sqlalchemy_type"]
 
         sqlalchemy_column_kwargs = {
-            "name": f"'{column.name}'",
+            "name": f"'{column['name']}'",
             "type_": sqlalchemy_type,
         }
 
-        if column.primary_key:
+        if column["primary_key"]:
             sqlalchemy_column_kwargs["primary_key"] = True
 
-        if not column.primary_key:
-            sqlalchemy_column_kwargs["nullable"] = column.nullable
+        if not column["primary_key"]:
+            sqlalchemy_column_kwargs["nullable"] = column["nullable"]
 
         field_kwargs = {
             "sa_column": f"Column({serialize_dict(sqlalchemy_column_kwargs)})",
         }
 
-        column_def = f"{field_name}: {pydantic_type} = Field({serialize_dict(field_kwargs)})"
+        column_def = (
+            f"{field_name}: {column['pydantic_type']} = Field({serialize_dict(field_kwargs)})"
+        )
         columns.append(column_def)
 
-        class_import = get_class_import_string(python_type)
+        class_import = get_class_import_string(column["python_type"])
         if class_import:
             imports.append(class_import)
 
@@ -389,14 +340,12 @@ def create_model_code(
     lines.append(f"class {factory_name}(PeerDBMixin, SQLModelFactory[{model_name}]):")
     lines.append(INDENT + f"__random_seed__ = {random_seed}")
 
-    for column in sa_table.columns:
-        python_type = get_python_type(column)
-
+    for column in parsed_statement["columns"]:
         # If the column is an integer primary key, then generate a globally unique integer
-        if python_type is int and column.primary_key:
+        if column["python_type"] is int and column["primary_key"]:
             lines.append("")
             lines.append(INDENT + "@classmethod")
-            lines.append(INDENT + f"def {column.name}(cls) -> int:")
+            lines.append(INDENT + f"def {column['name']}(cls) -> int:")
             lines.append(INDENT + INDENT + "return int(pydash.unique_id())")
 
             imports.append("import pydash")
