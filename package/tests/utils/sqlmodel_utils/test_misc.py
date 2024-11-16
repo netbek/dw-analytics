@@ -1,24 +1,15 @@
 from clickhouse_sqlalchemy import types
-from package.config.settings import get_settings
-from package.database import CHAdapter
-from package.tests.fixtures.database import DBTest
-from package.types import CHTableIdentifier, DbtSource
 from package.utils.sqlmodel_utils import (
-    create_model_code,
     get_pydantic_type,
     get_python_type,
     get_sqlalchemy_type,
     parse_create_table_statement,
 )
 from sqlalchemy import Column
-from sqlmodel import Table
-from typing import Any, Generator, List
 
 import datetime
 import pytest
 import uuid
-
-settings = get_settings()
 
 
 @pytest.fixture

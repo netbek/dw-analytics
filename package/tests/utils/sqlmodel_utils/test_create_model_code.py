@@ -1,27 +1,16 @@
-from clickhouse_sqlalchemy import types
 from package.config.settings import get_settings
 from package.database import CHAdapter
 from package.tests.fixtures.database import DBTest
 from package.types import CHTableIdentifier, DbtSource
-from package.utils.sqlmodel_utils import (
-    create_model_code,
-    get_pydantic_type,
-    get_python_type,
-    get_sqlalchemy_type,
-    parse_create_table_statement,
-)
-from sqlalchemy import Column
+from package.utils.sqlmodel_utils import create_model_code
 from sqlmodel import Table
-from typing import Any, Generator, List
+from typing import Any, Generator
 
-import datetime
 import pytest
-import uuid
 
 settings = get_settings()
 
-
-model_code = """
+expected_model_code = """
 \"""
 Created from:
 
@@ -57,7 +46,7 @@ class TestTable(SQLModel, table=True):
     peerdb_version: int = Field(sa_column=Column(name='_peerdb_version', type_=types.Int64, nullable=False))
 """
 
-factory_code = """
+expected_factory_code = """
 from .test_table import TestTable
 from package.polyfactory.factories.sqlmodel_factory import SQLModelFactory
 from package.polyfactory.mixins import PeerDBMixin
@@ -129,5 +118,5 @@ class TestCreateModelCode(DBTest):
     def test_ok(self, ch_adapter: CHAdapter, ch_table: Table, dbt_source: DbtSource):
         result = create_model_code(ch_adapter.settings, ch_adapter.settings.database, dbt_source)
 
-        assert result["model_code"].strip() == model_code.strip()
-        assert result["factory_code"].strip() == factory_code.strip()
+        assert result["model_code"].strip() == expected_model_code.strip()
+        assert result["factory_code"].strip() == expected_factory_code.strip()
