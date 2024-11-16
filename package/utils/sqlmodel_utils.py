@@ -338,6 +338,7 @@ def create_model_code(
     imports = [
         f"from .{model_filename} import {model_name}",
         "from package.polyfactory.factories.sqlmodel_factory import SQLModelFactory",
+        "from package.polyfactory.mixins import PeerDBMixin",
     ]
 
     lines = []
@@ -350,7 +351,7 @@ def create_model_code(
     # Add factory class
     lines.append("")
     lines.append("")
-    lines.append(f"class {factory_name}(SQLModelFactory[{model_name}]):")
+    lines.append(f"class {factory_name}(PeerDBMixin, SQLModelFactory[{model_name}]):")
     lines.append(INDENT + f"__random_seed__ = {random_seed}")
 
     factory_code = "\n".join(lines) + "\n"
