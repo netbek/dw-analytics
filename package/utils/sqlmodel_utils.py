@@ -158,19 +158,6 @@ def parse_create_table_statement(statement: str) -> dict:
     return result
 
 
-def to_field_name(column_name: str) -> str:
-    return column_name.lstrip("_")
-
-
-def get_class_import_string(class_) -> str | None:
-    if class_.__module__ == "builtins":
-        return None
-    elif class_.__module__ in ["datetime"]:
-        return "import datetime"
-    else:
-        return f"from {class_.__module__} import {class_.__name__}"
-
-
 def to_sqlalchemy_type(column_def: sqlglot.exp.ColumnDef) -> str:
     class ASTNode:
         pass
@@ -218,6 +205,19 @@ def to_sqlalchemy_type(column_def: sqlglot.exp.ColumnDef) -> str:
 
 def serialize_dict(data: dict) -> str:
     return ", ".join(f"{key}={value}" for key, value in data.items())
+
+
+def to_field_name(column_name: str) -> str:
+    return column_name.lstrip("_")
+
+
+def get_class_import_string(class_) -> str | None:
+    if class_.__module__ == "builtins":
+        return None
+    elif class_.__module__ in ["datetime"]:
+        return "import datetime"
+    else:
+        return f"from {class_.__module__} import {class_.__name__}"
 
 
 def create_class_filename(class_name: str) -> str:
