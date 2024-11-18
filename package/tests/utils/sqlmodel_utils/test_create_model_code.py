@@ -129,13 +129,14 @@ SETTINGS index_granularity = 8192
 \"""
 
 from clickhouse_sqlalchemy import engines
+from package.polyfactory.mixins import BaseMixin
 from package.sqlalchemy.clickhouse import types
 from sqlmodel import Column, Field, SQLModel
 from uuid import UUID
 import datetime
 
 
-class {python_class}(SQLModel, table=True):
+class {python_class}(BaseMixin, SQLModel, table=True):
     __tablename__ = '{table_identifier.table}'
     __table_args__ = (engines.MergeTree(order_by=('uint64',), primary_key=('uint64',), index_granularity=8192), {{'schema': '{table_identifier.database}'}},)
 
@@ -168,11 +169,11 @@ class {python_class}(SQLModel, table=True):
 expected_factory_code = f"""
 from .{table_identifier.table} import {python_class}
 from package.polyfactory.factories.sqlmodel_factory import SQLModelFactory
-from package.polyfactory.mixins import PeerDBMixin
+from package.polyfactory.mixins import PeerDBFactoryMixin
 import pydash
 
 
-class {python_class}Factory(PeerDBMixin, SQLModelFactory[{python_class}]):
+class {python_class}Factory(PeerDBFactoryMixin, SQLModelFactory[{python_class}]):
     __random_seed__ = 0
 
     @classmethod

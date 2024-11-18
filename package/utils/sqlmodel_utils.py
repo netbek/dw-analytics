@@ -235,7 +235,11 @@ def create_factory_name(model_name: str) -> str:
 
 
 def create_model_code(
-    db_settings: CHSettings, database: str, dbt_resource: DbtSource, random_seed: int = 0
+    db_settings: CHSettings,
+    database: str,
+    dbt_resource: DbtSource,
+    extend_primary_key: Optional[bool] = False,
+    random_seed: int = 0,
 ) -> Dict[str, str]:
     """Create the code of a SQLModel class from a table statement."""
     # 1. Create model
@@ -262,6 +266,7 @@ def create_model_code(
 
     imports = [
         "from clickhouse_sqlalchemy import engines",
+        "from package.polyfactory.mixins import BaseMixin",
         "from package.sqlalchemy.clickhouse import types",
         "from sqlmodel import Column, Field, SQLModel",
     ]
@@ -284,10 +289,16 @@ def create_model_code(
             "type_": sqlalchemy_type,
         }
 
-        if column["primary_key"]:
+        # ClickHouse does not require a unique primary key, but SQLAlchemy does. To work around
+        # this, flag the _peerdb_version column as part of a composite primary key in SQLAlchemy.
+        is_sqlalchemy_primary_key = column["primary_key"] or (
+            extend_primary_key and column["name"] == "_peerdb_version"
+        )
+
+        if is_sqlalchemy_primary_key:
             sqlalchemy_column_kwargs["primary_key"] = True
 
-        if not column["primary_key"]:
+        if not is_sqlalchemy_primary_key:
             sqlalchemy_column_kwargs["nullable"] = column["nullable"]
 
         field_kwargs = {
@@ -306,7 +317,7 @@ def create_model_code(
     lines = []
 
     # Add table class
-    lines.append(f"class {model_name}(SQLModel, table=True):")
+    lines.append(f"class {model_name}(BaseMixin, SQLModel, table=True):")
     lines.append(INDENT + f"__tablename__ = '{table_name}'")
     lines.append(
         INDENT
@@ -331,13 +342,13 @@ def create_model_code(
     imports = [
         f"from .{model_filename} import {model_name}",
         "from package.polyfactory.factories.sqlmodel_factory import SQLModelFactory",
-        "from package.polyfactory.mixins import PeerDBMixin",
+        "from package.polyfactory.mixins import PeerDBFactoryMixin",
     ]
 
     lines = []
 
     # Add factory class
-    lines.append(f"class {factory_name}(PeerDBMixin, SQLModelFactory[{model_name}]):")
+    lines.append(f"class {factory_name}(PeerDBFactoryMixin, SQLModelFactory[{model_name}]):")
     lines.append(INDENT + f"__random_seed__ = {random_seed}")
 
     for column in parsed_statement["columns"]:
@@ -367,6 +378,7 @@ def create_model_file(
     database: str,
     dbt_resource: DbtSource,
     directory: str,
+    extend_primary_key: Optional[bool] = False,
     replace_model: Optional[bool] = False,
     replace_factory: Optional[bool] = False,
 ) -> None:
@@ -381,7 +393,9 @@ def create_model_file(
     create_factory = not os.path.exists(factory_path) or replace_factory
 
     if create_model or create_factory:
-        result = create_model_code(db_settings, database, dbt_resource)
+        result = create_model_code(
+            db_settings, database, dbt_resource, extend_primary_key=extend_primary_key
+        )
 
         if create_model:
             with open(model_path, "wt") as fp:
