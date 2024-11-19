@@ -56,6 +56,9 @@ else
 [core]
 autocrlf = input
 
+[help]
+format = man
+
 [pull]
 rebase = false
 
