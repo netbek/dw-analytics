@@ -34,7 +34,7 @@ ENV DOCKER_USER=analyst
 
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
-    ca-certificates curl git less man-db nano openssh-client
+    bash-completion ca-certificates curl git less man-db nano openssh-client
 
 ENV VIRTUAL_ENV=/opt/venv
 ENV PATH="${VIRTUAL_ENV}/bin:${PATH}"

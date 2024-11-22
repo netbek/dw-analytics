@@ -1,4 +1,8 @@
-if [ -f "/usr/local/dbt/dbt-completion.bash" ]; then
+if [ -f /etc/bash_completion ]; then
+    source /etc/bash_completion
+fi
+
+if [ -f /usr/local/dbt/dbt-completion.bash ]; then
     source /usr/local/dbt/dbt-completion.bash
 fi
 
