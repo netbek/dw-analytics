@@ -138,7 +138,7 @@ services:
       - .:/home/analyst:rw
 
   test-clickhouse:
-    image: clickhouse/clickhouse-server:24.8.6.70-alpine
+    image: clickhouse/clickhouse-server:24.8.7.41-alpine
     env_file:
       - ./.env_files/test-clickhouse.env
     ports:
