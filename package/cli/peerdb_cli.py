@@ -28,6 +28,9 @@ async def install(project_name: str) -> None:
     )
     source_user = peerdb_config["users"].get(PEERDB_SOURCE_PEER)
 
+    peerdb.update_settings(peerdb_config["settings"])
+    app.console.print("Updated PeerDB settings", style="green")
+
     if source_user:
         source_peer.create_user(**source_user)
         app.console.print(
@@ -73,9 +76,6 @@ async def install(project_name: str) -> None:
         f"Created database '{destination_peer.database}' on destination",
         style="green",
     )
-
-    peerdb.update_settings(peerdb_config["settings"])
-    app.console.print("Updated PeerDB settings", style="green")
 
     for peer in peerdb_config["peers"].values():
         peerdb.create_peer(peer)
