@@ -5,7 +5,7 @@ volumes:
 
 services:
   prefect-postgres:
-    image: postgres:16.4-alpine3.20
+    image: postgres:17.0-alpine3.20
     env_file:
       - ./.env_files/prefect-postgres.env
     {% if DW_PREFECT_POSTGRES_PORT -%}
@@ -141,7 +141,7 @@ services:
 
   {% if profile in ('dev') -%}
   test-clickhouse:
-    image: clickhouse/clickhouse-server:24.8.7.41-alpine
+    image: clickhouse/clickhouse-server:24.8.8.17-alpine
     env_file:
       - ./.env_files/test-clickhouse.env
     {% if DW_TEST_CLICKHOUSE_HTTP_PORT or DW_TEST_CLICKHOUSE_NATIVE_PORT -%}
