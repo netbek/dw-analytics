@@ -27,7 +27,7 @@
 4. Start the Prefect containers:
 
     ```shell
-    docker compose up -d prefect-postgres prefect-server prefect-worker cli
+    docker compose up -d prefect-postgres prefect-server prefect-worker cli test-postgres test-clickhouse
     ```
 
     Wait for the container statuses to change to started and healthy. If you prefer to run the containers in the foreground, then omit the `-d` option.
@@ -67,16 +67,16 @@ Add aliases for frequently used commands to `~/.bash_aliases`:
 
 ```shell
 # Start Prefect in detached mode
-alias adw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli"
+alias adw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli test-postgres test-clickhouse"
 
 # Stop Prefect
 alias sdw="cd /path/to/dw-analytics && docker compose down"
 
 # Start Prefect and Jupyter in detached mode, and open Jupyter
-alias jdw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli jupyter && ./scripts/open.sh jupyter"
+alias jdw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli test-postgres test-clickhouse jupyter && ./scripts/open.sh jupyter"
 
 # Start Prefect in detached mode, and open VS Code
-alias cdw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli && ./scripts/open.sh vscode"
+alias cdw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli test-postgres test-clickhouse && ./scripts/open.sh vscode"
 ```
 
 Set `/path/to/` to the location of the repositories on your machine. If you prefer to run the containers in the foreground, then omit the `-d` option.
