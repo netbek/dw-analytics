@@ -18,7 +18,7 @@ dirs=(
 )
 
 for dir in "${dirs[@]}"; do
-    cd "./docker/${dir}"
+    cd "./deploy/${dir}"
 
     services=$(yq '.services | to_entries | map(select(.value.build != null) | .key) | .[]' docker-compose.yml)
     for service in $services; do

@@ -151,24 +151,24 @@ done
 
 # Render .env files
 templates=(
-    ./docker/clickhouse/templates/env.jinja2                   ./docker/clickhouse/.env
-    ./docker/clickhouse/templates/clickhouse.env.jinja2        ./docker/clickhouse/clickhouse.env
+    ./deploy/clickhouse/templates/env.jinja2                   ./deploy/clickhouse/.env
+    ./deploy/clickhouse/templates/clickhouse.env.jinja2        ./deploy/clickhouse/clickhouse.env
 
-    ./docker/analytics/templates/env.jinja2                    ./docker/analytics/.env
-    ./docker/analytics/templates/api.env.jinja2                ./docker/analytics/api.env
-    ./docker/analytics/templates/cli.env.jinja2                ./docker/analytics/cli.env
-    ./docker/analytics/templates/database.env.jinja2           ./docker/analytics/database.env
-    ./docker/analytics/templates/jupyter.env.jinja2            ./docker/analytics/jupyter.env
-    ./docker/analytics/templates/prefect-postgres.env.jinja2   ./docker/analytics/prefect-postgres.env
-    ./docker/analytics/templates/prefect-server.env.jinja2     ./docker/analytics/prefect-server.env
-    ./docker/analytics/templates/prefect-worker.env.jinja2     ./docker/analytics/prefect-worker.env
-    ./docker/analytics/templates/test-postgres.env.jinja2      ./docker/analytics/test-postgres.env
-    ./docker/analytics/templates/test-clickhouse.env.jinja2    ./docker/analytics/test-clickhouse.env
+    ./deploy/analytics/templates/env.jinja2                    ./deploy/analytics/.env
+    ./deploy/analytics/templates/api.env.jinja2                ./deploy/analytics/api.env
+    ./deploy/analytics/templates/cli.env.jinja2                ./deploy/analytics/cli.env
+    ./deploy/analytics/templates/database.env.jinja2           ./deploy/analytics/database.env
+    ./deploy/analytics/templates/jupyter.env.jinja2            ./deploy/analytics/jupyter.env
+    ./deploy/analytics/templates/prefect-postgres.env.jinja2   ./deploy/analytics/prefect-postgres.env
+    ./deploy/analytics/templates/prefect-server.env.jinja2     ./deploy/analytics/prefect-server.env
+    ./deploy/analytics/templates/prefect-worker.env.jinja2     ./deploy/analytics/prefect-worker.env
+    ./deploy/analytics/templates/test-postgres.env.jinja2      ./deploy/analytics/test-postgres.env
+    ./deploy/analytics/templates/test-clickhouse.env.jinja2    ./deploy/analytics/test-clickhouse.env
 
-    ./docker/monitor/templates/env.jinja2                      ./docker/monitor/.env
-    ./docker/monitor/templates/cadvisor.env.jinja2             ./docker/monitor/cadvisor.env
-    ./docker/monitor/templates/grafana.env.jinja2              ./docker/monitor/grafana.env
-    ./docker/monitor/templates/prometheus.env.jinja2           ./docker/monitor/prometheus.env
+    ./deploy/monitor/templates/env.jinja2                      ./deploy/monitor/.env
+    ./deploy/monitor/templates/cadvisor.env.jinja2             ./deploy/monitor/cadvisor.env
+    ./deploy/monitor/templates/grafana.env.jinja2              ./deploy/monitor/grafana.env
+    ./deploy/monitor/templates/prometheus.env.jinja2           ./deploy/monitor/prometheus.env
 )
 context=(
     "profile=${profile}"
@@ -202,11 +202,11 @@ for ((i = 1; i < ${#templates[@]}; i+=2)); do
     fi
 done
 
-# Create ./docker/analytics/.gitconfig
-if [ -f "./docker/analytics/.gitconfig" ] && [ "$force" == false ]; then
-    echo "Skipped ./docker/analytics/.gitconfig because it exists"
+# Create ./deploy/analytics/.gitconfig
+if [ -f "./deploy/analytics/.gitconfig" ] && [ "$force" == false ]; then
+    echo "Skipped ./deploy/analytics/.gitconfig because it exists"
 else
-    cat <<EOF > ./docker/analytics/.gitconfig
+    cat <<EOF > ./deploy/analytics/.gitconfig
 [core]
 autocrlf = input
 
@@ -223,5 +223,5 @@ autoSetupRemote = true
 email = $(git config --get --global user.email)
 name = $(git config --get --global user.name)
 EOF
-    echo "${tput_green}Created ./docker/analytics/.gitconfig${tput_reset}"
+    echo "${tput_green}Created ./deploy/analytics/.gitconfig${tput_reset}"
 fi

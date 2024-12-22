@@ -27,7 +27,7 @@ dirs=(
 )
 
 for dir in "${dirs[@]}"; do
-    cd "./docker/${dir}"
+    cd "./deploy/${dir}"
 
     # Delete images, volumes and networks
     docker compose down -v --rmi all
@@ -51,6 +51,6 @@ for dir in "${dirs[@]}"; do
 done
 
 # Delete .env files
-rm -f ./docker/*/.env ./docker/*/*.env ./docker/*/.gitconfig
+rm -f ./deploy/*/.env ./deploy/*/*.env ./deploy/*/.gitconfig
 
 echo "${tput_green}Done!${tput_reset}"

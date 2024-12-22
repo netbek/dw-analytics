@@ -36,7 +36,7 @@
 │   ├── requirements_dev.txt # Python development dependencies
 │   └── requirements_jupyter.txt # Extra Python dependencies of Jupyter container
 ├── clickhouse
-├── docker
+├── deploy
 │   └── # Docker container configurations
 ├── docs
 ├── monitor

@@ -70,7 +70,7 @@ Add aliases for frequently used commands to `~/.bash_aliases`:
 
 ```shell
 # Connect to ClickHouse
-alias cch="cd /path/to/dw-analytics/docker/clickhouse && docker compose exec clickhouse clickhouse-client --user analyst --password analyst"
+alias cch="cd /path/to/dw-analytics/deploy/clickhouse && docker compose exec clickhouse clickhouse-client --user analyst --password analyst"
 
 # Open Jupyter
 alias jdw="cd /path/to/dw-analytics/analytics/scripts/open.sh jupyter"
@@ -110,9 +110,9 @@ To delete all the data and Docker images, run:
 3. Start the services:
 
     ```shell
-    cd /path/to/dw-analytics/docker/clickhouse && docker compose up -d
-    cd /path/to/dw-analytics/docker/peerdb && docker compose up -d
-    cd /path/to/dw-analytics/docker/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
+    cd /path/to/dw-analytics/deploy/clickhouse && docker compose up -d
+    cd /path/to/dw-analytics/deploy/peerdb && docker compose up -d
+    cd /path/to/dw-analytics/deploy/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
     ```
 
 4. Run the provision script to configure Prefect:

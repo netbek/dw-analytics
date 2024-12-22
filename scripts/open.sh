@@ -27,24 +27,24 @@ fi
 cd "${root_dir}"
 
 if [ "${name}" == "dbt-docs" ]; then
-    source docker/analytics/.env
+    source deploy/analytics/.env
     open_cmd "http://localhost:${DW_DBT_DOCS_PORT}"
 elif [ "${name}" == "jupyter" ]; then
-    source docker/analytics/.env
+    source deploy/analytics/.env
     open_cmd "http://localhost:${DW_JUPYTER_PORT}/nbclassic/tree"
 elif [ "${name}" == "prefect-server" ]; then
-    source docker/analytics/.env
+    source deploy/analytics/.env
     open_cmd "http://localhost:${DW_PREFECT_SERVER_PORT}"
 elif [ "${name}" == "vscode" ]; then
     cd analytics
     vscode_remote_cmd "$PWD" /home/analyst
 elif [ "${name}" == "cadvisor" ]; then
-    source docker/monitor/.env
+    source deploy/monitor/.env
     open_cmd "http://localhost:${DW_CADVISOR_PORT}"
 elif [ "${name}" == "grafana" ]; then
-    source docker/monitor/.env
+    source deploy/monitor/.env
     open_cmd "http://localhost:${DW_GRAFANA_PORT}"
 elif [ "${name}" == "prometheus" ]; then
-    source docker/monitor/.env
+    source deploy/monitor/.env
     open_cmd "http://localhost:${DW_PROMETHEUS_PORT}"
 fi
