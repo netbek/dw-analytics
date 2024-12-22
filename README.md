@@ -15,39 +15,33 @@
 
 ```shell
 .
-├── .dbt
-│   └── # dbt profiles
-├── .devcontainer
-│   └── # VS Code dev container configuration
-├── .env_files
-│   └── # .env files used in Docker containers
-├── .prefect
-│   └── # Prefect profiles
+├── analytics
+│   ├── .dbt # dbt profiles
+│   ├── .devcontainer # VS Code dev container configuration
+│   ├── .prefect # Prefect profiles
+│   ├── package # Supplementary CLI and common utilities
+│   ├── projects # Data models, Python tasks, workflows, notebooks and tests
+│   ├── scripts # Convenience scripts
+│   ├── templates
+│   │   └── project # Template for new projects
+│   ├── .bashrc # Shell configuration used in CLI container
+│   ├── .gitconfig # Git configuration used in CLI container
+│   ├── .gitignore # Git configuration used in CLI container
+│   ├── .sqlfluff # SQL linter configuration used in CLI container
+│   ├── .sqlfluffignore # SQL linter configuration used in CLI container
+│   ├── .yamllint # YAML linter configuration used in CLI container
+│   ├── pyproject.toml # Configuration of Python tools in CLI container
+│   ├── requirements_api.txt # Extra Python dependencies of API container
+│   ├── requirements_base.txt # Python dependencies of all containers
+│   ├── requirements_dev.txt # Python development dependencies
+│   └── requirements_jupyter.txt # Extra Python dependencies of Jupyter container
+├── clickhouse
 ├── docker
 │   └── # Docker container configurations
-├── package
-│   └── # Supplementary CLI and common utilities
-├── projects
-│   └── # Data models, Python tasks, workflows, notebooks and tests
-├── scripts
-│   └── # Installation and convenience scripts
-├── template_env
-│   └── # Template for new .env files
-├── template_project
-│   └── # Template for new projects
-├── .bashrc # Shell configuration used in CLI container
-├── .env # Environment variables used by Docker Compose (not containers)
-├── .gitconfig # Git configuration used in CLI container
-├── .gitignore # Git configuration used in CLI container
-├── .sqlfluff # SQL linter configuration used in CLI container
-├── .sqlfluffignore # SQL linter configuration used in CLI container
-├── .yamllint # YAML linter configuration used in CLI container
-├── docker-compose.yml # Docker configurations for services, volumes and networking
-├── pyproject.toml # Configuration of Python tools in CLI container
-├── requirements_api.txt # Extra Python dependencies of API container
-├── requirements_base.txt # Python dependencies of all containers
-├── requirements_dev.txt # Python development dependencies
-└── requirements_jupyter.txt # Extra Python dependencies of Jupyter container
+├── docs
+├── monitor
+├── peerdb
+└── scripts # Installation scripts
 ```
 
 ## License

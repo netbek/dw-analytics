@@ -3,7 +3,7 @@ import os
 # Filesystem
 HOME_DIR = os.environ["HOME"]
 PROJECTS_DIR = os.path.join(HOME_DIR, "projects")
-TEMPLATE_PROJECT_DIR = os.path.join(HOME_DIR, "template_project")
+TEMPLATE_PROJECT_DIR = os.path.join(HOME_DIR, "templates", "project")
 
 # dbt
 DBT_PROFILES_DIR = os.environ["DBT_PROFILES_DIR"]

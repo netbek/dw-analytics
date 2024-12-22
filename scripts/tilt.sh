@@ -4,6 +4,6 @@ set -e
 scripts_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root_dir="${scripts_dir}/.."
 
-cd "${root_dir}/docker/analytics"
+cd "${root_dir}"
 
-docker compose exec cli prefect $@
+tilt $@ --port 29000

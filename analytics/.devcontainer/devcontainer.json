@@ -1,6 +1,6 @@
 {
   "name": "dw-analytics",
-  "dockerComposeFile": "../docker-compose.yml",
+  "dockerComposeFile": "../../docker/analytics/docker-compose.yml",
   "service": "cli",
   "workspaceFolder": "/home/analyst",
   "shutdownAction": "none",

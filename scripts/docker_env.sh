@@ -1,0 +1,227 @@
+#!/bin/bash
+set -e
+
+scripts_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+root_dir="${scripts_dir}/.."
+
+source "${scripts_dir}/variables.sh"
+source "${scripts_dir}/functions.sh"
+
+echo_help() {
+    echo "Usage: $0 PROFILE \\
+    [--cache/--no-cache] \\
+    [-f|--force] \\
+    [--clickhouse_default_username <value>] \\
+    [--clickhouse_default_password <value>] \\
+    [--clickhouse_default_database <value>] \\
+    [--prefect_postgres_default_username <value>] \\
+    [--prefect_postgres_default_password <value>] \\
+    [--prefect_postgres_default_database <value>] \\
+    [--prefect_postgres_prefect_username <value>] \\
+    [--prefect_postgres_prefect_password <value>] \\
+    [--prefect_postgres_prefect_database <value>]"
+    echo ""
+    echo "Arguments:"
+    echo "    profile: ${profile_choices[@]}"
+}
+
+cd "${root_dir}"
+
+cache_dir="./.cache"
+cache_file="${cache_dir}/variables.env"
+
+declare -a variable_names=( \
+    "clickhouse_default_username" \
+    "clickhouse_default_password" \
+    "clickhouse_default_database" \
+    "prefect_postgres_default_username" \
+    "prefect_postgres_default_password" \
+    "prefect_postgres_default_database" \
+    "prefect_postgres_prefect_username" \
+    "prefect_postgres_prefect_password" \
+    "prefect_postgres_prefect_database"
+)
+
+profile="$1"
+cache=true
+force=false
+quiet=false
+
+mkdir -p "${cache_dir}"
+
+# Load variables from cache created in previous execution
+if [ -f "${cache_file}" ] && [[ ! "${@}" =~ "--no-cache" ]]; then
+    source "${cache_file}"
+fi
+
+if [[ ! " ${profile_choices[@]} " =~ " ${profile} " ]]; then
+    echo "${tput_red}Invalid profile. Allowed values are: ${profile_choices[@]}${tput_reset}"
+    exit 1
+fi
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --cache)
+            cache=true
+            shift
+            ;;
+        --no-cache)
+            cache=false
+            shift
+            ;;
+        -f|--force)
+            force=true
+            shift
+            ;;
+        --quiet)
+            quiet=true
+            shift
+            ;;
+        --help)
+            echo_help
+            exit 0
+            ;;
+        --clickhouse_default_username)
+            clickhouse_default_username=$2
+            shift 2
+            ;;
+        --clickhouse_default_password)
+            clickhouse_default_password=$2
+            shift 2
+            ;;
+        --clickhouse_default_database)
+            clickhouse_default_database=$2
+            shift 2
+            ;;
+        --prefect_postgres_default_username)
+            prefect_postgres_default_username=$2
+            shift 2
+            ;;
+        --prefect_postgres_default_password)
+            prefect_postgres_default_password=$2
+            shift 2
+            ;;
+        --prefect_postgres_default_database)
+            prefect_postgres_default_database=$2
+            shift 2
+            ;;
+        --prefect_postgres_prefect_username)
+            prefect_postgres_prefect_username=$2
+            shift 2
+            ;;
+        --prefect_postgres_prefect_password)
+            prefect_postgres_prefect_password=$2
+            shift 2
+            ;;
+        --prefect_postgres_prefect_database)
+            prefect_postgres_prefect_database=$2
+            shift 2
+            ;;
+        *)
+            shift
+            ;;
+    esac
+done
+
+# Check whether the required values have been given
+is_complete=true
+for name in "${variable_names[@]}"; do
+    if [ -z "${!name}" ]; then
+        is_complete=false
+    fi
+done
+
+# Prompt the user to give the missing values
+if [ "$is_complete" == false ]; then
+    echo "Please provide the following information:"
+
+    for name in "${variable_names[@]}"; do
+        if [ -z "${!name}" ]; then
+            read -p "${name}: " "$name"
+        fi
+    done
+fi
+
+# Save variables to be used as defaults in next execution of this script
+> "${cache_file}"
+for name in "${variable_names[@]}"; do
+    value="${!name}"
+    echo "${name}=\"${value}\"" >> "${cache_file}"
+done
+
+# Render .env files
+templates=(
+    ./docker/clickhouse/templates/env.jinja2                   ./docker/clickhouse/.env
+    ./docker/clickhouse/templates/clickhouse.env.jinja2        ./docker/clickhouse/clickhouse.env
+
+    ./docker/analytics/templates/env.jinja2                    ./docker/analytics/.env
+    ./docker/analytics/templates/api.env.jinja2                ./docker/analytics/api.env
+    ./docker/analytics/templates/cli.env.jinja2                ./docker/analytics/cli.env
+    ./docker/analytics/templates/database.env.jinja2           ./docker/analytics/database.env
+    ./docker/analytics/templates/jupyter.env.jinja2            ./docker/analytics/jupyter.env
+    ./docker/analytics/templates/prefect-postgres.env.jinja2   ./docker/analytics/prefect-postgres.env
+    ./docker/analytics/templates/prefect-server.env.jinja2     ./docker/analytics/prefect-server.env
+    ./docker/analytics/templates/prefect-worker.env.jinja2     ./docker/analytics/prefect-worker.env
+    ./docker/analytics/templates/test-postgres.env.jinja2      ./docker/analytics/test-postgres.env
+    ./docker/analytics/templates/test-clickhouse.env.jinja2    ./docker/analytics/test-clickhouse.env
+
+    ./docker/monitor/templates/env.jinja2                      ./docker/monitor/.env
+    ./docker/monitor/templates/cadvisor.env.jinja2             ./docker/monitor/cadvisor.env
+    ./docker/monitor/templates/grafana.env.jinja2              ./docker/monitor/grafana.env
+    ./docker/monitor/templates/prometheus.env.jinja2           ./docker/monitor/prometheus.env
+)
+context=(
+    "profile=${profile}"
+    "clickhouse_default_username=${clickhouse_default_username}"
+    "clickhouse_default_password=${clickhouse_default_password}"
+    "clickhouse_default_database=${clickhouse_default_database}"
+    "prefect_postgres_default_username=${prefect_postgres_default_username}"
+    "prefect_postgres_default_password=${prefect_postgres_default_password}"
+    "prefect_postgres_default_database=${prefect_postgres_default_database}"
+    "prefect_postgres_prefect_username=${prefect_postgres_prefect_username}"
+    "prefect_postgres_prefect_password=${prefect_postgres_prefect_password}"
+    "prefect_postgres_prefect_database=${prefect_postgres_prefect_database}"
+)
+
+for ((i = 1; i < ${#templates[@]}; i+=2)); do
+    template_file="${templates[i-1]}"
+    output_file="${templates[i]}"
+
+    if [ -f "${output_file}" ] && [ "$force" == false ]; then
+        if [ "$quiet" == false ]; then
+            echo "Skipped ${template_file} because ${output_file} exists"
+        fi
+    else
+        render_template "$(dirname "${template_file}")" "$(basename "${template_file}")" "${context[@]}" > "${output_file}"
+
+        if [ -f "${output_file}" ]; then
+            if [ "$quiet" == false ]; then
+                echo "${tput_green}Created ${output_file}${tput_reset}"
+            fi
+        fi
+    fi
+done
+
+# Create ./docker/analytics/.gitconfig
+if [ -f "./docker/analytics/.gitconfig" ] && [ "$force" == false ]; then
+    echo "Skipped ./docker/analytics/.gitconfig because it exists"
+else
+    cat <<EOF > ./docker/analytics/.gitconfig
+[core]
+autocrlf = input
+
+[help]
+format = man
+
+[pull]
+rebase = false
+
+[push]
+autoSetupRemote = true
+
+[user]
+email = $(git config --get --global user.email)
+name = $(git config --get --global user.name)
+EOF
+    echo "${tput_green}Created ./docker/analytics/.gitconfig${tput_reset}"
+fi

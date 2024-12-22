@@ -5,4 +5,4 @@ tput_green=`tput setaf 2`
 tput_yellow=`tput setaf 3`
 tput_reset=`tput sgr0`
 
-profile_choices=("ci" "dev" "prod")
+profile_choices=("dev" "prod")

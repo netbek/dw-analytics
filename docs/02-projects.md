@@ -52,7 +52,7 @@ To create a project, run:
 cli project init PROJECT_NAME
 ```
 
-This command copies the directories and files from `./template_project` to `./projects/<PROJECT_NAME>`.
+This command copies the directories and files from `./templates/project` to `./projects/<PROJECT_NAME>`.
 
 ## Linting and testing a project
 

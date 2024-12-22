@@ -2,35 +2,38 @@
 
 ## Prerequisites
 
+1. [Postgres v13 or higher](https://www.postgresql.org/about/news/postgresql-13-released-2077/).
+
+## Development
+
+### Install
+
 1. [Docker Engine v23 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2 or higher](https://docs.docker.com/compose/install/). Follow the links for instructions or run this script:
 
     ```shell
-    ./scripts/install_docker.sh
+    ./scripts/install.sh docker
     ```
 
-2. [Postgres v13 or higher](https://www.postgresql.org/about/news/postgresql-13-released-2077/).
-
-3. [ClickHouse v23.8 or higher](https://clickhouse.com/docs/en/whats-new/changelog#-clickhouse-release-238-lts-2023-08-31). For development, use [https://github.com/netbek/dw-clickhouse](https://github.com/netbek/dw-clickhouse).
-
-## Development: Installation
-
-1. Run the install script:
+2. [Tilt v0.33.20 or higher](https://docs.tilt.dev/install). Follow the link for instructions or run this script:
 
     ```shell
-    ./scripts/install.sh
+    ./scripts/install.sh tilt
     ```
 
-2. Start the Postgres container.
-
-3. Start the ClickHouse container. If using [https://github.com/netbek/dw-clickhouse](https://github.com/netbek/dw-clickhouse), then [follow these instructions](https://github.com/netbek/dw-clickhouse/blob/main/README.md#usage).
-
-4. Start the Prefect containers:
+3. Clone PeerDB and create the .env files for deployment:
 
     ```shell
-    docker compose up -d prefect-postgres prefect-server prefect-worker cli test-postgres test-clickhouse
+    ./scripts/install.sh peerdb
+    ./scripts/docker_env.sh dev
     ```
 
-    Wait for the container statuses to change to started and healthy. If you prefer to run the containers in the foreground, then omit the `-d` option.
+4. Start the services:
+
+    ```shell
+    tilt up --port 29000
+    ```
+
+    Wait a few minutes for the Docker images to be built. To check the progress, open [http://localhost:29000](http://localhost:29000).
 
 5. Run the provision script to configure Prefect:
 
@@ -38,9 +41,9 @@
     ./scripts/cli.sh prefect provision dev
     ```
 
-## Development: Optional extras
+### Optional extras
 
-### VS Code
+#### VS Code
 
 [Download VS Code](https://code.visualstudio.com/). After installing VS Code, install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers):
 
@@ -48,7 +51,7 @@
 code --install-extension ms-vscode-remote.remote-containers
 ```
 
-### DBeaver
+#### DBeaver
 
 Client for Postgres, ClickHouse and other databases. To install, run:
 
@@ -61,34 +64,67 @@ sudo apt install dbeaver-ce
 
 See the docs for [creating a connection](https://github.com/dbeaver/dbeaver/wiki/Create-Connection).
 
-### Aliases
+#### Aliases
 
 Add aliases for frequently used commands to `~/.bash_aliases`:
 
 ```shell
-# Start Prefect in detached mode
-alias adw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli test-postgres test-clickhouse"
+# Connect to ClickHouse
+alias cch="cd /path/to/dw-analytics/docker/clickhouse && docker compose exec clickhouse clickhouse-client --user analyst --password analyst"
 
-# Stop Prefect
-alias sdw="cd /path/to/dw-analytics && docker compose down"
+# Open Jupyter
+alias jdw="cd /path/to/dw-analytics/analytics/scripts/open.sh jupyter"
 
-# Start Prefect and Jupyter in detached mode, and open Jupyter
-alias jdw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli test-postgres test-clickhouse jupyter && ./scripts/open.sh jupyter"
-
-# Start Prefect in detached mode, and open VS Code
-alias cdw="cd /path/to/dw-analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli test-postgres test-clickhouse && ./scripts/open.sh vscode"
+# Open VS Code
+alias cdw="cd /path/to/dw-analytics/analytics/scripts/open.sh vscode"
 ```
 
-Set `/path/to/` to the location of the repositories on your machine. If you prefer to run the containers in the foreground, then omit the `-d` option.
+Set `/path/to/` to the location of the repository on your machine.
 
-### Monitoring
-
-The resource usage of the Docker containers can be monitored with [https://github.com/netbek/dw-monitor](https://github.com/netbek/dw-monitor).
-
-## Uninstall
+### Uninstall
 
 To delete all the data and Docker images, run:
 
 ```shell
-./scripts/uninstall.sh
+./scripts/docker_clean.sh
+```
+
+## Production
+
+### Install
+
+1. [Docker Engine v23 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2 or higher](https://docs.docker.com/compose/install/). Follow the links for instructions or run this script:
+
+    ```shell
+    ./scripts/install.sh docker
+    ```
+
+2. Clone PeerDB, create the .env files for deployment, and build the Docker images:
+
+    ```shell
+    ./scripts/install.sh peerdb
+    ./scripts/docker_env.sh prod
+    ./scripts/docker_build.sh
+    ```
+
+3. Start the services:
+
+    ```shell
+    cd /path/to/dw-analytics/docker/clickhouse && docker compose up -d
+    cd /path/to/dw-analytics/docker/peerdb && docker compose up -d
+    cd /path/to/dw-analytics/docker/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
+    ```
+
+4. Run the provision script to configure Prefect:
+
+    ```shell
+    ./scripts/cli.sh prefect provision dev
+    ```
+
+### Uninstall
+
+To delete all the data and Docker images, run:
+
+```shell
+./scripts/docker_clean.sh
 ```
