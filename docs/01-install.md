@@ -78,7 +78,7 @@ Add aliases for frequently used commands to `~/.bash_aliases`:
 alias adw="cd /path/to/dw-analytics && tilt up --port 29000"
 
 # Stop warehouse
-alias adw="cd /path/to/dw-analytics && tilt down"
+alias sdw="cd /path/to/dw-analytics && tilt down"
 
 # Connect to ClickHouse
 alias cch="cd /path/to/dw-analytics/deploy/clickhouse && docker compose exec clickhouse clickhouse-client --user analyst --password analyst"
