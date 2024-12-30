@@ -139,7 +139,7 @@ services:
       - .:/home/analyst:rw
 
   test-clickhouse:
-    image: clickhouse/clickhouse-server:24.8.8.17-alpine
+    image: clickhouse/clickhouse-server:24.8.9.95-alpine
     env_file:
       - ./test-clickhouse.env
     ports:

@@ -2,7 +2,7 @@ name: dw-clickhouse
 
 services:
   clickhouse:
-    image: clickhouse/clickhouse-server:24.8.8.17-alpine
+    image: clickhouse/clickhouse-server:24.8.9.95-alpine
     env_file:
       - ./clickhouse.env
     extra_hosts:
