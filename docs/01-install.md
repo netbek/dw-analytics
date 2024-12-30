@@ -110,15 +110,25 @@ To delete all the data and Docker images, run:
     ./scripts/install.sh docker
     ```
 
-2. Clone PeerDB, create the .env files for deployment, and build the Docker images:
+2. Clone PeerDB:
 
     ```shell
     ./scripts/install.sh peerdb
+    ```
+
+3. Create the .env files for deployment:
+
+    ```shell
     ./scripts/env.sh prod
+    ```
+
+4. Build the Docker images:
+
+    ```shell
     ./scripts/build.sh
     ```
 
-3. Start the services:
+5. Start the services:
 
     ```shell
     cd /path/to/dw-analytics/deploy/clickhouse && docker compose up -d
@@ -126,7 +136,7 @@ To delete all the data and Docker images, run:
     cd /path/to/dw-analytics/deploy/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
     ```
 
-4. Run the provision script to configure Prefect:
+6. Run the provision script to configure Prefect:
 
     ```shell
     ./scripts/cli.sh prefect provision dev
