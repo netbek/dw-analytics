@@ -20,14 +20,19 @@
     ./scripts/install.sh tilt
     ```
 
-3. Clone PeerDB and create the .env files for deployment:
+3. Clone PeerDB:
 
     ```shell
     ./scripts/install.sh peerdb
-    ./scripts/docker_env.sh dev
     ```
 
-4. Start the services:
+4. Create the .env files for deployment:
+
+    ```shell
+    ./scripts/env.sh dev
+    ```
+
+5. Start the services:
 
     ```shell
     tilt up --port 29000
@@ -35,7 +40,7 @@
 
     Wait a few minutes for the Docker images to be built. To check the progress, open [http://localhost:29000](http://localhost:29000).
 
-5. Run the provision script to configure Prefect:
+6. Run the provision script to configure Prefect:
 
     ```shell
     ./scripts/cli.sh prefect provision dev
@@ -45,7 +50,7 @@
 
 #### VS Code
 
-[Download VS Code](https://code.visualstudio.com/). After installing VS Code, install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers):
+Download [VS Code](https://code.visualstudio.com/). After installing VS Code, install the [Dev Containers extension](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers):
 
 ```shell
 code --install-extension ms-vscode-remote.remote-containers
@@ -69,6 +74,12 @@ See the docs for [creating a connection](https://github.com/dbeaver/dbeaver/wiki
 Add aliases for frequently used commands to `~/.bash_aliases`:
 
 ```shell
+# Start warehouse
+alias adw="cd /path/to/dw-analytics && tilt up --port 29000"
+
+# Stop warehouse
+alias adw="cd /path/to/dw-analytics && tilt down"
+
 # Connect to ClickHouse
 alias cch="cd /path/to/dw-analytics/deploy/clickhouse && docker compose exec clickhouse clickhouse-client --user analyst --password analyst"
 
@@ -86,7 +97,7 @@ Set `/path/to/` to the location of the repository on your machine.
 To delete all the data and Docker images, run:
 
 ```shell
-./scripts/docker_clean.sh
+./scripts/destroy.sh
 ```
 
 ## Production
@@ -103,8 +114,8 @@ To delete all the data and Docker images, run:
 
     ```shell
     ./scripts/install.sh peerdb
-    ./scripts/docker_env.sh prod
-    ./scripts/docker_build.sh
+    ./scripts/env.sh prod
+    ./scripts/build.sh
     ```
 
 3. Start the services:
@@ -126,5 +137,5 @@ To delete all the data and Docker images, run:
 To delete all the data and Docker images, run:
 
 ```shell
-./scripts/docker_clean.sh
+./scripts/destroy.sh
 ```
