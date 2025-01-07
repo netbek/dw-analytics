@@ -129,13 +129,19 @@ Set `/path/to/` to the location of the repository on your machine.
 
 ### Uninstall
 
-1. For each project, stop PeerDB syncing:
+1. Start the services, if not already running:
+
+    ```shell
+    tilt up --port 29000
+    ```
+
+2. For each project, stop PeerDB syncing:
 
     ```shell
     ./scripts/cli.sh peerdb uninstall PROJECT_NAME
     ```
 
-2. Delete all the data and Docker images:
+3. Delete all the data and Docker images:
 
     ```shell
     ./scripts/destroy.sh
@@ -206,13 +212,21 @@ Set `/path/to/` to the location of the repository on your machine.
 
 ### Uninstall
 
-1. For each project, stop PeerDB syncing:
+1. Start the services, if not already running:
+
+    ```shell
+    cd /path/to/dw-analytics/deploy/clickhouse && docker compose up -d
+    cd /path/to/dw-analytics/deploy/peerdb && docker compose up -d
+    cd /path/to/dw-analytics/deploy/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
+    ```
+
+2. For each project, stop PeerDB syncing:
 
     ```shell
     ./scripts/cli.sh peerdb uninstall PROJECT_NAME
     ```
 
-2. Delete all the data and Docker images:
+3. Delete all the data and Docker images:
 
     ```shell
     ./scripts/destroy.sh
