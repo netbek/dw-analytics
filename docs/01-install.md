@@ -165,7 +165,7 @@ Set `/path/to/` to the location of the repository on your machine.
     tilt up --port 29000
     ```
 
-2. For each project, stop PeerDB syncing:
+2. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), stop PeerDB syncing:
 
     ```shell
     ./scripts/cli.sh peerdb uninstall PROJECT_NAME
@@ -280,7 +280,7 @@ Set `/path/to/` to the location of the repository on your machine.
     cd /path/to/dw-analytics/deploy/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
     ```
 
-2. For each project, stop PeerDB syncing:
+2. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), stop PeerDB syncing:
 
     ```shell
     ./scripts/cli.sh peerdb uninstall PROJECT_NAME
