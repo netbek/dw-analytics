@@ -79,7 +79,31 @@
     ./scripts/cli.sh project refresh PROJECT_NAME
     ```
 
-9. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
+9. Enable replication on the Postgres server.
+
+    | Setting                      | Recommended value  |
+    |------------------------------|--------------------|
+    | wal_level                    | logical            |
+    | max_wal_senders              | > 1                |
+    | max_replication_slots        | >= 4               |
+
+    To get the current settings, run this query:
+
+    ```sql
+    select name, setting
+    from pg_settings
+    where name in ('wal_level', 'max_wal_senders', 'max_replication_slots');
+    ```
+
+    To update the settings, amend `postgresql.conf` on the Postgres server and restart the server:
+
+    ```shell
+    wal_level = 'logical'
+    max_wal_senders = '10'
+    max_replication_slots = '10'
+    ```
+
+10. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
 
     ```shell
     ./scripts/cli.sh peerdb install PROJECT_NAME
@@ -214,7 +238,31 @@ Set `/path/to/` to the location of the repository on your machine.
     ./scripts/cli.sh project refresh PROJECT_NAME
     ```
 
-9. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
+9. Enable replication on the Postgres server.
+
+    | Setting                      | Recommended value  |
+    |------------------------------|--------------------|
+    | wal_level                    | logical            |
+    | max_wal_senders              | > 1                |
+    | max_replication_slots        | >= 4               |
+
+    To get the current settings, run this query:
+
+    ```sql
+    select name, setting
+    from pg_settings
+    where name in ('wal_level', 'max_wal_senders', 'max_replication_slots');
+    ```
+
+    To update the settings, amend `postgresql.conf` on the Postgres server and restart the server:
+
+    ```shell
+    wal_level = 'logical'
+    max_wal_senders = '10'
+    max_replication_slots = '10'
+    ```
+
+10. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
 
     ```shell
     ./scripts/cli.sh peerdb install PROJECT_NAME
