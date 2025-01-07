@@ -9,6 +9,10 @@ source "${scripts_dir}/functions.sh"
 
 cd "${root_dir}"
 
+echo "${tput_yellow}If PeerDB is syncing, stop it before continuing:${tput_reset}"
+echo "${tput_yellow}./scripts/cli.sh peerdb uninstall PROJECT_NAME${tput_reset}"
+echo ""
+
 read -p "Are you sure you want to delete all the data and Docker images? (y/n): " answer
 
 if [ "$answer" != "y" ]; then
