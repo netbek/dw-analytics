@@ -32,6 +32,20 @@
     ./scripts/env.sh dev
     ```
 
+    When prompted, enter the suggested values:
+
+    ```shell
+    clickhouse_default_username: default
+    clickhouse_default_password: default
+    clickhouse_default_database: default
+    prefect_postgres_default_username: postgres
+    prefect_postgres_default_password: postgres
+    prefect_postgres_default_database: postgres
+    prefect_postgres_prefect_username: prefect
+    prefect_postgres_prefect_password: prefect
+    prefect_postgres_prefect_database: prefect
+    ```
+
 5. Start the services:
 
     ```shell
