@@ -73,7 +73,7 @@
     ./scripts/cli.sh project refresh PROJECT_NAME
     ```
 
-9. For each project, set up PeerDB and the source and target databases:
+9. For each project, set up PeerDB and sync the ClickHouse database:
 
     ```shell
     ./scripts/cli.sh peerdb install PROJECT_NAME
@@ -190,7 +190,7 @@ To delete all the data and Docker images, run:
     ./scripts/cli.sh project refresh PROJECT_NAME
     ```
 
-9. For each project, set up PeerDB and the source and target databases:
+9. For each project, set up PeerDB and sync the ClickHouse database:
 
     ```shell
     ./scripts/cli.sh peerdb install PROJECT_NAME
