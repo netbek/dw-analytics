@@ -60,6 +60,27 @@
     ./scripts/cli.sh prefect provision dev
     ```
 
+7. For each project, clone its repo:
+
+    ```shell
+    cd analytics/projects
+    git clone ... PROJECT_NAME
+    ```
+
+8. For each project, install its dependencies:
+
+    ```shell
+    ./scripts/cli.sh project refresh PROJECT_NAME
+    ```
+
+9. For each project, set up PeerDB and the source and target databases:
+
+    ```shell
+    ./scripts/cli.sh peerdb install PROJECT_NAME
+    ```
+
+    To check the progress, open [http://localhost:3000/mirrors](http://localhost:3000/mirrors).
+
 ### Optional extras
 
 #### VS Code
@@ -155,6 +176,27 @@ To delete all the data and Docker images, run:
     ```shell
     ./scripts/cli.sh prefect provision dev
     ```
+
+7. For each project, clone its repo:
+
+    ```shell
+    cd analytics/projects
+    git clone ... PROJECT_NAME
+    ```
+
+8. For each project, install its dependencies:
+
+    ```shell
+    ./scripts/cli.sh project refresh PROJECT_NAME
+    ```
+
+9. For each project, set up PeerDB and the source and target databases:
+
+    ```shell
+    ./scripts/cli.sh peerdb install PROJECT_NAME
+    ```
+
+    To check the progress, open [http://localhost:3000/mirrors](http://localhost:3000/mirrors).
 
 ### Uninstall
 
