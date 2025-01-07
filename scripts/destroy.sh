@@ -53,4 +53,7 @@ done
 # Delete .env files
 rm -f ./deploy/*/.env ./deploy/*/*.env ./deploy/*/.gitconfig
 
+# Delete cache files
+rm -fr ./.cache
+
 echo "${tput_green}Done!${tput_reset}"
