@@ -46,6 +46,12 @@
     prefect_postgres_prefect_database: prefect
     ```
 
+    Amend the source database credentials, if necessary:
+
+    ```shell
+    grep -A 6 "Postgres development database" deploy/analytics/database.env
+    ```
+
 5. Start the services:
 
     ```shell
@@ -167,6 +173,12 @@ Set `/path/to/` to the location of the repository on your machine.
 
     ```shell
     ./scripts/env.sh prod
+    ```
+
+    Amend the source database credentials, if necessary:
+
+    ```shell
+    grep -A 6 "Postgres production database" deploy/analytics/database.env
     ```
 
 4. Build the Docker images:
