@@ -79,7 +79,7 @@
     ./scripts/cli.sh project refresh PROJECT_NAME
     ```
 
-9. For each project, set up PeerDB and sync the ClickHouse database:
+9. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
 
     ```shell
     ./scripts/cli.sh peerdb install PROJECT_NAME
@@ -214,7 +214,7 @@ Set `/path/to/` to the location of the repository on your machine.
     ./scripts/cli.sh project refresh PROJECT_NAME
     ```
 
-9. For each project, set up PeerDB and sync the ClickHouse database:
+9. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
 
     ```shell
     ./scripts/cli.sh peerdb install PROJECT_NAME
