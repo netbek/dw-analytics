@@ -30,6 +30,8 @@ services:
     extends:
       file: ../../peerdb/docker-compose.yml
       service: flow-snapshot-worker
+    extra_hosts:
+      - host.docker.internal:host-gateway
 
   flow-worker:
     extends:
