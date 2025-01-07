@@ -99,8 +99,8 @@
 
     ```shell
     wal_level = 'logical'
-    max_wal_senders = '10'
-    max_replication_slots = '10'
+    max_wal_senders = '2'
+    max_replication_slots = '4'
     ```
 
 10. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
@@ -258,8 +258,8 @@ Set `/path/to/` to the location of the repository on your machine.
 
     ```shell
     wal_level = 'logical'
-    max_wal_senders = '10'
-    max_replication_slots = '10'
+    max_wal_senders = '2'
+    max_replication_slots = '4'
     ```
 
 10. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
