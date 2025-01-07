@@ -129,11 +129,17 @@ Set `/path/to/` to the location of the repository on your machine.
 
 ### Uninstall
 
-To delete all the data and Docker images, run:
+1. For each project, stop PeerDB syncing:
 
-```shell
-./scripts/destroy.sh
-```
+    ```shell
+    ./scripts/cli.sh peerdb uninstall PROJECT_NAME
+    ```
+
+2. Delete all the data and Docker images:
+
+    ```shell
+    ./scripts/destroy.sh
+    ```
 
 ## Production
 
@@ -200,8 +206,14 @@ To delete all the data and Docker images, run:
 
 ### Uninstall
 
-To delete all the data and Docker images, run:
+1. For each project, stop PeerDB syncing:
 
-```shell
-./scripts/destroy.sh
-```
+    ```shell
+    ./scripts/cli.sh peerdb uninstall PROJECT_NAME
+    ```
+
+2. Delete all the data and Docker images:
+
+    ```shell
+    ./scripts/destroy.sh
+    ```
