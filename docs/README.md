@@ -2,14 +2,15 @@
 
 ## Guides
 
-- [Installation](docs/01-install.md)
-- [Analytics: Projects](docs/02-projects.md)
-- [Analytics: dbt](docs/03-dbt.md)
-- [Analytics: Jupyter Notebook](docs/04-jupyter.md)
-- [Analytics: API](docs/05-api.md)
-- [Analytics: Prefect](docs/06-prefect.md)
-- [Analytics: Operations](docs/07-operations.md)
-- [PeerDB](docs/08-peerdb.md)
+- [Installation](01-install.md)
+- [ClickHouse](02-clickhouse.md)
+- [PeerDB](03-peerdb.md)
+- [Analytics: Projects](04-projects.md)
+- [Analytics: dbt](05-dbt.md)
+- [Analytics: Jupyter Notebook](06-jupyter.md)
+- [Analytics: API](07-api.md)
+- [Analytics: Prefect](08-prefect.md)
+- [Analytics: Operations](09-operations.md)
 
 ## Resources
 
