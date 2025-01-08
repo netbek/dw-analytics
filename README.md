@@ -3,13 +3,14 @@
 ## Guides
 
 - [Installation](docs/01-install.md)
+- [ClickHouse](docs/02-clickhouse.md)
+- [PeerDB](docs/03-peerdb.md)
 - [Analytics: Projects](docs/04-projects.md)
 - [Analytics: dbt](docs/05-dbt.md)
 - [Analytics: Jupyter Notebook](docs/06-jupyter.md)
 - [Analytics: API](docs/07-api.md)
 - [Analytics: Prefect](docs/08-prefect.md)
 - [Analytics: Operations](docs/09-operations.md)
-- [PeerDB](docs/03-peerdb.md)
 
 ## File system
 
