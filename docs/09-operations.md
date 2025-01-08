@@ -31,7 +31,7 @@ To explore:
 
 | URL                                                                    | Description                                                       |
 |------------------------------------------------------------------------|-------------------------------------------------------------------|
-| [http://localhost:29000](localhost:29000)                              | Tilt: Status of Docker containers (development only)              |
+| [http://localhost:29000](http://localhost:29000)                       | Tilt: Status of Docker containers (development only)              |
 | [http://localhost:29320](http://localhost:29320)                       | Grafana: Resource usage of Docker containers                      |
 | [http://localhost:29200/dashboard](http://localhost:29200/dashboard)   | ClickHouse dashboard                                              |
 | [http://localhost:3000/mirrors](http://localhost:3000/mirrors)         | PeerDB mirrors                                                    |
