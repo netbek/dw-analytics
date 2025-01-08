@@ -14,7 +14,7 @@ deployments:
   version: null
   tags: [tutorial]
   description: null
-  entrypoint: flows/dbt.py:dbt_run_flow
+  entrypoint: flows/dbt_.py:dbt_run_flow
   parameters: {}
   work_pool:
     name: process_pool
