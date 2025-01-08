@@ -27,14 +27,15 @@ To explore:
     cli --help
     ```
 
-## Dashboards
+## Monitoring
 
-The following Docker containers provide dashboards. The `open.sh` script only opens a URL or application, so remember to start the relevant container(s) beforehand.
-
-| Service            | Command                            |
-|--------------------|------------------------------------|
-| `jupyter`          | `./scripts/open.sh jupyter`        |
-| `prefect-server`   | `./scripts/open.sh prefect-server` |
+| URL                                                                    | Description                                                       |
+|------------------------------------------------------------------------|-------------------------------------------------------------------|
+| [http://localhost:29000](localhost:29000)                              | Tilt: Status of Docker containers (development only)              |
+| [http://localhost:29320](http://localhost:29320)                       | Grafana: Resource usage of Docker containers                      |
+| [http://localhost:29200/dashboard](http://localhost:29200/dashboard)   | ClickHouse dashboard                                              |
+| [http://localhost:3000/mirrors](http://localhost:3000/mirrors)         | PeerDB mirrors                                                    |
+| [http://localhost:29120](http://localhost:29120)                       | Prefect dashboard                                                 |
 
 ## Database connections
 
@@ -54,10 +55,6 @@ Examples:
 |--------------------------------------|-------------------------------------------------------------------|
 | Use `psql` installed on host machine | `psql -h localhost -p 29110 -U prefect -d prefect`                |
 | Use `psql` installed in container    | `docker compose exec prefect-postgres psql -U prefect -d prefect` |
-
-## Monitoring
-
-The resource usage of the Docker containers can be monitored with [Grafana](http://localhost:29320).
 
 ## Resources
 
