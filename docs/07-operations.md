@@ -57,19 +57,7 @@ Examples:
 
 ## Monitoring
 
-The resource usage of the Docker containers can be monitored with [https://github.com/netbek/dw-monitor](https://github.com/netbek/dw-monitor).
-
-## Networking
-
-Ports can optionally be exposed. The configuration is loaded from `./.env` during startup.
-
-| Service            | Port  | Protocol    | Description           |
-|--------------------|-------|-------------|-----------------------|
-| `prefect-postgres` | 29110 | Postgres    | Postgres              |
-| `prefect-server`   | 29120 | HTTP        | Prefect               |
-| `jupyter`          | 29130 | HTTP        | Jupyter Notebook      |
-| `api`              | 29140 | HTTP        | API                   |
-| `cli`              | 29150 | HTTP        | dbt docs              |
+The resource usage of the Docker containers can be monitored with [Grafana](http://localhost:29320).
 
 ## Resources
 

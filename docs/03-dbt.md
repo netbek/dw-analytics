@@ -6,19 +6,20 @@ dbt projects are structured as follows:
 
 ```shell
 .
-└── projects
-    └── <PROJECT_NAME>
-        └── dbt
-            ├── analyses # https://docs.getdbt.com/docs/build/analyses
-            ├── docs # Documentation
-            ├── macros # https://docs.getdbt.com/docs/build/jinja-macros#macros
-            ├── models # https://docs.getdbt.com/docs/build/models
-            ├── seeds # https://docs.getdbt.com/docs/build/seeds
-            ├── snapshots # https://docs.getdbt.com/docs/build/snapshots
-            ├── tests # https://docs.getdbt.com/docs/build/data-tests
-            ├── dbt_project.yml # https://docs.getdbt.com/reference/dbt_project.yml
-            ├── dependencies.yml # https://docs.getdbt.com/docs/build/packages
-            └── selectors.yml # https://docs.getdbt.com/reference/node-selection/yaml-selectors
+└── analytics
+    └── projects
+        └── <PROJECT_NAME>
+            └── dbt
+                ├── analyses # https://docs.getdbt.com/docs/build/analyses
+                ├── docs # Documentation
+                ├── macros # https://docs.getdbt.com/docs/build/jinja-macros#macros
+                ├── models # https://docs.getdbt.com/docs/build/models
+                ├── seeds # https://docs.getdbt.com/docs/build/seeds
+                ├── snapshots # https://docs.getdbt.com/docs/build/snapshots
+                ├── tests # https://docs.getdbt.com/docs/build/data-tests
+                ├── dbt_project.yml # https://docs.getdbt.com/reference/dbt_project.yml
+                ├── dependencies.yml # https://docs.getdbt.com/docs/build/packages
+                └── selectors.yml # https://docs.getdbt.com/reference/node-selection/yaml-selectors
 ```
 
 ## CLI

@@ -43,11 +43,11 @@ To explore:
 
 ## Flows and tasks
 
-Flows exist as Python functions and flow entities. Python functions are stored in `./projects/<PROJECT_NAME>/flows`, and the flow entities are stored in the Prefect database.
+Flows exist as Python functions and flow entities. Python functions are stored in `./analytics/projects/<PROJECT_NAME>/flows`, and the flow entities are stored in the Prefect database.
 
 Flow entities appear on the Prefect dashboard under [Flows](http://localhost:29120/flows) and in the CLI at `prefect flows ls`. Flows that have not been deployed won't be listed.
 
-The Python files in `./projects/<PROJECT_NAME>/flows` contain 1 main flow function, optionally subflows, and 1 or more task functions that are used in the flow.
+The Python files in `./analytics/projects/<PROJECT_NAME>/flows` contain 1 main flow function, optionally subflows, and 1 or more task functions that are used in the flow.
 
 Further reading:
 
@@ -56,7 +56,7 @@ Further reading:
 
 ## Deployments
 
-Deployments of flows exist as configuration files and deployment entities. The configuration is stored in `./projects/<PROJECT_NAME>/prefect.yaml`, and the deployment entities are stored in the Prefect database.
+Deployments of flows exist as configuration files and deployment entities. The configuration is stored in `./analytics/projects/<PROJECT_NAME>/prefect.yaml`, and the deployment entities are stored in the Prefect database.
 
 Deployment entities appear on the Prefect dashboard under [Deployments](http://localhost:29120/deployments) and in the CLI at `prefect deployments ls`. Deployments that exist only in configuration won't be listed.
 
@@ -69,7 +69,7 @@ Further reading:
 
 For example, here are the steps to create a deployment in the `tutorial` project:
 
-1. Open [./projects/tutorial/prefect.yaml](../projects/tutorial/prefect.yaml#L44) and go to the commented section `Instructions for new deployments`.
+1. Open [./analytics/projects/tutorial/prefect.yaml](../analytics/projects/tutorial/prefect.yaml#L44) and go to the commented section `Instructions for new deployments`.
 
 2. Copy and append the template to the `deployments` list.
 
@@ -128,7 +128,7 @@ To delete a deployment:
     cli prefect deployment delete -d DEPLOYMENT_NAME
     ```
 
-2. Remove the deployment from the `deployments` list in `./projects/<PROJECT_NAME>/prefect.yaml`.
+2. Remove the deployment from the `deployments` list in `./analytics/projects/<PROJECT_NAME>/prefect.yaml`.
 
 Available commands:
 
@@ -141,7 +141,7 @@ Available commands:
 
 ## Naming conventions for flows and deployments
 
-Conventions for `./projects/<PROJECT_NAME>/flows` and `./projects/<PROJECT_NAME>/prefect.yaml`:
+Conventions for `./analytics/projects/<PROJECT_NAME>/flows` and `./analytics/projects/<PROJECT_NAME>/prefect.yaml`:
 
 - flow file name: `<FLOW_NAME>.py` (has no suffix)
 - flow function name: `<FLOW_NAME>_flow` (has suffix)
