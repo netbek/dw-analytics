@@ -20,27 +20,30 @@
 │   ├── .dbt # dbt profiles
 │   ├── .devcontainer # VS Code dev container configuration
 │   ├── .prefect # Prefect profiles
+│   ├── examples
+│   │   └── tutorial # Tutorial project
 │   ├── package # Supplementary CLI and common utilities
 │   ├── projects # Data models, Python tasks, workflows, notebooks and tests
-│   ├── scripts # Convenience scripts
 │   ├── templates
 │   │   └── project # Template for new projects
 │   ├── .bashrc # Shell configuration used in CLI container
 │   ├── .gitconfig # Git configuration used in CLI container
 │   ├── .gitignore # Git configuration used in CLI container
+│   ├── .pre-commit-config.yaml # Pre-commit hooks configuration
 │   ├── .sqlfluff # SQL linter configuration used in CLI container
 │   ├── .sqlfluffignore # SQL linter configuration used in CLI container
 │   ├── .yamllint # YAML linter configuration used in CLI container
+│   ├── Dockerfile
 │   ├── pyproject.toml # Configuration of Python tools in CLI container
 │   ├── requirements_api.txt # Extra Python dependencies of API container
 │   ├── requirements_base.txt # Python dependencies of all containers
 │   ├── requirements_dev.txt # Python development dependencies
 │   └── requirements_jupyter.txt # Extra Python dependencies of Jupyter container
-├── clickhouse
+├── clickhouse # ClickHouse configurations
 ├── deploy
 │   └── # Docker container configurations
 ├── docs
-├── monitor
+├── monitor # Monitoring configurations
 ├── peerdb
 └── scripts # Installation scripts
 ```
