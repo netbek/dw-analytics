@@ -1,0 +1,58 @@
+{
+  "name": "dw-analytics",
+  "dockerComposeFile": "../../deploy/analytics/docker-compose.yml",
+  "service": "cli",
+  "workspaceFolder": "/home/analyst",
+  "shutdownAction": "none",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "charliermarsh.ruff",
+        "dorzey.vscode-sqlfluff",
+        "eamodio.gitlens",
+        "ms-python.isort",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-toolsai.jupyter",
+        "njpwerner.autodocstring",
+        "samuelcolvin.jinjahtml",
+        "tamasfe.even-better-toml",
+        "usernamehw.errorlens"
+      ],
+      "settings": {
+        "[python]": {
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": true
+          },
+          "editor.defaultFormatter": "charliermarsh.ruff",
+          "editor.formatOnSave": true
+        },
+        "autoDocstring.startOnNewLine": true,
+        "breadcrumbs.enabled": false,
+        "editor.formatOnSave": false,
+        "files.associations": {
+          "*.sql": "jinja-sql"
+        },
+        "files.eol": "\n",
+        "git.openRepositoryInParentFolders": "always",
+        "isort.args": ["--settings-path", "/home/analyst/pyproject.toml"],
+        "isort.importStrategy": "fromEnvironment",
+        "python.defaultInterpreterPath": "/opt/venv/bin/python",
+        "python.experiments.enabled": false,
+        "python.languageServer": "Pylance",
+        "ruff.format.args": ["--config", "/home/analyst/pyproject.toml"],
+        "ruff.organizeImports": false,
+        "sqlfluff.config": "/home/analyst/.sqlfluff",
+        "sqlfluff.dialect": "clickhouse",
+        "sqlfluff.executablePath": "/home/analyst/.devcontainer/vscode_sqlfluff.py",
+        "sqlfluff.experimental.format.executeInTerminal": true,
+        "sqlfluff.format.enabled": true,
+        "sqlfluff.ignoreLocalConfig": true,
+        "sqlfluff.ignoreParsing": true,
+        "sqlfluff.linter.run": "onSave",
+        "sqlfluff.workingDirectory": "/",
+        "telemetry.telemetryLevel": "off"
+      }
+    }
+  }
+}

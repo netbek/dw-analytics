@@ -1,0 +1,59 @@
+settings:
+  PEERDB_CLICKHOUSE_ENABLE_PRIMARY_UPDATE: "false"
+  PEERDB_CLICKHOUSE_MAX_INSERT_THREADS: "0"
+  PEERDB_CLICKHOUSE_PARALLEL_NORMALIZE: "0"
+  PEERDB_CLICKHOUSE_UNBOUNDED_NUMERIC_AS_STRING: "false"
+  PEERDB_NULLABLE: "true"
+
+users:
+  source:
+    username: peerdb
+    password: peerdb
+
+peers:
+  source:
+    type: 3
+    postgres_config:
+      host: host.docker.internal
+      port: 5432
+      user: postgres
+      password: postgres
+      database: app
+
+  destination:
+    type: 8
+    clickhouse_config:
+      host: host.docker.internal
+      port: 29201
+      user: peerdb
+      password: peerdb
+      database: app
+      disable_tls: true
+
+mirrors:
+  +do_initial_snapshot: true
+  +idle_timeout_seconds: 60
+  +initial_snapshot_only: false
+  +max_batch_size: 1000000
+  +resync: false
+  +snapshot_max_parallel_workers: 4
+  +snapshot_num_rows_per_partition: 1000000
+  +snapshot_num_tables_in_parallel: 2
+  +soft_delete_col_name: _peerdb_is_deleted
+  +synced_at_col_name: _peerdb_synced_at
+
+# --------------------------------------------------------------------------------------------------
+# Instructions for new mirrors
+# --------------------------------------------------------------------------------------------------
+
+# 1. The `mirrors` section can contain 1 or more mirrors. A mirror can contain 1 or more table mappings.
+# 2. Copy and append the following template to the `mirrors` section.
+# 3. `source_name` and `destination_name` must be the same as in the `peers` section.
+# 4. Amend the mirror name ("cdc_example"), `source_table_identifier` and `destination_table_identifier`.
+
+#   cdc_example:
+#     source_name: source
+#     destination_name: destination
+#     table_mappings:
+#     - source_table_identifier: public.source_table
+#       destination_table_identifier: destination_table

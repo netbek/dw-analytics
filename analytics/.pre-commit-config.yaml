@@ -1,0 +1,24 @@
+repos:
+  - repo: https://github.com/pycqa/autoflake
+    rev: v2.3.1
+    hooks:
+      - id: autoflake
+        args: [--remove-all-unused-imports, --in-place]
+        stages: [pre-commit]
+  - repo: https://github.com/pycqa/isort
+    rev: 5.13.2
+    hooks:
+      - id: isort
+        args: [--settings-path, /home/analyst/pyproject.toml]
+        stages: [pre-commit]
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.8.6
+    hooks:
+      - id: ruff
+        alias: ruff-lint
+        args: [--config, /home/analyst/pyproject.toml]
+        stages: [manual]
+      - id: ruff-format
+        alias: ruff
+        args: [--config, /home/analyst/pyproject.toml]
+        stages: [pre-commit]

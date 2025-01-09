@@ -1,0 +1,185 @@
+name: dw-analytics
+
+services:
+  prefect-postgres:
+    image: postgres:17.0-alpine3.20
+    env_file:
+      - ./prefect-postgres.env
+    ports:
+      - ${DW_PREFECT_POSTGRES_PORT}:5432
+    volumes:
+      - ./prefect-postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - prefect-postgres-data:/var/lib/postgresql/data:rw
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 1s
+      timeout: 1s
+      retries: 10
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+  prefect-server:
+    image: dw-analytics-prefect-server:${EXPECTED_TAG:-latest}
+    build:
+      context: ../../analytics
+      target: prefect-common
+    command: prefect server start
+    env_file:
+      - ./prefect-server.env
+    environment:
+      - PREFECT_UI_URL=http://localhost:${DW_PREFECT_SERVER_PORT} # Used for flow run URL in notifications
+      - PREFECT_UI_API_URL=http://localhost:${DW_PREFECT_SERVER_PORT}/api
+    ports:
+      - ${DW_PREFECT_SERVER_PORT}:4200
+    volumes:
+      - ./prefect-server/static:/home/analyst/static:rw
+      - ../../analytics/.prefect:/home/analyst/.prefect:rw
+    healthcheck:
+      test: curl --fail http://0.0.0.0:4200/api/health || exit 1
+      interval: 1s
+      timeout: 1s
+      retries: 10
+    deploy:
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      prefect-postgres:
+        condition: service_healthy
+
+  prefect-worker:
+    image: dw-analytics-prefect-worker:${EXPECTED_TAG:-latest}
+    build:
+      context: ../../analytics
+      target: prefect-common
+    command: prefect worker start --name process-worker --pool process_pool --type process --limit 1
+    env_file:
+      - ./prefect-worker.env
+      - ./database.env
+    extra_hosts:
+      - host.docker.internal:host-gateway # Used for connection to ClickHouse
+    volumes:
+      - ./prefect-worker/healthcheck.py:/docker/healthcheck.py:ro
+      - ../../analytics/.dbt:/home/analyst/.dbt:rw
+      - ../../analytics/.prefect:/home/analyst/.prefect:rw
+      - ../../analytics/package:/home/analyst/package:rw
+      - ../../analytics/projects:/home/analyst/projects:rw
+    healthcheck:
+      test: /docker/healthcheck.py process-worker process_pool || exit 1
+      interval: 1s
+      timeout: 1s
+      retries: 10
+    deploy:
+      restart_policy:
+        condition: on-failure
+    depends_on:
+      prefect-server:
+        condition: service_healthy
+
+  cli:
+    image: dw-analytics-cli:${EXPECTED_TAG:-latest}
+    build:
+      context: ../../analytics
+      target: prefect-common
+    command: /bin/bash
+    env_file:
+      - ./cli.env
+      - ./database.env
+    working_dir: /home/analyst/projects
+    extra_hosts:
+      - host.docker.internal:host-gateway # Used for connection to ClickHouse
+    ports:
+      - ${DW_DBT_DOCS_PORT}:8080
+    volumes:
+      - ../../analytics:/home/analyst:rw
+      - ./.gitconfig:/home/analyst/.gitconfig:ro
+      - ${SSH_AUTH_SOCK}:/ssh-agent:ro
+    stdin_open: true
+    tty: true
+    depends_on:
+      prefect-server:
+        condition: service_healthy
+      prefect-worker:
+        condition: service_healthy
+
+  jupyter:
+    image: dw-analytics-jupyter:${EXPECTED_TAG:-latest}
+    build:
+      context: ../../analytics
+      target: jupyter
+    command: jupyter nbclassic --ip='0.0.0.0' --port=8888 --no-browser --ServerApp.token='' --ServerApp.password='' --ServerApp.notebook_dir='/home/analyst/projects'
+    env_file:
+      - ./jupyter.env
+      - ./database.env
+    extra_hosts:
+      - host.docker.internal:host-gateway # Used for connection to ClickHouse
+    ports:
+      - ${DW_JUPYTER_PORT}:8888
+    volumes:
+      - ../../analytics/.dbt:/home/analyst/.dbt:rw
+      - ../../analytics/.prefect:/home/analyst/.prefect:rw
+      - ../../analytics/package:/home/analyst/package:rw
+      - ../../analytics/projects:/home/analyst/projects:rw
+
+  api:
+    image: dw-analytics-api:${EXPECTED_TAG:-latest}
+    build:
+      context: ../../analytics
+      target: api
+    command: uvicorn main:app --app-dir /home/analyst/projects/tutorial/api --host 0.0.0.0 --port 80 --reload
+    env_file:
+      - ./api.env
+      - ./database.env
+    working_dir: /home/analyst/projects/tutorial/api
+    extra_hosts:
+      - host.docker.internal:host-gateway # Used for connection to ClickHouse
+    ports:
+      - ${DW_API_PORT}:80
+    volumes:
+      - .:/home/analyst:rw
+
+  test-clickhouse:
+    image: clickhouse/clickhouse-server:24.8.9.95-alpine
+    env_file:
+      - ./test-clickhouse.env
+    ports:
+      - ${DW_TEST_CLICKHOUSE_HTTP_PORT}:8123
+      - ${DW_TEST_CLICKHOUSE_TCP_PORT}:9000
+    volumes:
+      - ./test-clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - ./test-clickhouse/config.d/override.xml:/etc/clickhouse-server/config.d/override.xml:ro
+      - ./test-clickhouse/users.d/override.xml:/etc/clickhouse-server/users.d/override.xml:ro
+      - test-clickhouse-data:/var/lib/clickhouse:rw
+    healthcheck:
+      test: wget --no-verbose --spider http://0.0.0.0:8123/ping || exit 1
+      interval: 1s
+      timeout: 1s
+      retries: 10
+    deploy:
+      restart_policy:
+        condition: on-failure
+    cap_add:
+      - CAP_SYS_NICE # https://github.com/ClickHouse/ClickHouse/issues/68747#issuecomment-2306631664
+
+  test-postgres:
+    image: postgres:17.0-alpine3.20
+    env_file:
+      - ./test-postgres.env
+    ports:
+      - ${DW_TEST_POSTGRES_PORT}:5432
+    volumes:
+      - ./test-postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - test-postgres-data:/var/lib/postgresql/data:rw
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 1s
+      timeout: 1s
+      retries: 10
+    deploy:
+      restart_policy:
+        condition: on-failure
+
+volumes:
+  prefect-postgres-data:
+  test-clickhouse-data:
+  test-postgres-data:
