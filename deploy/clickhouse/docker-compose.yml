@@ -11,9 +11,9 @@ services:
       - ${DW_CLICKHOUSE_HTTP_PORT}:8123
       - ${DW_CLICKHOUSE_TCP_PORT}:9000
     volumes:
-      - ../../clickhouse/clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
-      - ../../clickhouse/clickhouse/config.d/override.xml:/etc/clickhouse-server/config.d/override.xml:ro
-      - ../../clickhouse/clickhouse/users.d/override.xml:/etc/clickhouse-server/users.d/override.xml:ro
+      - ../../clickhouse/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d:ro
+      - ../../clickhouse/config.d/override.xml:/etc/clickhouse-server/config.d/override.xml:ro
+      - ../../clickhouse/users.d/override.xml:/etc/clickhouse-server/users.d/override.xml:ro
       - clickhouse-data:/var/lib/clickhouse:rw
     healthcheck:
       test: wget --no-verbose --spider http://0.0.0.0:8123/ping || exit 1
