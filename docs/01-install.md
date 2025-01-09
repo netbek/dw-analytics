@@ -140,19 +140,19 @@ Add aliases for frequently used commands to `~/.bash_aliases`:
 
 ```shell
 # Start warehouse
-alias adw="cd /path/to/dw-analytics && tilt up --port 29000"
+alias adw="cd /path/to/dw && tilt up --port 29000"
 
 # Stop warehouse
-alias sdw="cd /path/to/dw-analytics && tilt down"
+alias sdw="cd /path/to/dw && tilt down"
 
 # Connect to ClickHouse
-alias cch="cd /path/to/dw-analytics/deploy/clickhouse && docker compose exec clickhouse clickhouse-client --user analyst --password analyst"
+alias cch="cd /path/to/dw/deploy/clickhouse && docker compose exec clickhouse clickhouse-client --user analyst --password analyst"
 
 # Open Jupyter
-alias jdw="cd /path/to/dw-analytics && ./scripts/open.sh jupyter"
+alias jdw="cd /path/to/dw && ./scripts/open.sh jupyter"
 
 # Open VS Code
-alias cdw="cd /path/to/dw-analytics && ./scripts/open.sh vscode"
+alias cdw="cd /path/to/dw && ./scripts/open.sh vscode"
 ```
 
 Set `/path/to/` to the location of the repository on your machine.
@@ -214,9 +214,9 @@ Set `/path/to/` to the location of the repository on your machine.
 5. Start the services:
 
     ```shell
-    cd /path/to/dw-analytics/deploy/clickhouse && docker compose up -d
-    cd /path/to/dw-analytics/deploy/peerdb && docker compose up -d
-    cd /path/to/dw-analytics/deploy/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
+    cd /path/to/dw/deploy/clickhouse && docker compose up -d
+    cd /path/to/dw/deploy/peerdb && docker compose up -d
+    cd /path/to/dw/deploy/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
     ```
 
 6. Run the provision script to configure Prefect:
@@ -275,9 +275,9 @@ Set `/path/to/` to the location of the repository on your machine.
 1. Start the services, if not already running:
 
     ```shell
-    cd /path/to/dw-analytics/deploy/clickhouse && docker compose up -d
-    cd /path/to/dw-analytics/deploy/peerdb && docker compose up -d
-    cd /path/to/dw-analytics/deploy/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
+    cd /path/to/dw/deploy/clickhouse && docker compose up -d
+    cd /path/to/dw/deploy/peerdb && docker compose up -d
+    cd /path/to/dw/deploy/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
     ```
 
 2. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), stop PeerDB syncing:
