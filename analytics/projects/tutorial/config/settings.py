@@ -1,22 +1,17 @@
 from functools import lru_cache
 from package.project import Project
-from package.types import (
-    CHSettings,
-    DbtSettings,
-    NotebookSettings,
-    PeerDBSettings,
-    PGSettings,
-    PrefectSettings,
-)
+from package.types import CHSettings, DbtSettings, NotebookSettings, PGSettings, PrefectSettings
 from package.utils.settings import (
     create_ch_settings,
     create_dbt_settings,
     create_notebook_settings,
-    create_peerdb_settings,
     create_pg_settings,
     create_prefect_settings,
 )
 from pydantic import BaseModel, Field
+
+# from package.types import PeerDBSettings
+# from package.utils.settings import create_peerdb_settings
 
 project = Project.from_path(__file__)
 
@@ -32,9 +27,9 @@ class Settings(BaseModel):
     notebook: NotebookSettings = Field(
         default_factory=create_notebook_settings(project.notebooks_directory)
     )
-    peerdb: PeerDBSettings = Field(
-        default_factory=create_peerdb_settings(project.peerdb_config_path)
-    )
+    # peerdb: PeerDBSettings = Field(
+    #     default_factory=create_peerdb_settings(project.peerdb_config_path)
+    # )
     prefect: PrefectSettings = Field(
         default_factory=create_prefect_settings(project.prefect_config_path)
     )
