@@ -149,10 +149,10 @@ alias sdw="cd /path/to/dw && tilt down"
 alias cch="cd /path/to/dw/deploy/clickhouse && docker compose exec clickhouse clickhouse-client --user analyst --password analyst"
 
 # Open Jupyter
-alias jdw="cd /path/to/dw && ./scripts/open.sh jupyter"
+alias dwj="cd /path/to/dw && ./scripts/open.sh jupyter"
 
 # Open VS Code
-alias cdw="cd /path/to/dw && ./scripts/open.sh vscode"
+alias dwc="cd /path/to/dw && ./scripts/open.sh vscode"
 ```
 
 Set `/path/to/` to the location of the repository on your machine.
