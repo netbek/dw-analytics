@@ -14,6 +14,10 @@ def docker_compose_build(project_name, service, context, deps=None, build_args=N
 analytics_settings(enable=False)
 version_settings(constraint=">=0.33.20")
 
+# TODO Restart container when these files change:
+# ./deploy/clickhouse/.env
+# ./deploy/clickhouse/clickhouse.env
+
 docker_compose("./deploy/clickhouse/docker-compose.yml", project_name="dw-clickhouse")
 dc_resource("clickhouse", labels=["clickhouse"], project_name="dw-clickhouse")
 
@@ -37,6 +41,19 @@ services = [
     "jupyter",
     "api",
 ]
+
+# TODO Restart container when these files change:
+# ./deploy/analytics/.env
+# ./deploy/analytics/api.env
+# ./deploy/analytics/cli.env
+# ./deploy/analytics/database.env
+# ./deploy/analytics/jupyter.env
+# ./deploy/analytics/peerdb.env
+# ./deploy/analytics/prefect-postgres.env
+# ./deploy/analytics/prefect-server.env
+# ./deploy/analytics/prefect-worker.env
+# ./deploy/analytics/test-clickhouse.env
+# ./deploy/analytics/test-postgres.env
 
 for service in services:
     docker_compose_build(
@@ -66,6 +83,12 @@ dc_resource("test-clickhouse", labels=["analytics"], project_name="dw-analytics"
 dc_resource("test-postgres", labels=["analytics"], project_name="dw-analytics")
 dc_resource("api", labels=["analytics"], project_name="dw-analytics")
 dc_resource("jupyter", labels=["analytics"], project_name="dw-analytics")
+
+# TODO Restart container when these files change:
+# ./deploy/monitor/.env
+# ./deploy/monitor/cadvisor.env
+# ./deploy/monitor/grafana.env
+# ./deploy/monitor/prometheus.env
 
 docker_compose("./deploy/monitor/docker-compose.yml", project_name="dw-monitor")
 dc_resource("cadvisor", labels=["monitor"], project_name="dw-monitor")
