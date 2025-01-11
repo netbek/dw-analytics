@@ -159,6 +159,7 @@ templates=(
     ./deploy/analytics/templates/cli.env.jinja2                ./deploy/analytics/cli.env
     ./deploy/analytics/templates/database.env.jinja2           ./deploy/analytics/database.env
     ./deploy/analytics/templates/jupyter.env.jinja2            ./deploy/analytics/jupyter.env
+    ./deploy/analytics/templates/peerdb.env.jinja2             ./deploy/analytics/peerdb.env
     ./deploy/analytics/templates/prefect-postgres.env.jinja2   ./deploy/analytics/prefect-postgres.env
     ./deploy/analytics/templates/prefect-server.env.jinja2     ./deploy/analytics/prefect-server.env
     ./deploy/analytics/templates/prefect-worker.env.jinja2     ./deploy/analytics/prefect-worker.env
