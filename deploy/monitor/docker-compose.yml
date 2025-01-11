@@ -2,6 +2,7 @@ name: dw-monitor
 
 services:
   cadvisor:
+    container_name: cadvisor
     image: gcr.io/cadvisor/cadvisor:v0.51.0
     env_file:
       - ./cadvisor.env
@@ -14,6 +15,7 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
 
   prometheus:
+    container_name: prometheus
     image: prom/prometheus:v2.55.1
     command: --config.file=/etc/prometheus/prometheus.yml --log.level=warn
     env_file:
@@ -27,6 +29,7 @@ services:
       - cadvisor
 
   grafana:
+    container_name: grafana
     image: grafana/grafana-oss:10.4.14
     env_file:
       - ./grafana.env
@@ -44,3 +47,7 @@ services:
 volumes:
   prometheus-data:
   grafana-data:
+
+networks:
+  default:
+    name: dw

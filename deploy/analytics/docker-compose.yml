@@ -2,6 +2,7 @@ name: dw-analytics
 
 services:
   prefect-postgres:
+    container_name: prefect-postgres
     image: postgres:17.0-alpine3.20
     env_file:
       - ./prefect-postgres.env
@@ -20,6 +21,7 @@ services:
         condition: on-failure
 
   prefect-server:
+    container_name: prefect-server
     image: dw-analytics-prefect-server:${EXPECTED_TAG:-latest}
     build:
       context: ../../analytics
@@ -48,6 +50,7 @@ services:
         condition: service_healthy
 
   prefect-worker:
+    container_name: prefect-worker
     image: dw-analytics-prefect-worker:${EXPECTED_TAG:-latest}
     build:
       context: ../../analytics
@@ -56,8 +59,7 @@ services:
     env_file:
       - ./prefect-worker.env
       - ./database.env
-    extra_hosts:
-      - host.docker.internal:host-gateway # Used for connection to ClickHouse
+      - ./peerdb.env
     volumes:
       - ./prefect-worker/healthcheck.py:/docker/healthcheck.py:ro
       - ../../analytics/.dbt:/home/analyst/.dbt:rw
@@ -77,6 +79,7 @@ services:
         condition: service_healthy
 
   cli:
+    container_name: cli
     image: dw-analytics-cli:${EXPECTED_TAG:-latest}
     build:
       context: ../../analytics
@@ -85,9 +88,10 @@ services:
     env_file:
       - ./cli.env
       - ./database.env
+      - ./peerdb.env
     working_dir: /home/analyst/projects
     extra_hosts:
-      - host.docker.internal:host-gateway # Used for connection to ClickHouse
+      - host.docker.internal:host-gateway # Used for connection to Postgres
     ports:
       - ${DW_DBT_DOCS_PORT}:8080
     volumes:
@@ -103,16 +107,16 @@ services:
         condition: service_healthy
 
   jupyter:
+    container_name: jupyter
     image: dw-analytics-jupyter:${EXPECTED_TAG:-latest}
     build:
       context: ../../analytics
       target: jupyter
-    command: jupyter nbclassic --ip='0.0.0.0' --port=8888 --no-browser --ServerApp.token='' --ServerApp.password='' --ServerApp.notebook_dir='/home/analyst/projects'
+    command: jupyter nbclassic --ip="0.0.0.0" --port=8888 --no-browser --ServerApp.token="" --ServerApp.password="" --ServerApp.notebook_dir="/home/analyst/projects"
     env_file:
       - ./jupyter.env
       - ./database.env
-    extra_hosts:
-      - host.docker.internal:host-gateway # Used for connection to ClickHouse
+      - ./peerdb.env
     ports:
       - ${DW_JUPYTER_PORT}:8888
     volumes:
@@ -122,23 +126,24 @@ services:
       - ../../analytics/projects:/home/analyst/projects:rw
 
   api:
+    container_name: api
     image: dw-analytics-api:${EXPECTED_TAG:-latest}
     build:
       context: ../../analytics
       target: api
-    command: uvicorn main:app --app-dir /home/analyst/projects/tutorial/api --host 0.0.0.0 --port 80 --reload
+    command: uvicorn main:app --app-dir /home/analyst/projects/main/api --host 0.0.0.0 --port 80 --reload
     env_file:
       - ./api.env
       - ./database.env
-    working_dir: /home/analyst/projects/tutorial/api
-    extra_hosts:
-      - host.docker.internal:host-gateway # Used for connection to ClickHouse
+      - ./peerdb.env
+    working_dir: /home/analyst/projects/main/api
     ports:
       - ${DW_API_PORT}:80
     volumes:
       - .:/home/analyst:rw
 
   test-clickhouse:
+    container_name: test-clickhouse
     image: clickhouse/clickhouse-server:24.8.9.95-alpine
     env_file:
       - ./test-clickhouse.env
@@ -162,6 +167,7 @@ services:
       - CAP_SYS_NICE # https://github.com/ClickHouse/ClickHouse/issues/68747#issuecomment-2306631664
 
   test-postgres:
+    container_name: test-postgres
     image: postgres:17.0-alpine3.20
     env_file:
       - ./test-postgres.env
@@ -183,3 +189,7 @@ volumes:
   prefect-postgres-data:
   test-clickhouse-data:
   test-postgres-data:
+
+networks:
+  default:
+    name: dw

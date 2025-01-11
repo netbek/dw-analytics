@@ -23,8 +23,8 @@ peers:
   destination:
     type: 8
     clickhouse_config:
-      host: host.docker.internal
-      port: 29201
+      host: clickhouse
+      port: 9000
       user: peerdb
       password: peerdb
       database: app

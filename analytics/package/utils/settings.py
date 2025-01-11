@@ -105,7 +105,7 @@ def create_notebook_settings(directory: Path | str) -> NotebookSettings:
 def create_peerdb_settings(config_path: Path | str) -> PeerDBSettings:
     class Settings(PeerDBSettings):
         model_config = SettingsConfigDict(
-            env_file=os.path.join(HOME_DIR, ".env_files/database.env"), extra="ignore"
+            env_file=os.path.join(HOME_DIR, ".env_files/peerdb.env"), extra="ignore"
         )
 
         api_url: str = Field(validation_alias="peerdb_api_url")
