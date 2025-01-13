@@ -5,11 +5,6 @@ settings:
   PEERDB_CLICKHOUSE_UNBOUNDED_NUMERIC_AS_STRING: "false"
   PEERDB_NULLABLE: "true"
 
-users:
-  source:
-    username: peerdb
-    password: peerdb
-
 peers:
   source:
     type: 3
