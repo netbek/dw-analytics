@@ -71,6 +71,53 @@ uninstall_peerdb() {
     fi
 }
 
+install_uv() {
+    echo "${tput_yellow}Installing uv ...${tput_reset}"
+    curl -fsSL https://astral.sh/uv/0.5.18/install.sh | sh
+    echo "${tput_green}Installed uv${tput_reset}"
+}
+
+install_deploy() {
+    cd "${root_dir}"
+
+    template_name="deploy"
+    template_src_dir="./templates/${template_name}"
+    dest_dir="./deploy"
+
+    if [ ! -d "${template_src_dir}" ]; then
+        echo "${tput_red}Error: Template '$template_name' not found.${tput_reset}"
+        exit 1
+    fi
+
+    if [ -d "${dest_dir}" ]; then
+        rm -fr "${dest_dir}"
+    fi
+
+    # Copy template to destination
+    uv run copier copy --trust "${template_src_dir}" "${dest_dir}"
+
+    # Create analytics/.gitconfig
+    gitconfig_file="${dest_dir}/analytics/.gitconfig"
+    cat <<EOF > "${gitconfig_file}"
+[core]
+autocrlf = input
+
+[help]
+format = man
+
+[pull]
+rebase = false
+
+[push]
+autoSetupRemote = true
+
+[user]
+email = $(git config --get --global user.email)
+name = $(git config --get --global user.name)
+EOF
+    echo "${tput_green}Created ${gitconfig_file}${tput_reset}"
+}
+
 if ([ "$1" == "--help" ] || [ -z "$1" ]); then
     echo_help
     exit 1

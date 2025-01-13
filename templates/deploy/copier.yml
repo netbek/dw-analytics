@@ -1,0 +1,147 @@
+_answers_file: .copier-answers.yml
+_jinja_extensions:
+  - copier_templates_extensions.TemplateExtensionLoader
+  - ../jinja.py:GeneratePassword
+_min_copier_version: "9.4.1"
+
+
+
+profile:
+  type: str
+  choices:
+    - dev
+    - prod
+  default: dev
+
+ask_password:
+  type: bool
+  help: "Do you want set custom passwords? If not, then passwords will be generated."
+  default: false
+
+strong_password:
+  type: bool
+  help: "Do you want strong passwords to be generated? If not, then passwords will be the same as usernames."
+  default: true
+  when: "{{ not ask_password }}"
+
+
+
+source_postgres_host:
+  type: str
+  help: "Source Postgres: Host"
+
+source_postgres_port:
+  type: int
+  help: "Source Postgres: Port"
+
+source_postgres_database:
+  type: str
+  help: "Source Postgres: Database"
+
+source_postgres_schema:
+  type: str
+  help: "Source Postgres: Schema"
+
+source_postgres_username:
+  type: str
+  help: "Source Postgres: Username"
+
+source_postgres_password:
+  type: str
+  help: "Source Postgres: Password"
+  default: "{% if not ask_password %}{% if strong_password %}{{ generate_password() }}{% else %}{{ source_postgres_username }}{% endif %}{% endif %}"
+  validator: "{% if not source_postgres_password | trim | length %}Required{% endif %}"
+  when: ask_password
+
+
+
+clickhouse_default_database:
+  type: str
+  help: "ClickHouse: Default database"
+  default: default
+  when: false
+
+clickhouse_analytics_database:
+  type: str
+  help: "ClickHouse: Analytics database"
+  default: analytics
+  when: false
+
+clickhouse_default_username:
+  type: str
+  help: "ClickHouse: Superuser username"
+  default: default
+  when: false
+
+clickhouse_default_password:
+  type: str
+  help: "ClickHouse: Superuser password"
+  default: "{% if not ask_password %}{% if strong_password %}{{ generate_password() }}{% else %}{{ clickhouse_default_username }}{% endif %}{% endif %}"
+  validator: "{% if not clickhouse_default_password | trim | length %}Required{% endif %}"
+  when: ask_password
+
+clickhouse_peerdb_username:
+  type: str
+  help: "ClickHouse: PeerDB username"
+  default: peerdb
+  when: false
+
+clickhouse_peerdb_password:
+  type: str
+  help: "ClickHouse: PeerDB password"
+  default: "{% if not ask_password %}{% if strong_password %}{{ generate_password() }}{% else %}{{ clickhouse_peerdb_username }}{% endif %}{% endif %}"
+  validator: "{% if not clickhouse_peerdb_password | trim | length %}Required{% endif %}"
+  when: ask_password
+
+clickhouse_analyst_username:
+  type: str
+  help: "ClickHouse: Analyst username"
+  default: analyst
+  when: false
+
+clickhouse_analyst_password:
+  type: str
+  help: "ClickHouse: Analyst password"
+  default: "{% if not ask_password %}{% if strong_password %}{{ generate_password() }}{% else %}{{ clickhouse_analyst_username }}{% endif %}{% endif %}"
+  validator: "{% if not clickhouse_analyst_password | trim | length %}Required{% endif %}"
+  when: ask_password
+
+
+
+prefect_postgres_default_database:
+  type: str
+  help: "Prefect Postgres: Default database"
+  default: postgres
+  when: false
+
+prefect_postgres_default_username:
+  type: str
+  help: "Prefect Postgres: Superuser username"
+  default: postgres
+  when: false
+
+prefect_postgres_default_password:
+  type: str
+  help: "Prefect Postgres: Superuser password"
+  default: "{% if not ask_password %}{% if strong_password %}{{ generate_password() }}{% else %}{{ prefect_postgres_default_username }}{% endif %}{% endif %}"
+  validator: "{% if not prefect_postgres_default_password | trim | length %}Required{% endif %}"
+
+
+
+prefect_postgres_prefect_database:
+  type: str
+  help: "Prefect Postgres: Prefect database"
+  default: prefect
+  when: false
+
+prefect_postgres_prefect_username:
+  type: str
+  help: "Prefect Postgres: Prefect username"
+  default: prefect
+  when: false
+
+prefect_postgres_prefect_password:
+  type: str
+  help: "Prefect Postgres: Prefect password"
+  default: "{% if not ask_password %}{% if strong_password %}{{ generate_password() }}{% else %}{{ prefect_postgres_prefect_username }}{% endif %}{% endif %}"
+  validator: "{% if not prefect_postgres_prefect_password | trim | length %}Required{% endif %}"

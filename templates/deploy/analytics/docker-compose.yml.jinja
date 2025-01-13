@@ -106,6 +106,7 @@ services:
       prefect-worker:
         condition: service_healthy
 
+  {% if profile == 'dev' -%}
   jupyter:
     container_name: jupyter
     image: dw-analytics-jupyter:${EXPECTED_TAG:-latest}
@@ -124,6 +125,7 @@ services:
       - ../../analytics/.prefect:/home/analyst/.prefect:rw
       - ../../analytics/package:/home/analyst/package:rw
       - ../../analytics/projects:/home/analyst/projects:rw
+  {%- endif %}
 
   api:
     container_name: api
@@ -142,6 +144,7 @@ services:
     volumes:
       - ../../analytics:/home/analyst:rw
 
+  {% if profile == 'dev' -%}
   test-clickhouse:
     container_name: test-clickhouse
     image: clickhouse/clickhouse-server:24.8.9.95-alpine
@@ -165,7 +168,9 @@ services:
         condition: on-failure
     cap_add:
       - CAP_SYS_NICE # https://github.com/ClickHouse/ClickHouse/issues/68747#issuecomment-2306631664
+  {%- endif %}
 
+  {% if profile == 'dev' -%}
   test-postgres:
     container_name: test-postgres
     image: postgres:17.0-alpine3.20
@@ -183,6 +188,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
+  {%- endif %}
 
 volumes:
   prefect-postgres-data:

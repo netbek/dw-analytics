@@ -8,51 +8,37 @@
 
 ### Install
 
-1. [Docker Engine v23 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2 or higher](https://docs.docker.com/compose/install/). Follow the links for instructions or run this script:
+1. Install [Docker Engine v23 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2 or higher](https://docs.docker.com/compose/install/). Follow the links for instructions or run this script:
 
     ```shell
     ./scripts/install.sh docker
     ```
 
-2. [Tilt v0.33.20 or higher](https://docs.tilt.dev/install). Follow the link for instructions or run this script:
+2. Install [Tilt v0.33.20 or higher](https://docs.tilt.dev/install). Follow the link for instructions or run this script:
 
     ```shell
     ./scripts/install.sh tilt
     ```
 
-3. Clone PeerDB:
+3. Install [uv v0.5.18 or higher](https://docs.astral.sh/uv/getting-started/installation). Follow the link for instructions or run this script:
+
+    ```shell
+    ./scripts/install.sh uv
+    ```
+
+4. Clone PeerDB:
 
     ```shell
     ./scripts/install.sh peerdb
     ```
 
-4. Create the .env files for deployment:
+5. Configure the deployment:
 
     ```shell
-    ./scripts/env.sh dev
+    ./scripts/install.sh deploy
     ```
 
-    When prompted, enter the suggested values:
-
-    ```shell
-    clickhouse_default_username: default
-    clickhouse_default_password: default
-    clickhouse_default_database: default
-    prefect_postgres_default_username: postgres
-    prefect_postgres_default_password: postgres
-    prefect_postgres_default_database: postgres
-    prefect_postgres_prefect_username: prefect
-    prefect_postgres_prefect_password: prefect
-    prefect_postgres_prefect_database: prefect
-    ```
-
-    Amend the source database credentials, if necessary:
-
-    ```shell
-    grep -A 6 "Postgres development database" deploy/analytics/database.env
-    ```
-
-5. Start the services:
+6. Start the services:
 
     ```shell
     tilt up --port 29000
@@ -60,26 +46,26 @@
 
     Wait a few minutes for the Docker images to be built. To check the progress, open [http://localhost:29000](http://localhost:29000).
 
-6. Run the provision script to configure Prefect:
+7. Run the provision script to configure Prefect:
 
     ```shell
     ./scripts/cli.sh prefect provision dev
     ```
 
-7. For each project, clone its repo:
+8. For each project, clone its repo:
 
     ```shell
     cd analytics/projects
     git clone ... PROJECT_NAME
     ```
 
-8. For each project, install its dependencies:
+9. For each project, install its dependencies:
 
     ```shell
     ./scripts/cli.sh project refresh PROJECT_NAME
     ```
 
-9. Enable replication on the Postgres server.
+10. Enable replication on the Postgres server.
 
     | Setting                      | Recommended value  |
     |------------------------------|--------------------|
@@ -103,7 +89,7 @@
     max_replication_slots = '4'
     ```
 
-10. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
+11. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
 
     ```shell
     ./scripts/cli.sh peerdb install PROJECT_NAME
@@ -181,37 +167,37 @@ Set `/path/to/` to the location of the repository on your machine.
 
 ### Install
 
-1. [Docker Engine v23 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2 or higher](https://docs.docker.com/compose/install/). Follow the links for instructions or run this script:
+1. Install [Docker Engine v23 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2 or higher](https://docs.docker.com/compose/install/). Follow the links for instructions or run this script:
 
     ```shell
     ./scripts/install.sh docker
     ```
 
-2. Clone PeerDB:
+2. Install [uv v0.5.18 or higher](https://docs.astral.sh/uv/getting-started/installation). Follow the link for instructions or run this script:
+
+    ```shell
+    ./scripts/install.sh uv
+    ```
+
+3. Clone PeerDB:
 
     ```shell
     ./scripts/install.sh peerdb
     ```
 
-3. Create the .env files for deployment:
+4. Configure the deployment:
 
     ```shell
-    ./scripts/env.sh prod
+    ./scripts/install.sh deploy
     ```
 
-    Amend the source database credentials, if necessary:
-
-    ```shell
-    grep -A 6 "Postgres production database" deploy/analytics/database.env
-    ```
-
-4. Build the Docker images:
+5. Build the Docker images:
 
     ```shell
     ./scripts/build.sh
     ```
 
-5. Start the services:
+6. Start the services:
 
     ```shell
     cd /path/to/dw/deploy/clickhouse && docker compose up -d
@@ -219,26 +205,26 @@ Set `/path/to/` to the location of the repository on your machine.
     cd /path/to/dw/deploy/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
     ```
 
-6. Run the provision script to configure Prefect:
+7. Run the provision script to configure Prefect:
 
     ```shell
     ./scripts/cli.sh prefect provision dev
     ```
 
-7. For each project, clone its repo:
+8. For each project, clone its repo:
 
     ```shell
     cd analytics/projects
     git clone ... PROJECT_NAME
     ```
 
-8. For each project, install its dependencies:
+9. For each project, install its dependencies:
 
     ```shell
     ./scripts/cli.sh project refresh PROJECT_NAME
     ```
 
-9. Enable replication on the Postgres server.
+10. Enable replication on the Postgres server.
 
     | Setting                      | Recommended value  |
     |------------------------------|--------------------|
@@ -262,7 +248,7 @@ Set `/path/to/` to the location of the repository on your machine.
     max_replication_slots = '4'
     ```
 
-10. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
+11. For each project that has database syncing (`peerdb.yaml` in the project root directory is not empty), set up PeerDB and sync the ClickHouse database:
 
     ```shell
     ./scripts/cli.sh peerdb install PROJECT_NAME
