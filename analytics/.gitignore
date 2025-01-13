@@ -5,7 +5,7 @@
 .bash_logout
 .cache
 .dotnet
-.env*
+.gitconfig
 .gk
 .ipynb_checkpoints
 .lesshst
