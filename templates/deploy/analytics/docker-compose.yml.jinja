@@ -91,7 +91,7 @@ services:
       - ./peerdb.env
     working_dir: /home/analyst/projects
     extra_hosts:
-      - host.docker.internal:host-gateway # Used for connection to Postgres
+      - host.docker.internal:host-gateway # Used for connection to Postgres created by PeerDB CLI
     ports:
       - ${DW_DBT_DOCS_PORT}:8080
     volumes:
