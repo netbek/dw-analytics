@@ -140,7 +140,7 @@ services:
     ports:
       - ${DW_API_PORT}:80
     volumes:
-      - .:/home/analyst:rw
+      - ../../analytics:/home/analyst:rw
 
   test-clickhouse:
     container_name: test-clickhouse
