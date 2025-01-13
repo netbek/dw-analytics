@@ -18,7 +18,8 @@ class CHAdapter(BaseAdapter):
     def create_uri(
         cls,
         host: str,
-        port: int,
+        http_port: int,
+        tcp_port: int,
         username: str,
         password: str,
         database: str,
@@ -30,13 +31,19 @@ class CHAdapter(BaseAdapter):
         else:
             scheme = "clickhouse"
 
+        if driver == "native":
+            port = tcp_port
+        else:
+            port = http_port
+
         return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
 
     @property
     def uri(self) -> str:
         return self.create_uri(
             self.settings.host,
-            self.settings.port,
+            self.settings.http_port,
+            self.settings.tcp_port,
             self.settings.username,
             self.settings.password,
             self.settings.database,

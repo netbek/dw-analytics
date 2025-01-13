@@ -59,9 +59,13 @@ def create_ch_settings(env_prefix: str) -> CHSettings:
             validation_alias=f"{env_prefix}host",
             serialization_alias="host",
         )
-        port: int = Field(
-            validation_alias=f"{env_prefix}port",
-            serialization_alias="port",
+        http_port: int = Field(
+            validation_alias=f"{env_prefix}http_port",
+            serialization_alias="http_port",
+        )
+        tcp_port: int = Field(
+            validation_alias=f"{env_prefix}tcp_port",
+            serialization_alias="tcp_port",
         )
         username: str = Field(
             validation_alias=f"{env_prefix}username",

@@ -7,7 +7,8 @@ from typing import Dict, List, Optional
 
 class CHSettings(BaseSettings):
     host: str
-    port: int
+    http_port: int
+    tcp_port: int
     username: str
     password: str
     database: str

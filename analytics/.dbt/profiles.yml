@@ -12,23 +12,23 @@
 #       type: clickhouse
 #       threads: 1
 #       host: "{{ env_var('<PROJECT_NAME>_DESTINATION_HOST') }}"
-#       port: "{{ env_var('<PROJECT_NAME>_DESTINATION_PORT')|as_number }}"
+#       port: "{% if env_var('<PROJECT_NAME>_DESTINATION_DRIVER') == 'native' %}{{ env_var('<PROJECT_NAME>_DESTINATION_TCP_PORT') | as_number }}{% else %}{{ env_var('<PROJECT_NAME>_DESTINATION_HTTP_PORT') | as_number }}{% endif %}"
 #       user: "{{ env_var('<PROJECT_NAME>_DESTINATION_USERNAME') }}"
 #       password: "{{ env_var('<PROJECT_NAME>_DESTINATION_PASSWORD') }}"
 #       schema: "{{ env_var('<PROJECT_NAME>_DESTINATION_DATABASE') }}"
 #       driver: "{{ env_var('<PROJECT_NAME>_DESTINATION_DRIVER') }}"
-#       secure: "{{ (env_var('<PROJECT_NAME>_DESTINATION_SECURE') == 'true')|as_bool }}"
+#       secure: "{{ (env_var('<PROJECT_NAME>_DESTINATION_SECURE') == 'true') | as_bool }}"
 #       use_lw_deletes: true
 #     test:
 #       type: clickhouse
 #       threads: 1
 #       host: "{{ env_var('<PROJECT_NAME>_TEST_DESTINATION_HOST') }}"
-#       port: "{{ env_var('<PROJECT_NAME>_TEST_DESTINATION_PORT')|as_number }}"
+#       port: "{% if env_var('<PROJECT_NAME>_TEST_DESTINATION_DRIVER') == 'native' %}{{ env_var('<PROJECT_NAME>_TEST_DESTINATION_TCP_PORT') | as_number }}{% else %}{{ env_var('<PROJECT_NAME>_TEST_DESTINATION_HTTP_PORT') | as_number }}{% endif %}"
 #       user: "{{ env_var('<PROJECT_NAME>_TEST_DESTINATION_USERNAME') }}"
 #       password: "{{ env_var('<PROJECT_NAME>_TEST_DESTINATION_PASSWORD') }}"
 #       schema: "{{ env_var('<PROJECT_NAME>_TEST_DESTINATION_DATABASE') }}"
 #       driver: "{{ env_var('<PROJECT_NAME>_TEST_DESTINATION_DRIVER') }}"
-#       secure: "{{ (env_var('<PROJECT_NAME>_TEST_DESTINATION_SECURE') == 'true')|as_bool }}"
+#       secure: "{{ (env_var('<PROJECT_NAME>_TEST_DESTINATION_SECURE') == 'true') | as_bool }}"
 #       use_lw_deletes: true
 
 # 3. Replace `<PROJECT_NAME>` with the project name. Must be lowercase except for env variables that must be uppercase.
@@ -41,12 +41,12 @@ tutorial:
       type: clickhouse
       threads: 1
       host: "{{ env_var('TUTORIAL_DESTINATION_HOST') }}"
-      port: "{{ env_var('TUTORIAL_DESTINATION_PORT')|as_number }}"
+      port: "{% if env_var('TUTORIAL_DESTINATION_DRIVER') == 'native' %}{{ env_var('TUTORIAL_DESTINATION_TCP_PORT') | as_number }}{% else %}{{ env_var('TUTORIAL_DESTINATION_HTTP_PORT') | as_number }}{% endif %}"
       user: "{{ env_var('TUTORIAL_DESTINATION_USERNAME') }}"
       password: "{{ env_var('TUTORIAL_DESTINATION_PASSWORD') }}"
       schema: "{{ env_var('TUTORIAL_DESTINATION_DATABASE') }}"
       driver: "{{ env_var('TUTORIAL_DESTINATION_DRIVER') }}"
-      secure: "{{ (env_var('TUTORIAL_DESTINATION_SECURE') == 'true')|as_bool }}"
+      secure: "{{ (env_var('TUTORIAL_DESTINATION_SECURE') == 'true') | as_bool }}"
       use_lw_deletes: true
 
 main:
@@ -56,21 +56,21 @@ main:
       type: clickhouse
       threads: 1
       host: "{{ env_var('MAIN_DESTINATION_HOST') }}"
-      port: "{{ env_var('MAIN_DESTINATION_PORT')|as_number }}"
+      port: "{% if env_var('MAIN_DESTINATION_DRIVER') == 'native' %}{{ env_var('MAIN_DESTINATION_TCP_PORT') | as_number }}{% else %}{{ env_var('MAIN_DESTINATION_HTTP_PORT') | as_number }}{% endif %}"
       user: "{{ env_var('MAIN_DESTINATION_USERNAME') }}"
       password: "{{ env_var('MAIN_DESTINATION_PASSWORD') }}"
       schema: "{{ env_var('MAIN_DESTINATION_DATABASE') }}"
       driver: "{{ env_var('MAIN_DESTINATION_DRIVER') }}"
-      secure: "{{ (env_var('MAIN_DESTINATION_SECURE') == 'true')|as_bool }}"
+      secure: "{{ (env_var('MAIN_DESTINATION_SECURE') == 'true') | as_bool }}"
       use_lw_deletes: true
     test:
       type: clickhouse
       threads: 1
       host: "{{ env_var('MAIN_TEST_DESTINATION_HOST') }}"
-      port: "{{ env_var('MAIN_TEST_DESTINATION_PORT')|as_number }}"
+      port: "{% if env_var('MAIN_TEST_DESTINATION_DRIVER') == 'native' %}{{ env_var('MAIN_TEST_DESTINATION_TCP_PORT') | as_number }}{% else %}{{ env_var('MAIN_TEST_DESTINATION_HTTP_PORT') | as_number }}{% endif %}"
       user: "{{ env_var('MAIN_TEST_DESTINATION_USERNAME') }}"
       password: "{{ env_var('MAIN_TEST_DESTINATION_PASSWORD') }}"
       schema: "{{ env_var('MAIN_TEST_DESTINATION_DATABASE') }}"
       driver: "{{ env_var('MAIN_TEST_DESTINATION_DRIVER') }}"
-      secure: "{{ (env_var('MAIN_TEST_DESTINATION_SECURE') == 'true')|as_bool }}"
+      secure: "{{ (env_var('MAIN_TEST_DESTINATION_SECURE') == 'true') | as_bool }}"
       use_lw_deletes: true

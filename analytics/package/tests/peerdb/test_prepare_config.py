@@ -63,7 +63,8 @@ peers:
     type: 8
     clickhouse_config:
       host: {settings.test_clickhouse.host}
-      port: {settings.test_clickhouse.port}
+      http_port: {settings.test_clickhouse.http_port}
+      tcp_port: {settings.test_clickhouse.tcp_port}
       user: {settings.test_clickhouse.username}
       password: {settings.test_clickhouse.password}
       database: {settings.test_clickhouse.database}
@@ -329,7 +330,8 @@ class TestOK(DBTest):
                     "type": 8,
                     "clickhouse_config": {
                         "host": settings.test_clickhouse.host,
-                        "port": settings.test_clickhouse.port,
+                        "http_port": settings.test_clickhouse.http_port,
+                        "tcp_port": settings.test_clickhouse.tcp_port,
                         "user": settings.test_clickhouse.username,
                         "password": settings.test_clickhouse.password,
                         "database": settings.test_clickhouse.database,
