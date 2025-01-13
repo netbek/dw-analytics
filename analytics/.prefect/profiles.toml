@@ -1,8 +1,5 @@
 active = "dev"
 
-[profiles.ci]
-PREFECT_DEFAULT_WORK_POOL_NAME = "process_pool"
-
 [profiles.dev]
 PREFECT_DEFAULT_WORK_POOL_NAME = "process_pool"
 
