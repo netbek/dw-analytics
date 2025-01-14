@@ -54,7 +54,4 @@ for dir in "${dirs[@]}"; do
     cd ../..
 done
 
-# Delete .env files
-# rm -f ./deploy/*/.env ./deploy/*/*.env ./deploy/*/.gitconfig
-
 echo "${tput_green}Done!${tput_reset}"
