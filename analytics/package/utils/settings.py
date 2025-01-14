@@ -7,12 +7,14 @@ from package.types import (
     PGSettings,
     PrefectSettings,
 )
+from package.utils.template import render_jinja_template
 from package.utils.yaml_utils import safe_load_file
 from pathlib import Path
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
 import os
+import yaml
 
 
 def create_pg_settings(env_prefix: str) -> PGSettings:
@@ -113,7 +115,9 @@ def create_peerdb_settings(config_path: Path | str) -> PeerDBSettings:
         )
 
         api_url: str = Field(validation_alias="peerdb_api_url")
-        config: dict = Field(default_factory=lambda: safe_load_file(config_path))
+        config: dict = Field(
+            default_factory=lambda: yaml.safe_load(render_jinja_template(config_path))
+        )
 
     return Settings
 
