@@ -41,6 +41,7 @@ source_postgres_database:
 source_postgres_schema:
   type: str
   help: "Source Postgres: Schema"
+  default: public
 
 source_postgres_username:
   type: str
@@ -61,12 +62,6 @@ clickhouse_default_database:
   default: default
   when: false
 
-clickhouse_analytics_database:
-  type: str
-  help: "ClickHouse: Analytics database"
-  default: analytics
-  when: false
-
 clickhouse_default_username:
   type: str
   help: "ClickHouse: Superuser username"
@@ -80,18 +75,13 @@ clickhouse_default_password:
   validator: "{% if not clickhouse_default_password | trim | length %}Required{% endif %}"
   when: ask_password
 
-clickhouse_peerdb_username:
-  type: str
-  help: "ClickHouse: PeerDB username"
-  default: peerdb
-  when: false
 
-clickhouse_peerdb_password:
+
+clickhouse_analyst_database:
   type: str
-  help: "ClickHouse: PeerDB password"
-  default: "{% if not ask_password %}{% if strong_password %}{{ generate_password() }}{% else %}{{ clickhouse_peerdb_username }}{% endif %}{% endif %}"
-  validator: "{% if not clickhouse_peerdb_password | trim | length %}Required{% endif %}"
-  when: ask_password
+  help: "ClickHouse: Analytics database"
+  default: analytics
+  when: false
 
 clickhouse_analyst_username:
   type: str
@@ -104,6 +94,25 @@ clickhouse_analyst_password:
   help: "ClickHouse: Analyst password"
   default: "{% if not ask_password %}{% if strong_password %}{{ generate_password() }}{% else %}{{ clickhouse_analyst_username }}{% endif %}{% endif %}"
   validator: "{% if not clickhouse_analyst_password | trim | length %}Required{% endif %}"
+  when: ask_password
+
+
+
+clickhouse_peerdb_database:
+  type: str
+  help: "ClickHouse: PeerDB destination database"
+
+clickhouse_peerdb_username:
+  type: str
+  help: "ClickHouse: PeerDB username"
+  default: peerdb
+  when: false
+
+clickhouse_peerdb_password:
+  type: str
+  help: "ClickHouse: PeerDB password"
+  default: "{% if not ask_password %}{% if strong_password %}{{ generate_password() }}{% else %}{{ clickhouse_peerdb_username }}{% endif %}{% endif %}"
+  validator: "{% if not clickhouse_peerdb_password | trim | length %}Required{% endif %}"
   when: ask_password
 
 
