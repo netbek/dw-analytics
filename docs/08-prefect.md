@@ -80,7 +80,7 @@ For example, here are the steps to create a deployment in the `tutorial` project
 5. Run the deploy command:
 
     ```shell
-    cli prefect deploy -d DEPLOYMENT_NAME
+    cli prefect deploy -d <DEPLOYMENT_NAME>
     ```
 
     `DEPLOYMENT_NAME` is the `name` value in the `deployments` list.
@@ -88,35 +88,35 @@ For example, here are the steps to create a deployment in the `tutorial` project
     By default, new deployments are active. To create a paused deployment, add the `--pause` option:
 
     ```shell
-    cli prefect deploy -d DEPLOYMENT_NAME --pause
+    cli prefect deploy -d <DEPLOYMENT_NAME> --pause
     ```
 
 Available commands:
 
-| Description                                 | Command                                                               |
-|---------------------------------------------|-----------------------------------------------------------------------|
-| Deploy all flows of 1 project               | `cli prefect deploy -p PROJECT_NAME`                                  |
-| Deploy all flows of multiple projects       | `cli prefect deploy -p PROJECT_NAME -p PROJECT_NAME`                  |
-| Deploy 1 flow                               | `cli prefect deploy -d DEPLOYMENT_NAME`                               |
-| Deploy multiple flows                       | `cli prefect deploy -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME`            |
+| Description                                 | Command                                                                   |
+|---------------------------------------------|---------------------------------------------------------------------------|
+| Deploy all flows of 1 project               | `cli prefect deploy -p <PROJECT_NAME>`                                    |
+| Deploy all flows of multiple projects       | `cli prefect deploy -p <PROJECT_NAME> -p <PROJECT_NAME>`                  |
+| Deploy 1 flow                               | `cli prefect deploy -d <DEPLOYMENT_NAME>`                                 |
+| Deploy multiple flows                       | `cli prefect deploy -d <DEPLOYMENT_NAME> -d <DEPLOYMENT_NAME>`            |
 
 ### Pause a deployment
 
-| Description                                 | Command                                                               |
-|---------------------------------------------|-----------------------------------------------------------------------|
-| Pause all deployments of 1 project          | `cli prefect deployment pause -p PROJECT_NAME`                        |
-| Pause all deployments of multiple projects  | `cli prefect deployment pause -p PROJECT_NAME -p PROJECT_NAME`        |
-| Pause 1 deployment                          | `cli prefect deployment pause -d DEPLOYMENT_NAME`                     |
-| Pause multiple deployments                  | `cli prefect deployment pause -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME`  |
+| Description                                 | Command                                                                   |
+|---------------------------------------------|---------------------------------------------------------------------------|
+| Pause all deployments of 1 project          | `cli prefect deployment pause -p <PROJECT_NAME>`                          |
+| Pause all deployments of multiple projects  | `cli prefect deployment pause -p <PROJECT_NAME> -p <PROJECT_NAME>`        |
+| Pause 1 deployment                          | `cli prefect deployment pause -d <DEPLOYMENT_NAME>`                       |
+| Pause multiple deployments                  | `cli prefect deployment pause -d <DEPLOYMENT_NAME> -d <DEPLOYMENT_NAME>`  |
 
 ### Resume a deployment
 
-| Description                                 | Command                                                               |
-|---------------------------------------------|-----------------------------------------------------------------------|
-| Resume all deployments of 1 project         | `cli prefect deployment resume -p PROJECT_NAME`                       |
-| Resume all deployments of multiple projects | `cli prefect deployment resume -p PROJECT_NAME -p PROJECT_NAME`       |
-| Resume 1 deployment                         | `cli prefect deployment resume -d DEPLOYMENT_NAME`                    |
-| Resume multiple deployments                 | `cli prefect deployment resume -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME` |
+| Description                                 | Command                                                                   |
+|---------------------------------------------|---------------------------------------------------------------------------|
+| Resume all deployments of 1 project         | `cli prefect deployment resume -p <PROJECT_NAME>`                         |
+| Resume all deployments of multiple projects | `cli prefect deployment resume -p <PROJECT_NAME> -p <PROJECT_NAME>`       |
+| Resume 1 deployment                         | `cli prefect deployment resume -d <DEPLOYMENT_NAME>`                      |
+| Resume multiple deployments                 | `cli prefect deployment resume -d <DEPLOYMENT_NAME> -d <DEPLOYMENT_NAME>` |
 
 ### Delete a deployment
 
@@ -125,19 +125,19 @@ To delete a deployment:
 1. Run the `delete` command to delete the deployment entity from the Prefect database:
 
     ```shell
-    cli prefect deployment delete -d DEPLOYMENT_NAME
+    cli prefect deployment delete -d <DEPLOYMENT_NAME>
     ```
 
 2. Remove the deployment from the `deployments` list in `./analytics/projects/<PROJECT_NAME>/prefect.yaml`.
 
 Available commands:
 
-| Description                                 | Command                                                               |
-|---------------------------------------------|-----------------------------------------------------------------------|
-| Delete all deployments of 1 project         | `cli prefect deployment delete -p PROJECT_NAME`                       |
-| Delete all deployments of multiple projects | `cli prefect deployment delete -p PROJECT_NAME -p PROJECT_NAME`       |
-| Delete 1 deployment                         | `cli prefect deployment delete -d DEPLOYMENT_NAME`                    |
-| Delete multiple deployments                 | `cli prefect deployment delete -d DEPLOYMENT_NAME -d DEPLOYMENT_NAME` |
+| Description                                 | Command                                                                   |
+|---------------------------------------------|---------------------------------------------------------------------------|
+| Delete all deployments of 1 project         | `cli prefect deployment delete -p <PROJECT_NAME>`                         |
+| Delete all deployments of multiple projects | `cli prefect deployment delete -p <PROJECT_NAME> -p <PROJECT_NAME>`       |
+| Delete 1 deployment                         | `cli prefect deployment delete -d <DEPLOYMENT_NAME>`                      |
+| Delete multiple deployments                 | `cli prefect deployment delete -d <DEPLOYMENT_NAME> -d <DEPLOYMENT_NAME>` |
 
 ## Naming conventions for flows and deployments
 

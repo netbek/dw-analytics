@@ -51,7 +51,7 @@ When more than 1 flow or notebook needs a certain function, consider adding a ut
 To create a project, run:
 
 ```shell
-cli project init PROJECT_NAME
+cli project init <PROJECT_NAME>
 ```
 
 This command copies the directories and files from `./analytics/templates/project` to `./analytics/projects/<PROJECT_NAME>`.
@@ -61,13 +61,13 @@ This command copies the directories and files from `./analytics/templates/projec
 To lint the SQL and YAML files of a project, run:
 
 ```shell
-cli project lint PROJECT_NAME
+cli project lint <PROJECT_NAME>
 ```
 
 To run all of the dbt and Python tests of a project, run:
 
 ```shell
-cli project test PROJECT_NAME
+cli project test <PROJECT_NAME>
 ```
 
 To run specific Python tests, use the `pytest` command. Here's an example filesystem structure:
@@ -104,7 +104,7 @@ pytest tests/utils
 To delete dbt artifacts, install dbt dependencies, and sync the global dbt macros (`./analytics/projects/<PROJECT_NAME>/dbt/macros/dbt`), run:
 
 ```shell
-cli project refresh PROJECT_NAME
+cli project refresh <PROJECT_NAME>
 ```
 
 ## Delete a project
@@ -112,7 +112,7 @@ cli project refresh PROJECT_NAME
 To delete a project, run:
 
 ```shell
-cli project delete PROJECT_NAME
+cli project delete <PROJECT_NAME>
 ```
 
 > [!CAUTION]

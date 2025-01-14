@@ -10,13 +10,13 @@ TODO
 ## Install
 
 ```shell
-cli peerdb install PROJECT_NAME
+cli peerdb install <PROJECT_NAME>
 ```
 
 ## Uninstall
 
 ```shell
-cli peerdb uninstall PROJECT_NAME
+cli peerdb uninstall <PROJECT_NAME>
 ```
 
 ## Resources
