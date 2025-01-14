@@ -139,6 +139,6 @@ for package in "$@"; do
     if command_exists "$cmd"; then
         $cmd
     else
-        echo "${tput_red}Error: Package '$package' not supported.${tput_reset}"
+        echo "${tput_red}Error: Package must be one of: docker, mkcert, tilt, peerdb, uv, deploy${tput_reset}"
     fi
 done
