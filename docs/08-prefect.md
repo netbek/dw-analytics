@@ -69,7 +69,7 @@ Further reading:
 
 For example, here are the steps to create a deployment in the `tutorial` project:
 
-1. Open [./analytics/projects/tutorial/prefect.yaml](../analytics/projects/tutorial/prefect.yaml#L44) and go to the commented section `Instructions for new deployments`.
+1. Open [./analytics/examples/tutorial/prefect.yaml](../analytics/examples/tutorial/prefect.yaml#L44) and go to the commented section `Instructions for new deployments`.
 
 2. Copy and append the template to the `deployments` list.
 

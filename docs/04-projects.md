@@ -5,7 +5,7 @@
 
 ## Overview
 
-Projects are structured as follows. To explore, open `./analytics/projects/tutorial`.
+Projects are structured as follows. To explore, open `./analytics/examples/tutorial`.
 
 ```shell
 .
