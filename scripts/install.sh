@@ -87,11 +87,11 @@ install_deploy() {
         git pull
         cd ..
     else
-        echo "Please enter Git repo URL of deployment config (HTTPS or SSH syntax):"
+        echo "Please enter the URL of the deployment configuration Git repo (HTTPS or SSH syntax):"
         read -r repo_url
 
         if [ -z "${repo_url}" ]; then
-            echo "${tput_red}Error: Repo URL is required.${tput_reset}"
+            echo "${tput_red}Error: Git repo URL is required.${tput_reset}"
             exit 1
         fi
 
