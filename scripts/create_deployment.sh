@@ -23,7 +23,7 @@ cd "${root_dir}"
 
 template_name="deploy"
 template_src_dir="./templates/${template_name}"
-dest_dir="./${1:-deploy}"
+dest_dir="${1:-deploy}"
 
 if [ ! -d "${template_src_dir}" ]; then
     echo "${tput_red}Error: Template '$template_name' not found.${tput_reset}"

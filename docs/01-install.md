@@ -53,7 +53,7 @@
 4. Install a deployment configuration:
 
     ```shell
-    ./scripts/install.sh deploy
+    ./scripts/install_deployment.sh <REPOSITORY_URL> <BRANCH_NAME>
     ```
 
 5. For each project, clone its repo:
@@ -176,7 +176,7 @@ Set `/path/to/` to the location of the repository on your machine.
 3. Install a deployment configuration:
 
     ```shell
-    ./scripts/install.sh deploy
+    ./scripts/install_deployment.sh <REPOSITORY_URL> <BRANCH_NAME>
     ```
 
 4. For each project, clone its repo:
@@ -244,7 +244,7 @@ Set `/path/to/` to the location of the repository on your machine.
 
 ## Deployment configuration
 
-The deployment configuration of the services are stored in a Git repo that's cloned to `./deploy`. Profiles are stored in branches, e.g. `dev` for development, `prod` for production.
+The deployment configurations of the services are stored in a Git repo that's cloned to `./deploy`. Profiles are stored in branches, e.g. `dev` for development, `prod` for production.
 
 ### Prerequisite
 
@@ -259,7 +259,7 @@ Install [uv v0.5.18 or higher](https://docs.astral.sh/uv/getting-started/install
 To create a configuration, run:
 
 ```shell
-./scripts/create_deployment_config.sh [DESTINATION_DIR]
+./scripts/create_deployment.sh [DESTINATION_DIR]
 ```
 
 The destination directory is optional and defaults to `./deploy`.
@@ -269,7 +269,7 @@ The destination directory is optional and defaults to `./deploy`.
 To install a configuration, run:
 
 ```shell
-./scripts/install.sh deploy
+./scripts/install_deployment.sh <REPOSITORY_URL> <BRANCH_NAME>
 ```
 
 This command clones the repo and creates a Git config file for the current user in the CLI and VS Code dev containers (`./deploy/analytics/.gitconfig`).

@@ -3,14 +3,15 @@ set -e
 
 scripts_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root_dir="${scripts_dir}/.."
-deploy_dir="./deploy"
-gitconfig_file="${deploy_dir}/analytics/.gitconfig"
 
 source "${scripts_dir}/variables.sh"
 source "${scripts_dir}/functions.sh"
 
 echo_help() {
     echo "Usage: $0 <PACKAGE> [PACKAGE ...]"
+    echo ""
+    echo "Arguments:"
+    echo "    package: docker, mkcert, peerdb, tilt, uv"
 }
 
 docker_compose_exists() {
@@ -79,52 +80,6 @@ install_uv() {
     echo "${tput_green}Installed uv${tput_reset}"
 }
 
-install_deploy() {
-    cd "${root_dir}"
-
-    if [ -d "${deploy_dir}" ]; then
-        cd "${deploy_dir}"
-        git pull
-        cd ..
-    else
-        echo "Please enter the URL of the deployment configuration Git repo (HTTPS or SSH syntax):"
-        read -r repo_url
-
-        if [ -z "${repo_url}" ]; then
-            echo "${tput_red}Error: Git repo URL is required.${tput_reset}"
-            exit 1
-        fi
-
-        git clone "${repo_url}" "${deploy_dir}"
-    fi
-
-    install_gitconfig
-}
-
-install_gitconfig() {
-    cd "${root_dir}"
-
-    cat <<EOF > "${gitconfig_file}"
-[core]
-autocrlf = input
-
-[help]
-format = man
-
-[pull]
-rebase = false
-
-[push]
-autoSetupRemote = true
-
-[user]
-email = $(git config --get --global user.email)
-name = $(git config --get --global user.name)
-EOF
-
-    echo "${tput_green}Created ${gitconfig_file}${tput_reset}"
-}
-
 if ([ "$1" == "--help" ] || [ -z "$1" ]); then
     echo_help
     exit 1
@@ -139,6 +94,6 @@ for package in "$@"; do
     if command_exists "$cmd"; then
         $cmd
     else
-        echo "${tput_red}Error: Package must be one of: docker, mkcert, tilt, peerdb, uv, deploy${tput_reset}"
+        echo "${tput_red}Error: Package must be one of: docker, mkcert, peerdb, tilt, uv${tput_reset}"
     fi
 done
