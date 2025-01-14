@@ -2,5 +2,5 @@
 set -e
 
 clickhouse-client -n <<-EOSQL
-create database if not exists {{ clickhouse_analytics_database }};
+create database if not exists {{ clickhouse_analyst_database }};
 EOSQL

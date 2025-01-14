@@ -3,12 +3,14 @@ set -e
 
 scripts_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 root_dir="${scripts_dir}/.."
+deploy_dir="./deploy"
+gitconfig_file="${deploy_dir}/analytics/.gitconfig"
 
 source "${scripts_dir}/variables.sh"
 source "${scripts_dir}/functions.sh"
 
 echo_help() {
-    echo "Usage: $0 PACKAGE [PACKAGE ...]"
+    echo "Usage: $0 <PACKAGE> [PACKAGE ...]"
 }
 
 docker_compose_exists() {
@@ -80,24 +82,28 @@ install_uv() {
 install_deploy() {
     cd "${root_dir}"
 
-    template_name="deploy"
-    template_src_dir="./templates/${template_name}"
-    dest_dir="./deploy"
+    if [ -d "${deploy_dir}" ]; then
+        cd "${deploy_dir}"
+        git pull
+        cd ..
+    else
+        echo "Please enter Git repo URL of deployment config (HTTPS or SSH syntax):"
+        read -r repo_url
 
-    if [ ! -d "${template_src_dir}" ]; then
-        echo "${tput_red}Error: Template '$template_name' not found.${tput_reset}"
-        exit 1
+        if [ -z "${repo_url}" ]; then
+            echo "${tput_red}Error: Repo URL is required.${tput_reset}"
+            exit 1
+        fi
+
+        git clone "${repo_url}" "${deploy_dir}"
     fi
 
-    if [ -d "${dest_dir}" ]; then
-        rm -fr "${dest_dir}"
-    fi
+    install_gitconfig
+}
 
-    # Copy template to destination
-    uv run copier copy --trust "${template_src_dir}" "${dest_dir}"
+install_gitconfig() {
+    cd "${root_dir}"
 
-    # Create analytics/.gitconfig
-    gitconfig_file="${dest_dir}/analytics/.gitconfig"
     cat <<EOF > "${gitconfig_file}"
 [core]
 autocrlf = input
@@ -115,6 +121,7 @@ autoSetupRemote = true
 email = $(git config --get --global user.email)
 name = $(git config --get --global user.name)
 EOF
+
     echo "${tput_green}Created ${gitconfig_file}${tput_reset}"
 }
 

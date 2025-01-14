@@ -27,7 +27,6 @@
 │   ├── templates
 │   │   └── project # Template for new projects
 │   ├── .bashrc # Shell configuration used in CLI container
-│   ├── .gitconfig # Git configuration used in CLI container
 │   ├── .gitignore # Git configuration used in CLI container
 │   ├── .pre-commit-config.yaml # Pre-commit hooks configuration
 │   ├── .sqlfluff # SQL linter configuration used in CLI container
@@ -39,11 +38,7 @@
 │   ├── requirements_base.txt # Python dependencies of all containers
 │   ├── requirements_dev.txt # Python development dependencies
 │   └── requirements_jupyter.txt # Extra Python dependencies of Jupyter container
-├── deploy # Docker container configurations
-│   ├── analytics
-│   ├── clickhouse
-│   ├── monitor
-│   └── peerdb
+├── deploy # Deployment configuration
 ├── docs
 ├── peerdb
 └── scripts # Installation scripts

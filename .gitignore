@@ -1,5 +1,5 @@
-.cache
 .ruff_cache
 .venv
 __pycache__
+/deploy
 /peerdb

@@ -176,9 +176,7 @@ services:
         condition: on-failure
     cap_add:
       - CAP_SYS_NICE # https://github.com/ClickHouse/ClickHouse/issues/68747#issuecomment-2306631664
-  {%- endif %}
 
-  {% if profile == 'dev' -%}
   test-postgres:
     container_name: test-postgres
     image: postgres:17.0-alpine3.20
@@ -200,8 +198,10 @@ services:
 
 volumes:
   prefect-postgres-data:
+  {% if profile == 'dev' -%}
   test-clickhouse-data:
   test-postgres-data:
+  {%- endif %}
 
 networks:
   default:
