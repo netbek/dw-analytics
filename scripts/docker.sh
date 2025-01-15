@@ -22,42 +22,30 @@ echo_help() {
 }
 
 up() {
-    cd "${root_dir}"
-
-    cd deploy/clickhouse
+    cd "${root_dir}/deploy/clickhouse"
     docker compose up -d
-    cd ../..
 
-    cd deploy/peerdb
+    cd "${root_dir}/deploy/peerdb"
     docker compose up -d
-    cd ../..
 
-    cd deploy/analytics
+    cd "${root_dir}/deploy/analytics"
     docker compose up -d prefect-postgres prefect-server prefect-worker cli api
-    cd ../..
 }
 
 down() {
-    cd "${root_dir}"
-
-    cd deploy/analytics
+    cd "${root_dir}/deploy/analytics"
     docker compose down prefect-postgres prefect-server prefect-worker cli api
-    cd ../..
 
-    cd deploy/peerdb
+    cd "${root_dir}/deploy/peerdb"
     docker compose down
-    cd ../..
 
-    cd deploy/clickhouse
+    cd "${root_dir}/deploy/clickhouse"
     docker compose down
-    cd ../..
 }
 
 build() {
-    cd "${root_dir}"
-
     for dir in "${dirs[@]}"; do
-        cd "deploy/${dir}"
+        cd "${root_dir}/deploy/${dir}"
 
         services=$(yq '.services | to_entries | map(select(.value.build != null) | .key) | .[]' docker-compose.yml)
         for service in $services; do
@@ -70,18 +58,14 @@ build() {
             cmd="docker compose pull ${service}"
             $cmd
         done
-
-        cd ../..
     done
 
     echo "${tput_green}Done!${tput_reset}"
 }
 
 destroy() {
-    cd "${root_dir}"
-
     for dir in "${dirs[@]}"; do
-        cd "deploy/${dir}"
+        cd "${root_dir}/deploy/${dir}"
 
         # Delete images, volumes and networks
         docker compose down -v --rmi all
@@ -100,8 +84,6 @@ destroy() {
 
         # Delete build cache
         docker builder prune -f
-
-        cd ../..
     done
 
     echo "${tput_green}Done!${tput_reset}"
