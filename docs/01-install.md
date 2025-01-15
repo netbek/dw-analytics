@@ -154,7 +154,8 @@ Set `/path/to/` to the location of the repository on your machine.
 3. Delete all the data and Docker images:
 
     ```shell
-    ./scripts/destroy.sh
+    tilt down
+    ./scripts/docker.sh destroy
     ```
 
 ## Production
@@ -189,7 +190,7 @@ Set `/path/to/` to the location of the repository on your machine.
 5. Build the Docker images:
 
     ```shell
-    ./scripts/build.sh
+    ./scripts/docker.sh build
     ```
 
 6. Start the services:
@@ -235,7 +236,8 @@ Set `/path/to/` to the location of the repository on your machine.
 3. Delete all the data and Docker images:
 
     ```shell
-    ./scripts/destroy.sh
+    ./scripts/docker.sh down
+    ./scripts/docker.sh destroy
     ```
 
 ## Deployment configuration
