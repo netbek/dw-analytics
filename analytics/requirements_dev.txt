@@ -3,8 +3,8 @@ livereload==2.7.1
 polyfactory==2.18.1
 pre-commit==4.0.1
 pytest==8.3.4
-ruff==0.8.6
-SQLAlchemy==2.0.36
+ruff==0.9.1
+SQLAlchemy==2.0.37
 sqlfluff==3.3.0
 sqlfluff-templater-dbt==3.3.0
 sqlmodel==0.0.22
