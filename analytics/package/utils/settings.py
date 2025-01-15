@@ -1,4 +1,3 @@
-from package.config.constants import HOME_DIR
 from package.types import (
     CHSettings,
     DbtSettings,
@@ -13,15 +12,12 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
 
-import os
 import yaml
 
 
 def create_pg_settings(env_prefix: str) -> PGSettings:
     class Settings(PGSettings):
-        model_config = SettingsConfigDict(
-            env_file=os.path.join(HOME_DIR, ".env_files/database.env"), extra="ignore"
-        )
+        model_config = SettingsConfigDict(env_file="/usr/local/share/dw/database.env", extra="ignore")
 
         host: str = Field(
             validation_alias=f"{env_prefix}host",
@@ -53,9 +49,7 @@ def create_pg_settings(env_prefix: str) -> PGSettings:
 
 def create_ch_settings(env_prefix: str) -> CHSettings:
     class Settings(CHSettings):
-        model_config = SettingsConfigDict(
-            env_file=os.path.join(HOME_DIR, ".env_files/database.env"), extra="ignore"
-        )
+        model_config = SettingsConfigDict(env_file="/usr/local/share/dw/database.env", extra="ignore")
 
         host: str = Field(
             validation_alias=f"{env_prefix}host",
@@ -110,9 +104,7 @@ def create_notebook_settings(directory: Path | str) -> NotebookSettings:
 
 def create_peerdb_settings(config_path: Path | str) -> PeerDBSettings:
     class Settings(PeerDBSettings):
-        model_config = SettingsConfigDict(
-            env_file=os.path.join(HOME_DIR, ".env_files/peerdb.env"), extra="ignore"
-        )
+        model_config = SettingsConfigDict(env_file="/usr/local/share/dw/peerdb.env", extra="ignore")
 
         api_url: str = Field(validation_alias="peerdb_api_url")
         config: dict = Field(
