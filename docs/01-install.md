@@ -53,7 +53,7 @@
 4. Install a deployment configuration:
 
     ```shell
-    ./scripts/install_deployment.sh <REPOSITORY_URL> <BRANCH_NAME>
+    ./scripts/deployment-install.sh <REPOSITORY_URL> <BRANCH_NAME>
     ```
 
 5. For each project, clone its repo:
@@ -176,7 +176,7 @@ Set `/path/to/` to the location of the repository on your machine.
 3. Install a deployment configuration:
 
     ```shell
-    ./scripts/install_deployment.sh <REPOSITORY_URL> <BRANCH_NAME>
+    ./scripts/deployment-install.sh <REPOSITORY_URL> <BRANCH_NAME>
     ```
 
 4. For each project, clone its repo:
@@ -195,9 +195,7 @@ Set `/path/to/` to the location of the repository on your machine.
 6. Start the services:
 
     ```shell
-    cd deploy/clickhouse && docker compose up -d
-    cd deploy/peerdb && docker compose up -d
-    cd deploy/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
+    ./scripts/docker.sh up
     ```
 
 7. Run the provision script to configure Prefect:
@@ -225,9 +223,7 @@ Set `/path/to/` to the location of the repository on your machine.
 1. Start the services, if not already running:
 
     ```shell
-    cd deploy/clickhouse && docker compose up -d
-    cd deploy/peerdb && docker compose up -d
-    cd deploy/analytics && docker compose up -d prefect-postgres prefect-server prefect-worker cli api
+    ./scripts/docker.sh up
     ```
 
 2. For each project that has database syncing, stop PeerDB syncing:
@@ -259,7 +255,7 @@ Install [uv v0.5.18 or higher](https://docs.astral.sh/uv/getting-started/install
 To create a configuration, run:
 
 ```shell
-./scripts/create_deployment.sh [DESTINATION_DIR]
+./scripts/deployment-create.sh [DESTINATION_DIR]
 ```
 
 The destination directory is optional and defaults to `./deploy`.
@@ -269,7 +265,7 @@ The destination directory is optional and defaults to `./deploy`.
 To install a configuration, run:
 
 ```shell
-./scripts/install_deployment.sh <REPOSITORY_URL> <BRANCH_NAME>
+./scripts/deployment-install.sh <REPOSITORY_URL> <BRANCH_NAME>
 ```
 
 This command clones the repo and creates a Git config file for the current user in the CLI and VS Code dev containers (`./deploy/analytics/.gitconfig`).
