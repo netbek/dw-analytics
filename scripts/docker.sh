@@ -47,13 +47,13 @@ build() {
     for dir in "${dirs[@]}"; do
         cd "${root_dir}/deploy/${dir}"
 
-        services=$(yq '.services | to_entries | map(select(.value.build != null) | .key) | .[]' docker-compose.yml)
+        services=$(yq_cmd '.services | to_entries | map(select(.value.build != null) | .key) | .[]' docker-compose.yml)
         for service in $services; do
             cmd="docker compose build ${service} --build-arg DOCKER_UID=$(id -u) --build-arg DOCKER_GID=$(id -g)"
             $cmd
         done
 
-        services=$(yq '.services | to_entries | map(select(.value.build == null) | .key) | .[]' docker-compose.yml)
+        services=$(yq_cmd '.services | to_entries | map(select(.value.build == null) | .key) | .[]' docker-compose.yml)
         for service in $services; do
             cmd="docker compose pull ${service}"
             $cmd
@@ -71,7 +71,7 @@ destroy() {
         docker compose down -v --rmi all
 
         # Delete images tagged by Tilt
-        services=$(yq '.services | to_entries | map(select(.value.build != null) | .key) | .[]' docker-compose.yml)
+        services=$(yq_cmd '.services | to_entries | map(select(.value.build != null) | .key) | .[]' docker-compose.yml)
         for service in $services; do
             image_name=$(yq_cmd ".services.${service}.image // \"${service}\"" docker-compose.yml | sed 's/:.*//')
             if [ -n $image_name ]; then
