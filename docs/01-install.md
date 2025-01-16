@@ -270,4 +270,4 @@ To install a configuration, run:
 ./scripts/deployment-install.sh <REPOSITORY_URL> <BRANCH_NAME>
 ```
 
-This command clones the repo and creates a Git config file for the current user in the CLI and VS Code dev containers (`./deploy/analytics/.gitconfig`).
+This command operates on `./deploy`. If the directory doesn't exist, then the given repository is cloned to `./deploy`. Else, the given branch is fetched. The command also creates a Git config file (`./deploy/analytics/.gitconfig`) for the current user that's used inside the CLI and VS Code dev containers.
