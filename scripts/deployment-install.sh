@@ -22,10 +22,8 @@ fi
 
 repo_url="$1"
 branch_name="$2"
-deploy_dir="deploy"
+deploy_dir="${root_dir}/deploy"
 gitconfig_file="${deploy_dir}/analytics/.gitconfig"
-
-cd "${root_dir}"
 
 if [ -d "${deploy_dir}" ]; then
     cd "${deploy_dir}"
