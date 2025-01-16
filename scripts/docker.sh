@@ -15,10 +15,10 @@ dirs=(
 )
 
 echo_help() {
-    echo "Usage: $0 <ACTION>"
+    echo "Usage: $0 <COMMAND>"
     echo ""
     echo "Arguments:"
-    echo "    action: up, down, build, destroy"
+    echo "    command: up, down, build, destroy"
 }
 
 up() {
@@ -99,5 +99,5 @@ cmd="$@"
 if command_exists "$cmd"; then
     $cmd
 else
-    echo "${tput_red}Error: Action must be one of: up, down, build, destroy${tput_reset}"
+    echo "${tput_red}Error: Command must be one of: up, down, build, destroy${tput_reset}"
 fi
