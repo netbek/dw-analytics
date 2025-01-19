@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from contextlib import contextmanager
 from package.types import CHSettings, PGSettings
+from sqlalchemy import URL
 from sqlmodel import create_engine, Session, Table
 from typing import Any, Generator, List, Optional, overload
 
@@ -12,7 +13,7 @@ class BaseAdapter(ABC):
     @overload
     @classmethod
     @abstractmethod
-    def create_uri(
+    def create_url(
         cls,
         host: str,
         port: int,
@@ -20,12 +21,12 @@ class BaseAdapter(ABC):
         password: str,
         database: str,
         schema: str,
-    ) -> str: ...
+    ) -> URL: ...
 
     @overload
     @classmethod
     @abstractmethod
-    def create_uri(
+    def create_url(
         cls,
         host: str,
         port: int,
@@ -34,18 +35,18 @@ class BaseAdapter(ABC):
         database: str,
         driver: Optional[str] = None,
         secure: Optional[bool] = None,
-    ) -> str: ...
+    ) -> URL: ...
 
     @classmethod
     @abstractmethod
-    def create_uri(cls, *args, **kwargs) -> str: ...
+    def create_url(cls, *args, **kwargs) -> URL: ...
 
     @abstractmethod
     def create_client(): ...
 
     @contextmanager
     def create_engine(self):
-        engine = create_engine(self.uri, echo=False)
+        engine = create_engine(self.url, echo=False)
 
         yield engine
 

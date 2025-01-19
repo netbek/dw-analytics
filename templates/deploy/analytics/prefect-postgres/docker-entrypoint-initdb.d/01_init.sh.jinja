@@ -1,13 +1,8 @@
 #!/bin/bash
 set -e
 
-prefect_username="{{ prefect_postgres_prefect_username }}"
-prefect_password="{{ prefect_postgres_prefect_password }}"
+psql -tc "select 1 from pg_catalog.pg_user where usename = '{{ prefect_postgres_prefect_username }}'" | grep -q 1 || \
+    psql -c "create user {{ prefect_postgres_prefect_username }} with password '{{ prefect_postgres_prefect_password }}';"
 
-psql -tc "select 1 from pg_catalog.pg_user where usename = '${prefect_username}'" | grep -q 1 || \
-    psql -c "create user ${prefect_username} with password '${prefect_password}';"
-
-prefect_database="{{ prefect_postgres_prefect_database }}"
-
-psql -tc "select 1 from pg_catalog.pg_database where datname = '${prefect_database}';" | grep -q 1 || \
-    psql -c "create database ${prefect_database} with owner ${prefect_username};"
+psql -tc "select 1 from pg_catalog.pg_database where datname = '{{ prefect_postgres_prefect_database }}';" | grep -q 1 || \
+    psql -c "create database {{ prefect_postgres_prefect_database }} with owner {{ prefect_postgres_prefect_username }};"

@@ -3,6 +3,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from package.database.adapters.base import BaseAdapter
 from package.types import CHIdentifier, CHSettings, CHTableIdentifier
+from sqlalchemy import URL
 from sqlmodel import create_engine, MetaData, Table
 from typing import List, Optional
 
@@ -15,7 +16,7 @@ class CHAdapter(BaseAdapter):
         super().__init__(settings)
 
     @classmethod
-    def create_uri(
+    def create_url(
         cls,
         host: str,
         http_port: int,
@@ -25,7 +26,7 @@ class CHAdapter(BaseAdapter):
         database: str,
         driver: Optional[str] = None,
         secure: Optional[bool] = None,
-    ) -> str:
+    ) -> URL:
         if driver:
             scheme = f"clickhouse+{driver}"
         else:
@@ -36,11 +37,18 @@ class CHAdapter(BaseAdapter):
         else:
             port = http_port
 
-        return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
+        return URL.create(
+            scheme,
+            host=host,
+            port=port,
+            username=username,
+            password=password,
+            database=database,
+        )
 
     @property
-    def uri(self) -> str:
-        return self.create_uri(
+    def url(self) -> URL:
+        return self.create_url(
             self.settings.host,
             self.settings.http_port,
             self.settings.tcp_port,
@@ -53,7 +61,19 @@ class CHAdapter(BaseAdapter):
 
     @contextmanager
     def create_client(self) -> Generator[Client | None]:
-        client = clickhouse_connect.get_client(dsn=self.uri)
+        if self.settings.driver == "native":
+            port = self.settings.tcp_port
+        else:
+            port = self.settings.http_port
+
+        client = clickhouse_connect.get_client(
+            host=self.settings.host,
+            port=port,
+            username=self.settings.username,
+            password=self.settings.password,
+            database=self.settings.database,
+            secure=self.settings.secure,
+        )
 
         yield client
 
@@ -175,8 +195,8 @@ class CHAdapter(BaseAdapter):
         if database is None:
             database = self.settings.database
 
-        uri = self.create_uri(**self.settings.model_dump())
-        engine = create_engine(uri, echo=False)
+        url = self.create_url(**self.settings.model_dump())
+        engine = create_engine(url, echo=False)
         metadata = MetaData(schema=database)
         metadata.reflect(bind=engine, views=True)
 
@@ -201,8 +221,8 @@ class CHAdapter(BaseAdapter):
         if database is None:
             database = self.settings.database
 
-        uri = self.create_uri(**self.settings.model_dump())
-        engine = create_engine(uri, echo=False)
+        url = self.create_url(**self.settings.model_dump())
+        engine = create_engine(url, echo=False)
         metadata = MetaData(schema=database)
         metadata.reflect(bind=engine, views=True)
 

@@ -15,13 +15,18 @@ dirs=(
 )
 
 echo_help() {
-    echo "Usage: $0 <COMMAND>"
+    echo "Usage: $0 <COMMAND> [PROFILE]"
     echo ""
     echo "Arguments:"
     echo "    command: up, down, build, destroy"
+    echo ""
+    echo "Options:"
+    echo "    profile: dev, prod"
 }
 
 up() {
+    local profile="$1"
+
     cd "${root_dir}/deploy/clickhouse"
     docker compose up -d
 
@@ -29,12 +34,17 @@ up() {
     docker compose up -d
 
     cd "${root_dir}/deploy/analytics"
-    docker compose up -d prefect-postgres prefect-server prefect-worker cli api
+
+    if [ "$profile" == "dev" ]; then
+        docker compose up -d prefect-postgres prefect-server prefect-worker cli api jupyter test-clickhouse test-postgres
+    else
+        docker compose up -d prefect-postgres prefect-server prefect-worker cli api
+    fi
 }
 
 down() {
     cd "${root_dir}/deploy/analytics"
-    docker compose down prefect-postgres prefect-server prefect-worker cli api
+    docker compose down
 
     cd "${root_dir}/deploy/peerdb"
     docker compose down
@@ -94,10 +104,15 @@ if ([ "$1" == "--help" ] || [ -z "$1" ]); then
     exit 1
 fi
 
-cmd="$@"
+cmd="$1"
+profile="${2:-dev}"
 
 if command_exists "$cmd"; then
-    $cmd
+    if ([ "$profile" == "dev" ] || [ "$profile" == "prod" ]); then
+        $cmd "${profile}"
+    else
+        echo "${tput_red}Error: Profile must be one of: dev, prod${tput_reset}"
+    fi
 else
     echo "${tput_red}Error: Command must be one of: up, down, build, destroy${tput_reset}"
 fi

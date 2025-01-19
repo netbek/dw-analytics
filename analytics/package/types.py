@@ -16,10 +16,10 @@ class CHSettings(BaseSettings):
     driver: Optional[str] = Field(default=None)
 
     @property
-    def uri(self) -> str:
+    def url(self) -> str:
         from package.database import CHAdapter
 
-        return CHAdapter.create_uri(**self.model_dump(by_alias=True))
+        return CHAdapter.create_url(**self.model_dump(by_alias=True))
 
 
 class PGSettings(BaseSettings):
@@ -31,10 +31,10 @@ class PGSettings(BaseSettings):
     schema_: str = Field(serialization_alias="schema")
 
     @property
-    def uri(self) -> str:
+    def url(self) -> str:
         from package.database import PGAdapter
 
-        return PGAdapter.create_uri(**self.model_dump(by_alias=True))
+        return PGAdapter.create_url(**self.model_dump(by_alias=True))
 
 
 class DbtSettings(BaseSettings):

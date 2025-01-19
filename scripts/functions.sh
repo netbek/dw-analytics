@@ -57,3 +57,23 @@ vscode_remote_cmd() {
 yq_cmd() {
     docker run --rm -i -v "${PWD}":/workdir mikefarah/yq:4.40.4 "$@"
 }
+
+create_gitconfig() {
+    cat <<EOF > "$1"
+[core]
+autocrlf = input
+
+[help]
+format = man
+
+[pull]
+rebase = false
+
+[push]
+autoSetupRemote = true
+
+[user]
+email = $(git config --get --global user.email)
+name = $(git config --get --global user.name)
+EOF
+}

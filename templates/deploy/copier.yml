@@ -29,30 +29,33 @@ strong_password:
 source_postgres_host:
   type: str
   help: "Source Postgres: Host"
+  validator: "{% if not source_postgres_host | trim | length %}Required{% endif %}"
 
 source_postgres_port:
   type: int
   help: "Source Postgres: Port"
+  validator: "{% if not source_postgres_port %}Required{% endif %}"
 
 source_postgres_database:
   type: str
   help: "Source Postgres: Database"
+  validator: "{% if not source_postgres_database | trim | length %}Required{% endif %}"
 
 source_postgres_schema:
   type: str
   help: "Source Postgres: Schema"
   default: public
+  validator: "{% if not source_postgres_schema | trim | length %}Required{% endif %}"
 
 source_postgres_username:
   type: str
   help: "Source Postgres: Username"
+  validator: "{% if not source_postgres_username | trim | length %}Required{% endif %}"
 
 source_postgres_password:
   type: str
   help: "Source Postgres: Password"
-  default: "{% if not ask_password %}{% if strong_password %}{{ generate_password() }}{% else %}{{ source_postgres_username }}{% endif %}{% endif %}"
   validator: "{% if not source_postgres_password | trim | length %}Required{% endif %}"
-  when: ask_password
 
 
 
