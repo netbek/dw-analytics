@@ -196,7 +196,7 @@ Set `/path/to/` to the location of the repository on your machine.
 6. Start the services:
 
     ```shell
-    ./scripts/docker.sh up
+    ./scripts/docker.sh up prod
     ```
 
 7. Run the provision script to configure Prefect:
@@ -224,7 +224,7 @@ Set `/path/to/` to the location of the repository on your machine.
 1. Start the services, if not already running:
 
     ```shell
-    ./scripts/docker.sh up
+    ./scripts/docker.sh up prod
     ```
 
 2. For each project that has database syncing, stop PeerDB syncing:
