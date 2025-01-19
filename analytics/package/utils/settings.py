@@ -17,7 +17,9 @@ import yaml
 
 def create_pg_settings(env_prefix: str) -> PGSettings:
     class Settings(PGSettings):
-        model_config = SettingsConfigDict(env_file="/usr/local/share/dw/database.env", extra="ignore")
+        model_config = SettingsConfigDict(
+            env_file="/usr/local/share/dw/database.env", extra="ignore"
+        )
 
         host: str = Field(
             validation_alias=f"{env_prefix}host",
@@ -49,7 +51,9 @@ def create_pg_settings(env_prefix: str) -> PGSettings:
 
 def create_ch_settings(env_prefix: str) -> CHSettings:
     class Settings(CHSettings):
-        model_config = SettingsConfigDict(env_file="/usr/local/share/dw/database.env", extra="ignore")
+        model_config = SettingsConfigDict(
+            env_file="/usr/local/share/dw/database.env", extra="ignore"
+        )
 
         host: str = Field(
             validation_alias=f"{env_prefix}host",

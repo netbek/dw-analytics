@@ -131,7 +131,7 @@ class PeerDB:
 
                         if source_table is None:
                             raise Exception(
-                                f"Source table '{table_mapping["source_table_identifier"]}' not found in database of peer '{PEERDB_SOURCE_PEER}'"
+                                f"Source table '{table_mapping['source_table_identifier']}' not found in database of peer '{PEERDB_SOURCE_PEER}'"
                             )
 
                         # Find the destination table in the dbt sources config
@@ -145,7 +145,7 @@ class PeerDB:
 
                         if dbt_source is None:
                             raise Exception(
-                                f"Destination table '{table_mapping["destination_table_identifier"]}' not found in dbt config"
+                                f"Destination table '{table_mapping['destination_table_identifier']}' not found in dbt config"
                             )
 
                         # Compute the excluded columns (difference between source and destination tables)

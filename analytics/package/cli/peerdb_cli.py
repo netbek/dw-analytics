@@ -34,14 +34,14 @@ async def install(project_name: str) -> None:
     if source_user:
         source_peer.create_user(**source_user)
         app.console.print(
-            f"Created user '{source_user["username"]}' on source",
+            f"Created user '{source_user['username']}' on source",
             style="green",
         )
 
         for schema in peerdb_config["publication_schemas"]:
             source_peer.grant_user_privileges(source_user["username"], schema)
             app.console.print(
-                f"Granted privileges to user '{source_user["username"]}' on source schema '{schema}'",
+                f"Granted privileges to user '{source_user['username']}' on source schema '{schema}'",
                 style="green",
             )
 
@@ -58,7 +58,7 @@ async def install(project_name: str) -> None:
                     schema=source_table_identifier.schema_,
                 )
                 app.console.print(
-                    f"Set replica identity of '{table_mapping["source_table_identifier"]}' to '{table_mapping["replica_identity"]}'",
+                    f"Set replica identity of '{table_mapping['source_table_identifier']}' to '{table_mapping['replica_identity']}'",
                     style="green",
                 )
 
@@ -67,7 +67,7 @@ async def install(project_name: str) -> None:
             publication["name"], publication["table_identifiers"], replace=True
         )
         app.console.print(
-            f"Created publication '{publication["name"]}' on source",
+            f"Created publication '{publication['name']}' on source",
             style="green",
         )
 
@@ -126,7 +126,7 @@ async def uninstall(project_name: str) -> None:
     for publication in peerdb_config["publications"].values():
         source_peer.drop_publication(publication["name"])
         app.console.print(
-            f"Dropped publication '{publication["name"]}' on source",
+            f"Dropped publication '{publication['name']}' on source",
             style="green",
         )
 
@@ -144,7 +144,7 @@ async def uninstall(project_name: str) -> None:
                     schema=source_table_identifier.schema_,
                 )
                 app.console.print(
-                    f"Set replica identity of '{table_mapping["source_table_identifier"]}' to '{replica_identity}'",
+                    f"Set replica identity of '{table_mapping['source_table_identifier']}' to '{replica_identity}'",
                     style="green",
                 )
 
@@ -152,13 +152,13 @@ async def uninstall(project_name: str) -> None:
         for schema in peerdb_config["publication_schemas"]:
             source_peer.revoke_user_privileges(source_user["username"], schema)
             app.console.print(
-                f"Revoked privileges from user '{source_user["username"]}' on source schema '{schema}'",
+                f"Revoked privileges from user '{source_user['username']}' on source schema '{schema}'",
                 style="green",
             )
 
         source_peer.drop_user(source_user["username"])
         app.console.print(
-            f"Dropped user '{source_user["username"]}' on source",
+            f"Dropped user '{source_user['username']}' on source",
             style="green",
         )
 

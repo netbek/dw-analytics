@@ -164,7 +164,7 @@ class Dbt:
         for resource_type in resource_types:
             if resource_type not in valid_resource_types:
                 raise ValueError(
-                    f"'resource_types' must be any of: {", ".join(valid_resource_types)}"
+                    f"'resource_types' must be any of: {', '.join(valid_resource_types)}"
                 )
 
         result = self.list_sync(

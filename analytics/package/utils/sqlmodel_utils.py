@@ -253,7 +253,7 @@ def create_model_code(
     engine_kwargs = {}
 
     if parsed_statement["version"]:
-        engine_kwargs["version"] = f"'{parsed_statement["version"]}'"
+        engine_kwargs["version"] = f"'{parsed_statement['version']}'"
 
     if parsed_statement["order_by"]:
         engine_kwargs["order_by"] = tuple(parsed_statement["order_by"])
