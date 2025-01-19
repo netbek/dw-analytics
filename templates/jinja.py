@@ -5,8 +5,9 @@ from jinja2.ext import Extension
 
 
 def generate_password(length=32):
-    # Quotes are excluded so that quoted values can be used in .env files
-    special_chars = "!;#$%&()*+,-./:;<=>?@[]^_{|}~"
+    # Quotes are excluded so that quoted values can be used in .env files.
+    # $ is excluded because it causes variable substition in some cases.
+    special_chars = "!;#%&()*+,-./:;<=>?@[]^_{|}~"
     alphabet = string.ascii_letters + string.digits + special_chars
 
     # Ensure the first character is a letter

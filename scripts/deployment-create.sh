@@ -23,18 +23,20 @@ cd "${root_dir}"
 
 template_name="deploy"
 template_src_dir="./templates/${template_name}"
-dest_dir="${1:-deploy}"
+deploy_dir="${1:-deploy}"
 
 if [ ! -d "${template_src_dir}" ]; then
     echo "${tput_red}Error: Template '$template_name' not found.${tput_reset}"
     exit 1
 fi
 
-if [ -d "${dest_dir}" ]; then
-    echo "${tput_red}Error: Destination directory '$dest_dir' already exists.${tput_reset}"
+if [ -d "${deploy_dir}" ]; then
+    echo "${tput_red}Error: Destination directory '$deploy_dir' already exists.${tput_reset}"
     exit 1
 fi
 
-uv run copier copy --trust "${template_src_dir}" "${dest_dir}"
+uv run copier copy --trust "${template_src_dir}" "${deploy_dir}"
 
-echo "${tput_green}Created ${dest_dir}${tput_reset}"
+create_gitconfig "${deploy_dir}/analytics/.gitconfig"
+
+echo "${tput_green}Created '${deploy_dir}'${tput_reset}"

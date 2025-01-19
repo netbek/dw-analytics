@@ -23,7 +23,6 @@ fi
 repo_url="$1"
 branch_name="$2"
 deploy_dir="${root_dir}/deploy"
-gitconfig_file="${deploy_dir}/analytics/.gitconfig"
 
 if [ -d "${deploy_dir}" ]; then
     cd "${deploy_dir}"
@@ -34,22 +33,4 @@ else
     git clone "${repo_url}" --branch "${branch_name}" "${deploy_dir}"
 fi
 
-cat <<EOF > "${gitconfig_file}"
-[core]
-autocrlf = input
-
-[help]
-format = man
-
-[pull]
-rebase = false
-
-[push]
-autoSetupRemote = true
-
-[user]
-email = $(git config --get --global user.email)
-name = $(git config --get --global user.name)
-EOF
-
-echo "${tput_green}Created ${gitconfig_file}${tput_reset}"
+create_gitconfig "${deploy_dir}/analytics/.gitconfig"
