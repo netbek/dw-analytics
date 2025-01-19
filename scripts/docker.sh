@@ -15,10 +15,16 @@ dirs=(
 )
 
 echo_help() {
+    echo "Usage: $0 <COMMAND>"
+    echo ""
+    echo "Arguments:"
+    echo "    command: down, build, destroy"
+    echo ""
+    echo ""
     echo "Usage: $0 <COMMAND> [PROFILE]"
     echo ""
     echo "Arguments:"
-    echo "    command: up, down, build, destroy"
+    echo "    command: up"
     echo ""
     echo "Options:"
     echo "    profile: dev, prod"
