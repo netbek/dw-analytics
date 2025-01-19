@@ -2,6 +2,7 @@ from collections.abc import Generator
 from contextlib import contextmanager
 from package.database.adapters.base import BaseAdapter
 from package.types import PGIdentifier, PGSettings, PGTableIdentifier
+from sqlalchemy import URL
 from sqlmodel import create_engine, MetaData, Table
 from typing import Any, List, Optional
 
@@ -14,7 +15,7 @@ class PGAdapter(BaseAdapter):
         super().__init__(settings)
 
     @classmethod
-    def create_uri(
+    def create_url(
         cls,
         host: str,
         port: int,
@@ -22,14 +23,19 @@ class PGAdapter(BaseAdapter):
         password: str,
         database: str,
         schema: str,
-    ) -> str:
-        scheme = "postgresql"
-
-        return f"{scheme}://{username}:{password}@{host}:{port}/{database}"
+    ) -> URL:
+        return URL.create(
+            "postgresql",
+            host=host,
+            port=port,
+            username=username,
+            password=password,
+            database=database,
+        )
 
     @property
-    def uri(self) -> str:
-        return self.create_uri(
+    def url(self) -> URL:
+        return self.create_url(
             self.settings.host,
             self.settings.port,
             self.settings.username,
@@ -42,7 +48,14 @@ class PGAdapter(BaseAdapter):
     def create_client(
         self, autocommit: bool = True
     ) -> Generator[tuple[psycopg2.extensions.connection, psycopg2.extensions.cursor], Any, None]:
-        connection = psycopg2.connect(dsn=self.uri)
+        connection = psycopg2.connect(
+            host=self.settings.host,
+            port=self.settings.port,
+            user=self.settings.username,
+            password=self.settings.password,
+            database=self.settings.database,
+        )
+
         connection.autocommit = autocommit
 
         with connection.cursor() as cursor:
@@ -189,10 +202,10 @@ class PGAdapter(BaseAdapter):
         if schema is None:
             schema = self.settings.schema_
 
-        uri = self.create_uri(
+        url = self.create_url(
             **self.settings.model_copy(update={"database": database}).model_dump(by_alias=True)
         )
-        engine = create_engine(uri, echo=False)
+        engine = create_engine(url, echo=False)
         metadata = MetaData(schema=schema)
         metadata.reflect(bind=engine, views=True)
 
@@ -276,10 +289,10 @@ class PGAdapter(BaseAdapter):
         if schema is None:
             schema = self.settings.schema_
 
-        uri = self.create_uri(
+        url = self.create_url(
             **self.settings.model_copy(update={"database": database}).model_dump(by_alias=True)
         )
-        engine = create_engine(uri, echo=False)
+        engine = create_engine(url, echo=False)
         metadata = MetaData(schema=schema)
         metadata.reflect(bind=engine, views=True)
 
@@ -322,7 +335,7 @@ class PGAdapter(BaseAdapter):
 
         statement = f"""
         create user {quoted_username}
-        with {' '.join(computed_options)} password %(password)s;
+        with {" ".join(computed_options)} password %(password)s;
         """
 
         with self.create_client() as (conn, cur):
@@ -411,7 +424,7 @@ class PGAdapter(BaseAdapter):
 
         quoted_publication = PGIdentifier.quote(publication)
         quoted_tables = [PGTableIdentifier.from_string(table).to_string() for table in tables]
-        statement = f"create publication {quoted_publication} for table {", ".join(quoted_tables)};"
+        statement = f"create publication {quoted_publication} for table {', '.join(quoted_tables)};"
 
         with self.create_client() as (conn, cur):
             cur.execute(statement)
