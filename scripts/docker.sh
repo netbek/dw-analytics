@@ -21,12 +21,10 @@ echo_help() {
     echo "    command: down, build, destroy"
     echo ""
     echo ""
-    echo "Usage: $0 <COMMAND> [PROFILE]"
+    echo "Usage: $0 <COMMAND> <PROFILE>"
     echo ""
     echo "Arguments:"
     echo "    command: up"
-    echo ""
-    echo "Options:"
     echo "    profile: dev, prod"
 }
 
@@ -111,14 +109,16 @@ if ([ "$1" == "--help" ] || [ -z "$1" ]); then
 fi
 
 cmd="$1"
-profile="${2:-dev}"
+profile="$2"
 
-if command_exists "$cmd"; then
-    if ([ "$profile" == "dev" ] || [ "$profile" == "prod" ]); then
+if [ "${cmd}" == "up" ]; then
+    if ([ "${profile}" == "dev" ] || [ "${profile}" == "prod" ]); then
         $cmd "${profile}"
     else
         echo "${tput_red}Error: Profile must be one of: dev, prod${tput_reset}"
     fi
+elif command_exists "$cmd"; then
+    $cmd
 else
-    echo "${tput_red}Error: Command must be one of: up, down, build, destroy${tput_reset}"
+    echo "${tput_red}Error: Command must be one of: down, build, destroy${tput_reset}"
 fi
