@@ -61,7 +61,7 @@ install_tilt() {
 install_peerdb() {
     echo "${tput_yellow}Installing PeerDB ...${tput_reset}"
     uninstall_peerdb
-    git clone https://github.com/PeerDB-io/peerdb --branch v0.22.5
+    git clone https://github.com/PeerDB-io/peerdb --branch v0.23.0
     echo "${tput_green}Installed PeerDB${tput_reset}"
 }
 
@@ -70,7 +70,11 @@ uninstall_peerdb() {
         rm -fr peerdb
 
         # Delete volumes
-        docker volume rm peerdb_minio-data peerdb_pgdata
+        for volume in peerdb_minio-data peerdb_pgdata; do
+            if docker volume inspect "$volume" &>/dev/null; then
+                docker volume rm "$volume"
+            fi
+        done
     fi
 }
 
