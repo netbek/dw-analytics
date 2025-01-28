@@ -1,9 +1,9 @@
 isort==5.13.2
 livereload==2.7.1
 polyfactory==2.18.1
-pre-commit==4.0.1
+pre-commit==4.1.0
 pytest==8.3.4
-ruff==0.9.1
+ruff==0.9.3
 SQLAlchemy==2.0.37
 sqlfluff==3.3.0
 sqlfluff-templater-dbt==3.3.0
