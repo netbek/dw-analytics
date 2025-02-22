@@ -16,6 +16,6 @@ pydash==8.0.5
 python-dateutil==2.9.0.post0
 PyYAML==6.0.2
 rich==13.9.4
-sqlglot==26.6.0
+sqlglot==25.34.0  # Pinned because of breaking changes in 26.x. ClickHouse ORDER BY keys are not parsed consistently.
 sqlparse==0.5.3
 typer==0.12.5  # Pinned because of prefect
