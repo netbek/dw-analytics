@@ -3,7 +3,7 @@ name: dw-analytics
 services:
   prefect-postgres:
     container_name: prefect-postgres
-    image: postgres:17.0-alpine3.20
+    image: postgres:17.4-alpine3.21
     env_file:
       - ./prefect-postgres.env
     ports:
@@ -155,7 +155,7 @@ services:
   {% if profile == 'dev' -%}
   test-clickhouse:
     container_name: test-clickhouse
-    image: clickhouse/clickhouse-server:24.8.9.95-alpine
+    image: clickhouse/clickhouse-server:24.8.14.39-alpine
     env_file:
       - ./test-clickhouse.env
     ports:
@@ -179,7 +179,7 @@ services:
 
   test-postgres:
     container_name: test-postgres
-    image: postgres:17.0-alpine3.20
+    image: postgres:17.4-alpine3.21
     env_file:
       - ./test-postgres.env
     ports:
